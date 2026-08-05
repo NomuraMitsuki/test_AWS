@@ -1,0 +1,67 @@
+# CI/CD 設計 — GitHub Actions
+
+## 方針
+
+- AWS 認証は **OIDC**（アクセスキーを GitHub Secrets に置かない）
+- `main` ブランチが `dev` 環境の正
+- Terraform apply は plan 結果の確認後に手動承認（`environment` 保護ルール）
+
+## ワークフロー
+
+### 1. `infra.yml` — Terraform
+
+| トリガー | 内容 |
+|----------|------|
+| PR（`infra/**`） | `terraform fmt` / `validate` / `plan`（コメント投稿は任意） |
+| push to `main`（`infra/**`） | plan → **environment: dev の approval** → apply |
+
+権限: `github_oidc` モジュールが発行する `attendance-dev-infra` ロール（必要最小の Terraform 権限）。
+
+### 2. `backend.yml` — Lambda
+
+| トリガー | 内容 |
+|----------|------|
+| PR（`backend/**`） | lint / 単体テスト（pytest） |
+| push to `main`（`backend/**`） | パッケージ zip またはコンテナビルド → `aws lambda update-function-code`（関数ごと） |
+
+権限: 対象 Lambda の更新と、必要なら S3 アーティファクトへの書込。
+
+### 3. `frontend.yml` — Amplify / Next.js
+
+| トリガー | 内容 |
+|----------|------|
+| PR（`frontend/**`） | `npm ci` / lint / build |
+| push to `main`（`frontend/**`） | Amplify へ連携（Amplify の GitHub 接続を主、または Actions から `amplify start-job`） |
+
+環境変数（Cognito User Pool ID、App Client ID、API Base URL）は Amplify 環境変数または GitHub Environments に保持。
+
+## ブランチ戦略（学習用）
+
+```text
+feature/*  →  PR  →  main (dev)
+```
+
+本番環境追加時は `release/*` や環境ディレクトリ追加で拡張する。
+
+## 必要な GitHub 設定
+
+1. AWS アカウントに OIDC provider（`token.actions.githubusercontent.com`）
+2. IAM ロールの信頼ポリシーで `repo:ORG/REPO:*` または `ref:refs/heads/main` に制限
+3. Repository Environments: `dev`（apply 用 reviewers）
+4. Secrets / Variables:
+   - `AWS_ROLE_ARN_INFRA`
+   - `AWS_ROLE_ARN_BACKEND`
+   - `AWS_REGION=ap-northeast-1`
+   - Amplify / Cognito 関連（フロント用）
+
+## 品質ゲート（最小）
+
+- Terraform: fmt + validate 必須、plan 差分を PR で確認
+- Backend: pytest グリーン
+- Frontend: `next build` 成功
+
+## ロールバック
+
+- infra: 直前の state に対する再 apply、または destroy/再構築（学習環境）
+- Lambda: 前バージョンの `publish` / alias（初期は手動で前 zip を再デプロイでも可）
+- Frontend: Amplify の前ジョブ再デプロイ

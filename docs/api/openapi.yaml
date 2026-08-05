@@ -1,0 +1,565 @@
+openapi: 3.0.3
+info:
+  title: Attendance Management API
+  description: |
+    勤怠管理アプリ（学習用）の HTTP API。
+    すべてのエンドポイントは Cognito JWT（Bearer）必須。
+    エラー形式: `{ "code", "message", "request_id" }`
+  version: 0.1.0
+servers:
+  - url: https://{apiId}.execute-api.ap-northeast-1.amazonaws.com
+    variables:
+      apiId:
+        default: example
+tags:
+  - name: health
+  - name: attendance
+  - name: leave
+  - name: users
+  - name: exports
+paths:
+  /health:
+    get:
+      tags: [health]
+      summary: ヘルスチェック
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /attendance/clock-in:
+    post:
+      tags: [attendance]
+      summary: 出勤打刻
+      security:
+        - cognitoJwt: []
+      responses:
+        "201":
+          description: 打刻成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AttendanceRecord"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          description: 既に出勤済みなど
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /attendance/clock-out:
+    post:
+      tags: [attendance]
+      summary: 退勤打刻
+      security:
+        - cognitoJwt: []
+      responses:
+        "200":
+          description: 退勤成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AttendanceRecord"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          description: 未出勤など
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /attendance/me:
+    get:
+      tags: [attendance]
+      summary: 自身の打刻履歴
+      security:
+        - cognitoJwt: []
+      parameters:
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: 履歴一覧
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AttendanceRecord"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /attendance/summary:
+    get:
+      tags: [attendance]
+      summary: 月次勤務時間サマリ
+      security:
+        - cognitoJwt: []
+      parameters:
+        - name: year
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: month
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+        - name: user_id
+          in: query
+          description: manager/admin のみ他者指定可
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: サマリ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AttendanceSummary"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /leave-requests:
+    get:
+      tags: [leave]
+      summary: 休暇申請一覧
+      security:
+        - cognitoJwt: []
+      parameters:
+        - name: scope
+          in: query
+          schema:
+            type: string
+            enum: [me, team, all]
+            default: me
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, approved, rejected]
+      responses:
+        "200":
+          description: 一覧
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/LeaveRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    post:
+      tags: [leave]
+      summary: 休暇申請作成
+      security:
+        - cognitoJwt: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeaveRequestCreate"
+      responses:
+        "201":
+          description: 作成
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeaveRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /leave-requests/{id}/approve:
+    post:
+      tags: [leave]
+      summary: 休暇申請を承認
+      security:
+        - cognitoJwt: []
+      parameters:
+        - $ref: "#/components/parameters/LeaveId"
+      responses:
+        "200":
+          description: 承認済み
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeaveRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /leave-requests/{id}/reject:
+    post:
+      tags: [leave]
+      summary: 休暇申請を却下
+      security:
+        - cognitoJwt: []
+      parameters:
+        - $ref: "#/components/parameters/LeaveId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reject_reason:
+                  type: string
+      responses:
+        "200":
+          description: 却下済み
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeaveRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /users:
+    get:
+      tags: [users]
+      summary: ユーザー一覧（admin）
+      security:
+        - cognitoJwt: []
+      responses:
+        "200":
+          description: 一覧
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/User"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    post:
+      tags: [users]
+      summary: ユーザー招待（admin）
+      security:
+        - cognitoJwt: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserInvite"
+      responses:
+        "201":
+          description: 招待完了
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /users/{id}:
+    patch:
+      tags: [users]
+      summary: ユーザー更新（ロール・上長・無効化）
+      security:
+        - cognitoJwt: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: 更新後ユーザー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /exports/attendance:
+    post:
+      tags: [exports]
+      summary: 勤怠 CSV エクスポート
+      security:
+        - cognitoJwt: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExportRequest"
+      responses:
+        "200":
+          description: 署名付き URL 付き
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportResult"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+components:
+  securitySchemes:
+    cognitoJwt:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Cognito User Pool ID Token
+
+  parameters:
+    LeaveId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    Unauthorized:
+      description: 未認証
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Forbidden:
+      description: 権限不足
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    BadRequest:
+      description: 入力不正
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Conflict:
+      description: 業務ルール衝突
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    Error:
+      type: object
+      required: [code, message, request_id]
+      properties:
+        code:
+          type: string
+          example: ALREADY_CLOCKED_IN
+        message:
+          type: string
+        request_id:
+          type: string
+
+    AttendanceRecord:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        work_date:
+          type: string
+          format: date
+        clock_in_at:
+          type: string
+          format: date-time
+        clock_out_at:
+          type: string
+          format: date-time
+          nullable: true
+        note:
+          type: string
+          nullable: true
+
+    AttendanceSummary:
+      type: object
+      properties:
+        year:
+          type: integer
+        month:
+          type: integer
+        total_work_minutes:
+          type: integer
+        work_days:
+          type: integer
+        records:
+          type: array
+          items:
+            $ref: "#/components/schemas/AttendanceRecord"
+
+    LeaveRequestCreate:
+      type: object
+      required: [leave_type, start_date, end_date]
+      properties:
+        leave_type:
+          type: string
+          enum: [paid, absence, other]
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        comment:
+          type: string
+
+    LeaveRequest:
+      allOf:
+        - $ref: "#/components/schemas/LeaveRequestCreate"
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            user_id:
+              type: string
+              format: uuid
+            status:
+              type: string
+              enum: [pending, approved, rejected]
+            approver_id:
+              type: string
+              format: uuid
+              nullable: true
+            reject_reason:
+              type: string
+              nullable: true
+            created_at:
+              type: string
+              format: date-time
+
+    UserInvite:
+      type: object
+      required: [email, name, role]
+      properties:
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        role:
+          type: string
+          enum: [employee, manager, admin]
+        manager_id:
+          type: string
+          format: uuid
+          nullable: true
+
+    UserUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        role:
+          type: string
+          enum: [employee, manager, admin]
+        manager_id:
+          type: string
+          format: uuid
+          nullable: true
+        status:
+          type: string
+          enum: [active, disabled]
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+        manager_id:
+          type: string
+          format: uuid
+          nullable: true
+        status:
+          type: string
+
+    ExportRequest:
+      type: object
+      required: [from_date, to_date, scope]
+      properties:
+        from_date:
+          type: string
+          format: date
+        to_date:
+          type: string
+          format: date
+        scope:
+          type: string
+          enum: [self, team, all]
+          description: self=本人, team=配下(manager), all=全体(admin)
+
+    ExportResult:
+      type: object
+      properties:
+        export_job_id:
+          type: string
+          format: uuid
+        download_url:
+          type: string
+          format: uri
+        expires_in:
+          type: integer
+          description: 秒
+          example: 300
