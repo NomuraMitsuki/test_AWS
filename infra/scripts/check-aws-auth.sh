@@ -39,4 +39,5 @@ if ! aws ec2 describe-regions --region-names "$REGION" --output text >/dev/null 
   exit 1
 fi
 
-echo "OK: terraform plan/apply 用の認証準備が整っています。"
+echo "OK: AWS CLI から見た認証は有効です。"
+echo "注意: aws login のみの場合、Terraform には eval \"\$(aws configure export-credentials --format env)\" か ./infra/scripts/tf-dev.sh が必要です。"

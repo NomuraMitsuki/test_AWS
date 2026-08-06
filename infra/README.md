@@ -10,13 +10,13 @@
 # 推奨: aws login（必要時）+ export-credentials + terraform を一括
 ./infra/scripts/tf-dev.sh auth
 ./infra/scripts/tf-dev.sh plan
-./infra/scripts/tf-dev.sh apply   # 対話確認あり（課金リソースに注意）
+./infra/scripts/tf-dev.sh apply   # 再 plan のあと [y/N]（課金リソースに注意）
 
-# 認証確認のみ
+# AWS CLI の疎通確認のみ（Terraform 用 export は別途）
 ./infra/scripts/check-aws-auth.sh
 ```
 
-`aws login` だけだと Terraform が資格情報を拾えないことがある。`tf-dev.sh` は `aws configure export-credentials` を挟んで回避する。
+`aws login` だけだと Terraform が資格情報を拾えないことがある。`tf-dev.sh` は `aws configure export-credentials` を挟んで回避する。`apply` は保存済み plan を使うため Terraform 標準の yes/no は出ず、スクリプトが `[y/N]` を聞く。
 
 OIDC ロールは初回 apply 後に初めて作られるため、**最初の plan/apply はローカル等の一時資格情報**で行う（state はローカルのままなので、永続環境で apply するか先にリモート state 化する。詳細は認証手順）。成功後に次を GitHub Secrets へ登録する:
 

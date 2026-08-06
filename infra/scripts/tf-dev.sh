@@ -22,7 +22,7 @@ usage() {
 
   auth   aws login（必要時）と export-credentials、認証確認のみ
   plan   上記のあと terraform init / plan -out=tfplan
-  apply  plan を実行してから terraform apply tfplan（対話確認あり）
+  apply  内部で plan し直し、yes 確認のあと terraform apply tfplan
 
 aws login の資格情報は Terraform が直接拾えないことがあるため、
 必ず aws configure export-credentials を環境変数へ展開してから実行する。
@@ -114,11 +114,20 @@ run_apply() {
   require_cmd terraform
   ensure_tfvars
   cd "$DEV_DIR"
-  echo "→ apply 前に最新の plan を取ります"
+  echo "→ apply 前に最新の plan を取ります（保存済み plan への apply には Terraform の yes/no が出ないため、ここで確認します）"
   terraform init -input=false
   terraform plan -input=false -out="$PLAN_FILE"
-  echo "→ terraform apply tfplan（確認プロンプトに従ってください。課金リソースが含まれます）"
-  terraform apply "$PLAN_FILE"
+  echo ""
+  echo "警告: apply すると NAT Gateway / RDS など課金リソースが作成または更新されます。"
+  printf "この plan を apply しますか? [y/N] "
+  local answer
+  read -r answer
+  if [[ ! "$answer" =~ ^[yY]$ ]]; then
+    echo "中止しました（apply なし）。"
+    exit 1
+  fi
+  echo "→ terraform apply tfplan"
+  terraform apply -input=false "$PLAN_FILE"
   echo "OK: apply 完了。OIDC 用に次を控えてください:"
   terraform output gha_infra_role_arn
   terraform output gha_backend_role_arn

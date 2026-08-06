@@ -68,14 +68,18 @@ eval "$(aws configure export-credentials --format env)"
 ```bash
 ./infra/scripts/tf-dev.sh auth    # login（必要時）+ export-credentials + 確認
 ./infra/scripts/tf-dev.sh plan    # 上記のあと terraform plan -out=tfplan
-./infra/scripts/tf-dev.sh apply   # plan のあと apply（対話確認あり）
+./infra/scripts/tf-dev.sh apply   # 内部で plan し直し → [y/N] 確認 → apply
 ```
 
-認証確認だけなら従来どおり:
+`apply` は単体で完結する（直前の `plan` サブコマンドは必須ではない。付けると plan が二重になる）。保存済み plan への `terraform apply tfplan` には Terraform 標準の yes/no が出ないため、スクリプト側で `[y/N]` を聞く。
+
+AWS CLI の疎通確認だけなら:
 
 ```bash
 ./infra/scripts/check-aws-auth.sh
 ```
+
+（CLI が通っても Terraform 用には `export-credentials` または `tf-dev.sh` が必要な場合がある。）
 
 ## C. 初回 plan / apply（W-108）
 
@@ -86,10 +90,18 @@ W-108 の完了条件: `terraform fmt` / `validate` / **資格情報付き `plan
 ```bash
 ./infra/scripts/tf-dev.sh plan
 # 差分を確認（RDS が publicly_accessible でないこと、S3 がパブリックでないこと）
-./infra/scripts/tf-dev.sh apply
+./infra/scripts/tf-dev.sh apply   # 内部で再 plan のあと [y/N]
 ```
 
-手動で回す場合:
+W-108 の fmt / validate は `tf-dev.sh` には含めていない。初回ゲートとして別途:
+
+```bash
+cd infra/envs/dev
+terraform fmt -check -recursive ../..
+terraform validate
+```
+
+手動で plan/apply する場合:
 
 ```bash
 cd infra/envs/dev
@@ -97,9 +109,8 @@ cp -n terraform.tfvars.example terraform.tfvars   # 初回のみ
 # リモート state にする場合は providers.tf の backend "s3" を有効化し、先に bucket/lock を用意してから:
 eval "$(aws configure export-credentials --format env)"   # aws login 利用時
 terraform init
-terraform fmt -check -recursive ../..
-terraform validate
 terraform plan -out=tfplan
+# 保存済み plan の apply には yes/no が出ない。内容を確認してから:
 terraform apply tfplan
 ```
 
