@@ -45,9 +45,9 @@ feature/*  →  PR  →  main (dev)
 
 ## 必要な GitHub 設定
 
-1. **初回のみ**ローカル資格情報で `infra/envs/dev` を apply し、OIDC provider と IAM ロールを作成する（手順: [docs/infra/aws-auth-bootstrap.md](../infra/aws-auth-bootstrap.md)）
+1. **初回のみ**永続可能な実行環境の資格情報で `infra/envs/dev` を apply し、OIDC provider と IAM ロールを作成する（手順: [docs/infra/aws-auth-bootstrap.md](../infra/aws-auth-bootstrap.md)。state 保全に注意）
 2. IAM ロールの信頼ポリシーで `repo:ORG/REPO:*` または `ref:refs/heads/main` に制限（モジュール既定）
-3. Repository Environments: `dev`（apply 用 reviewers）
+3. Repository Environments: `dev` — 現状ワークフローは plan までのため任意。apply ジョブ追加時は reviewers を必須にする
 4. Secrets / Variables:
    - `AWS_ROLE_ARN_INFRA`（`terraform output gha_infra_role_arn`）
    - `AWS_ROLE_ARN_BACKEND`（`terraform output gha_backend_role_arn`）

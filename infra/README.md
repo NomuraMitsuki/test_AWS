@@ -11,7 +11,10 @@
 ./infra/scripts/check-aws-auth.sh
 ```
 
-OIDC ロールは初回 apply 後に初めて作られるため、**最初の plan/apply はローカル（または Cloud Agent）の一時資格情報**で行う。成功後に `terraform output gha_infra_role_arn` を GitHub Secrets `AWS_ROLE_ARN_INFRA` へ登録する。
+OIDC ロールは初回 apply 後に初めて作られるため、**最初の plan/apply はローカル等の一時資格情報**で行う（state はローカルのままなので、永続環境で apply するか先にリモート state 化する。詳細は認証手順）。成功後に次を GitHub Secrets へ登録する:
+
+- `AWS_ROLE_ARN_INFRA` ← `terraform output gha_infra_role_arn`
+- `AWS_ROLE_ARN_BACKEND` ← `terraform output gha_backend_role_arn`
 
 ## ローカル検証
 

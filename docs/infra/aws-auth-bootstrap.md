@@ -1,6 +1,6 @@
-# AWS 認証ブートストラップ（W-108 前提）
+# AWS 認証ブートストラップ（W-108）
 
-初回の `terraform plan` / `apply` と、その後の GitHub Actions（OIDC）利用までの手順。
+W-108（fmt / validate / plan）を資格情報付きで完了し、OIDC 利用に進むための初回 `apply` までを含む手順。
 
 ## 前提
 
@@ -11,6 +11,7 @@
 
 **鶏卵問題:** GitHub Actions の OIDC ロール（`attendance-dev-gha-infra` 等）は Terraform apply 後に初めて存在する。したがって **初回 apply はローカル（または Cloud Agent）の一時資格情報** で行い、成功後にロール ARN を GitHub Secrets へ登録する。
 
+**State（重要）:** 現状 `infra/envs/dev/providers.tf` は **ローカル state**（S3 backend はコメントアウト）。Cloud Agent のエフェメラル環境で apply すると、環境破棄と共に state を失い、以降の plan/apply や GHA と整合できなくなる。初回 apply は **state を保持できるマシン**（ローカル PC、永続ディスク付きランナー等）で行うか、apply 前に [terraform-design.md](terraform-design.md) の State 管理に従い S3 + DynamoDB へリモート化する。OIDC 切り替え（§D）は、その state が以降も参照できることが前提。
 ## A. 初回 apply 用の資格情報
 
 次のいずれかでよい（長期キーをリポジトリに置かない）。
@@ -54,18 +55,23 @@ aws sts get-caller-identity
 
 成功時のみ `terraform plan` に進む。
 
-## C. 初回 plan / apply
+## C. 初回 plan / apply（W-108）
+
+W-108 の完了条件: `terraform fmt` / `validate` / **資格情報付き `plan`**。OIDC を有効にするには続けて **初回 `apply`** が必要（これも W-108 の残作業として扱う）。
 
 ```bash
 cd infra/envs/dev
 cp -n terraform.tfvars.example terraform.tfvars   # 初回のみ
+# リモート state にする場合は providers.tf の backend "s3" を有効化し、先に bucket/lock を用意してから:
 terraform init
+terraform fmt -check -recursive ../..
+terraform validate
 terraform plan -out=tfplan
-# 差分を確認（RDS が publicly_accessible、S3 がパブリックになっていないこと）
+# 差分を確認（RDS が publicly_accessible でないこと、S3 がパブリックでないこと）
 terraform apply tfplan
 ```
 
-apply 後、次を控える:
+apply 後、次を控える（state と一緒に保管する）:
 
 ```bash
 terraform output gha_infra_role_arn
@@ -74,14 +80,15 @@ terraform output gha_backend_role_arn
 
 ## D. GitHub OIDC への切り替え
 
+前提: §C の state が以降の実行環境（ローカルまたは CI）から参照できること。
+
 1. リポジトリ Settings → Secrets and variables → Actions に登録:
    - `AWS_ROLE_ARN_INFRA` = `gha_infra_role_arn` の値
    - `AWS_ROLE_ARN_BACKEND` = `gha_backend_role_arn` の値
-2. （任意）Environment `dev` を作成し、apply 用に reviewer を設定
+2. Repository Environment `dev`: 現状の `infra.yml` は plan までのため任意。apply ジョブを追加するときは reviewers 付きで必須（[github-actions.md](../cicd/github-actions.md)）
 3. 以降の PR / `main` では `.github/workflows/infra.yml` が OIDC で `plan` する
 
 詳細は [docs/cicd/github-actions.md](../cicd/github-actions.md)。
-
 ## E. 権限の目安（初回ローカル用）
 
 学習用なら AdministratorAccess 相当でもよい。絞る場合の目安:

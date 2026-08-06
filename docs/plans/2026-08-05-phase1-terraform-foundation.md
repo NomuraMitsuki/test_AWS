@@ -161,12 +161,15 @@ infra/
 
 ---
 
-## Task 9: Verification gate
+## Task 9: Verification gate（W-108）
 
-- [ ] `terraform fmt -check -recursive`
-- [ ] `terraform validate` in `envs/dev`
-- [ ] `terraform plan` against a sandbox account (manual; skip if no credentials)
+完了条件: fmt / validate / 資格情報付き plan。OIDC 有効化のため初回 apply も含む（認証・state 手順は [aws-auth-bootstrap.md](../infra/aws-auth-bootstrap.md)）。
+
+- [x] `terraform fmt -check -recursive`（コード側は PR #4 時点で済み）
+- [x] `terraform validate` in `envs/dev`
+- [ ] `terraform plan` against a sandbox account（資格情報＋永続 state 環境）
 - [ ] Confirm no public RDS / no public S3 in plan output
+- [ ] 初回 `terraform apply`（OIDC ロール作成）と GitHub Secrets 登録
 - [ ] Push branch and open/update PR
 
 ---

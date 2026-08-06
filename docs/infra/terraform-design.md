@@ -13,8 +13,8 @@ infra/
       main.tf
       variables.tf
       outputs.tf
+      providers.tf          # required_providers + backend（現状は local、S3 はコメント）
       terraform.tfvars
-      backend.tf
   modules/
     network/      # VPC, subnets, NAT, SG
     cognito/      # User Pool, groups, app client
@@ -23,6 +23,8 @@ infra/
     api/          # HTTP API, JWT authorizer, Lambda, IAM
     monitoring/   # Log groups, alarms, dashboard
     github_oidc/  # GitHub Actions OIDC provider + roles
+  scripts/
+    check-aws-auth.sh
 ```
 
 ## モジュール責務
@@ -39,9 +41,10 @@ infra/
 
 ## State 管理
 
-- リモート state: S3 + DynamoDB ロック（初回のみ手動または bootstrap スクリプト）
-- key 例: `attendance/dev/terraform.tfstate`
-- ローカル検証時は `backend "local"` に切り替え可能
+- **現状:** `envs/dev/providers.tf` でローカル state（S3 backend ブロックはコメントアウト）
+- **推奨（初回 apply 前または直後）:** S3 + DynamoDB ロックへリモート化。key 例: `attendance/dev/terraform.tfstate`
+- Cloud Agent などエフェメラル環境での apply は state 喪失リスクがある（[aws-auth-bootstrap.md](aws-auth-bootstrap.md)）
+- 認証・OIDC 切り替え手順: [aws-auth-bootstrap.md](aws-auth-bootstrap.md)
 
 ## 主要変数
 
