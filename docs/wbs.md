@@ -50,7 +50,7 @@
 | W-105 | monitoring 骨格 | 完了 | PR #4 |
 | W-106 | github_oidc モジュール | 完了 | PR #4 |
 | W-107 | dev 合成 + infra 用 GitHub Actions（plan まで） | 完了 | PR #4 |
-| W-108 | 検証ゲート（fmt / validate / plan） | 進行中 | fmt/validate 済み。plan/apply は AWS 認証後 |
+| W-108 | 検証ゲート（fmt / validate / plan） | 進行中 | fmt/validate 済み。認証手順・check スクリプト追加済み。plan/apply は資格情報待ち |
 
 ---
 

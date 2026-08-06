@@ -1,0 +1,100 @@
+# AWS 認証ブートストラップ（W-108 前提）
+
+初回の `terraform plan` / `apply` と、その後の GitHub Actions（OIDC）利用までの手順。
+
+## 前提
+
+- AWS アカウント（学習用サンドボックス可）と、リソース作成権限を持つ IAM プリンシパル
+- リージョン: `ap-northeast-1`
+- リポジトリ: `NomuraMitsuki/test_AWS`
+- Terraform `>= 1.5`（CI / 推奨ローカル: `1.9.8`）と AWS CLI v2
+
+**鶏卵問題:** GitHub Actions の OIDC ロール（`attendance-dev-gha-infra` 等）は Terraform apply 後に初めて存在する。したがって **初回 apply はローカル（または Cloud Agent）の一時資格情報** で行い、成功後にロール ARN を GitHub Secrets へ登録する。
+
+## A. 初回 apply 用の資格情報
+
+次のいずれかでよい（長期キーをリポジトリに置かない）。
+
+### A-1. 環境変数（Cloud Agent / CI 外の一時利用向け）
+
+```bash
+export AWS_ACCESS_KEY_ID=...
+export AWS_SECRET_ACCESS_KEY=...
+export AWS_SESSION_TOKEN=...          # 一時クレデンシャルの場合
+export AWS_DEFAULT_REGION=ap-northeast-1
+aws sts get-caller-identity          # Account / Arn が表示されれば OK
+```
+
+Cloud Agent に渡す場合は、チャットや Environment Secrets 経由で上記を設定する。値をコミットしない。
+
+### A-2. AWS SSO（ローカル推奨）
+
+```bash
+aws configure sso
+# SSO start URL / リージョン / アカウント / ロールを対話設定
+aws sso login --profile attendance-dev
+export AWS_PROFILE=attendance-dev
+export AWS_DEFAULT_REGION=ap-northeast-1
+aws sts get-caller-identity
+```
+
+### A-3. 名前付きプロファイル（アクセスキー）
+
+```bash
+aws configure --profile attendance-dev
+export AWS_PROFILE=attendance-dev
+aws sts get-caller-identity
+```
+
+## B. 認証確認スクリプト
+
+```bash
+./infra/scripts/check-aws-auth.sh
+```
+
+成功時のみ `terraform plan` に進む。
+
+## C. 初回 plan / apply
+
+```bash
+cd infra/envs/dev
+cp -n terraform.tfvars.example terraform.tfvars   # 初回のみ
+terraform init
+terraform plan -out=tfplan
+# 差分を確認（RDS が publicly_accessible、S3 がパブリックになっていないこと）
+terraform apply tfplan
+```
+
+apply 後、次を控える:
+
+```bash
+terraform output gha_infra_role_arn
+terraform output gha_backend_role_arn
+```
+
+## D. GitHub OIDC への切り替え
+
+1. リポジトリ Settings → Secrets and variables → Actions に登録:
+   - `AWS_ROLE_ARN_INFRA` = `gha_infra_role_arn` の値
+   - `AWS_ROLE_ARN_BACKEND` = `gha_backend_role_arn` の値
+2. （任意）Environment `dev` を作成し、apply 用に reviewer を設定
+3. 以降の PR / `main` では `.github/workflows/infra.yml` が OIDC で `plan` する
+
+詳細は [docs/cicd/github-actions.md](../cicd/github-actions.md)。
+
+## E. 権限の目安（初回ローカル用）
+
+学習用なら AdministratorAccess 相当でもよい。絞る場合の目安:
+
+- EC2 / VPC / RDS / S3 / Cognito / Secrets Manager / SNS / CloudWatch / IAM（OIDC provider・ロール作成）
+
+最小権限への絞り込みは apply 安定後の後続課題。
+
+## F. トラブルシュート
+
+| 症状 | 確認 |
+|------|------|
+| `Unable to locate credentials` | `AWS_PROFILE` / 環境変数 / `aws sts get-caller-identity` |
+| `ExpiredToken` | SSO 再ログイン、またはセッション更新 |
+| OIDC plan がスキップ／失敗 | Secrets にロール ARN があるか、初回 apply 済みか |
+| `AccessDenied` on IAM OIDC | 初回プリンシパルに `iam:CreateOpenIDConnectProvider` 等があるか |

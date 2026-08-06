@@ -15,6 +15,7 @@ Next.js + API Gateway + Lambda + Cognito + RDS + S3 による勤怠管理アプ�
 | API (OpenAPI) | [docs/api/openapi.yaml](docs/api/openapi.yaml) |
 | 画面一覧 | [docs/ui/screens.md](docs/ui/screens.md) |
 | Terraform 設計 | [docs/infra/terraform-design.md](docs/infra/terraform-design.md) |
+| AWS 認証ブートストラップ | [docs/infra/aws-auth-bootstrap.md](docs/infra/aws-auth-bootstrap.md) |
 | CI/CD 設計 | [docs/cicd/github-actions.md](docs/cicd/github-actions.md) |
 | 監視設計 | [docs/ops/monitoring.md](docs/ops/monitoring.md) |
 | Phase 1 実装計画 | [docs/plans/2026-08-05-phase1-terraform-foundation.md](docs/plans/2026-08-05-phase1-terraform-foundation.md) |

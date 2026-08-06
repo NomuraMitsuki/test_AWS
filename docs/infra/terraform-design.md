@@ -60,6 +60,7 @@ infra/
 - Lambda → RDS は SG で 5432 のみ
 - DB パスワードは Secrets Manager で自動生成・ローテーションは後続課題
 - 長期 AWS キーをリポジトリに置かない（OIDC）
+- 初回 apply 用の一時資格情報と OIDC 切り替え手順: [aws-auth-bootstrap.md](aws-auth-bootstrap.md)
 
 ## デプロイ順序
 

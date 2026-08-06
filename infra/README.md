@@ -2,6 +2,17 @@
 
 `infra/envs/dev` が合成ルート。モジュールは `infra/modules/*`。
 
+## AWS 認証（初回必須）
+
+手順の詳細: [docs/infra/aws-auth-bootstrap.md](../docs/infra/aws-auth-bootstrap.md)
+
+```bash
+# 資格情報を設定したうえで
+./infra/scripts/check-aws-auth.sh
+```
+
+OIDC ロールは初回 apply 後に初めて作られるため、**最初の plan/apply はローカル（または Cloud Agent）の一時資格情報**で行う。成功後に `terraform output gha_infra_role_arn` を GitHub Secrets `AWS_ROLE_ARN_INFRA` へ登録する。
+
 ## ローカル検証
 
 ```bash
@@ -10,11 +21,9 @@ cp terraform.tfvars.example terraform.tfvars   # 必要なら編集
 terraform init
 terraform fmt -recursive ../..
 terraform validate
-# AWS 資格情報がある場合のみ
+# AWS 資格情報がある場合のみ（先に check-aws-auth.sh）
 terraform plan
 ```
-
-初回 apply 前に、GitHub Secrets に `AWS_ROLE_ARN_INFRA` を設定する（OIDC ロールは apply 後に出力されるため、最初の apply はローカル資格情報でも可）。
 
 ## モジュール
 
