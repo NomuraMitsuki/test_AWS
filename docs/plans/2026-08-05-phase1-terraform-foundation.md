@@ -29,12 +29,13 @@
 infra/
   versions.tf                 # shared version constraints (optional root)
   envs/dev/
-    backend.tf                # S3 backend (or local for first boot)
-    providers.tf
+    providers.tf              # required_providers + backend（local 既定 / S3 はコメント）
     main.tf
     variables.tf
     outputs.tf
     terraform.tfvars.example
+  scripts/
+    check-aws-auth.sh
   modules/
     network/
     cognito/
@@ -44,7 +45,6 @@ infra/
     github_oidc/
     api/                      # optional in Phase 1: HTTP API + health Lambda stub
 ```
-
 ---
 
 ## Task 1: Bootstrap Terraform layout
@@ -53,8 +53,7 @@ infra/
 - Create `infra/envs/dev/providers.tf`
 - Create `infra/envs/dev/variables.tf`
 - Create `infra/envs/dev/terraform.tfvars.example`
-- Create `infra/envs/dev/backend.tf` (commented S3 backend + local default)
-
+- Create `infra/envs/dev/providers.tf`（コメントアウトの S3 backend + local 既定）
 - [ ] Create directory tree under `infra/`
 - [ ] Add provider with `region = var.aws_region` default `ap-northeast-1`
 - [ ] Add variables: `project_name`, `environment`, `aws_region`, `github_org_repo`

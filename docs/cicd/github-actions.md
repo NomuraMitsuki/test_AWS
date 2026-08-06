@@ -10,13 +10,12 @@
 
 ### 1. `infra.yml` — Terraform
 
-| トリガー | 内容 |
-|----------|------|
-| PR（`infra/**`） | `terraform fmt` / `validate` / `plan`（コメント投稿は任意） |
-| push to `main`（`infra/**`） | plan → **environment: dev の approval** → apply |
+| トリガー | 現状（実装） | 目標（後続） |
+|----------|--------------|--------------|
+| PR（`infra/**`） | `fmt` / `validate`。OIDC があれば `plan`（失敗時は注記のみ） | 同左＋ plan コメント投稿 |
+| push to `main`（`infra/**`） | validate のみ（apply ジョブ未実装） | plan → **environment: dev の approval** → apply |
 
-権限: `github_oidc` モジュールが発行する `attendance-dev-gha-infra` ロール（必要最小の Terraform 権限へ後で絞る）。
-
+権限: `github_oidc` モジュールが発行する `attendance-dev-gha-infra` ロール（必要最小の Terraform 権限へ後で絞る）。現状ジョブは `terraform init -backend=false` のため、リモート state 化後に backend 利用へ切り替える。
 ### 2. `backend.yml` — Lambda
 
 | トリガー | 内容 |
