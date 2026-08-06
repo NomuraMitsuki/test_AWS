@@ -24,6 +24,8 @@ Next.js + API Gateway + Lambda + Cognito + RDS + S3 による勤怠管理アプ�
 
 設計資料の要件漏れ・矛盾・誤字を確認するときは、チャットで「設計資料をレビューして」と依頼するか `/review-design-docs` を使います。メインエージェントは起動のみ行い、readonly の `design-doc-reviewer` サブエージェントが `docs/` を横断して指摘リストを返します（定義: [`.cursor/skills/review-design-docs/`](.cursor/skills/review-design-docs/) / [`.cursor/agents/design-doc-reviewer.md`](.cursor/agents/design-doc-reviewer.md)）。
 
+設計関連ファイルを含む **PR を新規作成する直前** にも、ルール [`.cursor/rules/pr-design-review.mdc`](.cursor/rules/pr-design-review.mdc) により同じレビューを走らせます（ファイル変更の都度ではありません）。
+
 ## 技術スタック（確定）
 
 - Frontend: Next.js 14 (App Router) / TypeScript / Amplify Hosting

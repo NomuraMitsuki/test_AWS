@@ -1,6 +1,6 @@
 ---
 name: design-doc-reviewer
-description: Use when reviewing design docs under docs/ for requirement gaps, contradictions, or typos; when the user says 設計資料をレビューして; or when the review-design-docs skill is invoked. Use proactively for PRs that change docs/.
+description: Use when reviewing design docs under docs/ for requirement gaps, contradictions, or typos; before creating a PR that changes docs/ or design-related files; when the user says 設計資料をレビューして; or when the review-design-docs skill is invoked. Use proactively at PR creation time for design-doc changes.
 model: inherit
 readonly: true
 ---
@@ -15,7 +15,7 @@ readonly: true
 
 - Readonly: ファイル編集、コミット、push、システム状態の変更をしない。
 - 先に `.cursor/skills/review-design-docs/references/checklist.md` を読み、それに従う。
-- チェックリスト記載の資料セット（または親プロンプトで絞られたパス）をレビューする。
+- チェックリスト記載の資料セットをレビューする。親が「PR 変更ファイル一覧」を渡した場合は、その差分を重点にしつつ関連資料との矛盾も見る。
 - 修正は実装しない。親が明示しない限り、アプリ実装コードのレビューには広げない。
 - 信号の強い指摘を優先する。正しさに無関係な好みのスタイル指摘は避ける。
 - ユーザー向けの本文・見出し・指摘文は **日本語** で書く（識別子・パス・API 名は原文のまま）。

@@ -14,6 +14,12 @@
 | W-002 | 設計資料レビュー担当（スキル＋サブエージェント）の追加 | 完了 | PR #2 |
 | W-003 | 日本語表記ルール（`.cursor/rules`）の追加 | 完了 | PR #2 |
 | W-004 | 本 WBS の作成・維持 | 完了 | PR #2 で作成。以降は随時更新 |
+| W-005 | PR 作成時の設計資料レビュールール追加 | 完了 | PR #3 / `pr-design-review` |
+| W-016 | Nit | 設計スペックのネットワーク文言を明確化 | 完了 | R-007 / PR #3 |
+| W-017 | Should | `/attendance/me` と `/attendance/records?scope=self` の役割整理を資料に明記 | 未着手 | PR前レビュー R-001 |
+| W-018 | Should | 休暇承認画面（S10）の一覧取得 API を画面資料に明記 | 未着手 | PR前レビュー R-002 |
+| W-019 | Should | 配下サマリの画面導線（S06/S07）を要件と揃える | 未着手 | PR前レビュー R-003 |
+| W-020 | Should | `/attendance/summary` の manager 配下限定を OpenAPI 説明に明記 | 未着手 | PR前レビュー R-004 |
 
 ---
 
