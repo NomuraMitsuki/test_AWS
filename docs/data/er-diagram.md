@@ -118,6 +118,7 @@ erDiagram
 ## インデックス（推奨）
 
 - `attendance_records (user_id, work_date)`
-- `leave_requests (status, user_id)`
-- `leave_requests (approver_id)` — 承認待ち検索用に申請者の manager 経由で引く
-- `users (manager_id)` where status = active
+- `leave_requests (user_id, status)` — 申請者自身の一覧、および配下ユーザー ID 集合に対する pending 抽出
+- `users (manager_id)` — 上長から配下メンバーを引く（承認待ち・配下勤怠の起点）
+
+補足: 承認待ちは「`users.manager_id = 呼び出し元` のユーザーが申請した `leave_requests.status = pending`」で引く。`approver_id` は承認／却下**後**に埋まるため、承認待ち検索の主キーには使わない。

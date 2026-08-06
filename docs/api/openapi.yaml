@@ -3,7 +3,8 @@ info:
   title: Attendance Management API
   description: |
     勤怠管理アプリ（学習用）の HTTP API。
-    すべてのエンドポイントは Cognito JWT（Bearer）必須。
+    原則として Cognito JWT（Bearer）必須。例外は `GET /health` のみ（認証なし）。
+    一覧・エクスポートの `scope` は共通で `self`（本人）/ `team`（配下）/ `all`（全体）。
     エラー形式: `{ "code", "message", "request_id" }`
   version: 0.1.0
 servers:
@@ -21,7 +22,8 @@ paths:
   /health:
     get:
       tags: [health]
-      summary: ヘルスチェック
+      summary: ヘルスチェック（JWT 不要）
+      description: 稼働確認用。Cognito JWT は不要（唯一の認証例外）。
       security: []
       responses:
         "200":
@@ -111,6 +113,56 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
 
+  /attendance/records:
+    get:
+      tags: [attendance]
+      summary: 打刻履歴（scope 指定）
+      description: |
+        manager は `scope=team` で配下の勤怠を閲覧できる。
+        admin は `scope=all` も可。employee は `self` のみ。
+      security:
+        - cognitoJwt: []
+      parameters:
+        - name: scope
+          in: query
+          description: self=本人, team=配下(manager), all=全体(admin)
+          schema:
+            type: string
+            enum: [self, team, all]
+            default: self
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: user_id
+          in: query
+          description: team/all 時に特定ユーザーへ絞る場合（権限内のみ）
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 履歴一覧
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AttendanceRecord"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
   /attendance/summary:
     get:
       tags: [attendance]
@@ -157,10 +209,11 @@ paths:
       parameters:
         - name: scope
           in: query
+          description: self=本人, team=配下(manager), all=全体(admin)
           schema:
             type: string
-            enum: [me, team, all]
-            default: me
+            enum: [self, team, all]
+            default: self
         - name: status
           in: query
           schema:

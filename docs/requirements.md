@@ -22,6 +22,7 @@ AWS の主要サービス（Lambda・API Gateway・Cognito・RDS・S3）と、Te
 - 初回ログイン時の仮パスワード変更
 - 出勤／退勤打刻
 - 自身の打刻履歴・月次勤務時間サマリ
+- 上長による配下メンバーの勤怠閲覧（履歴・サマリ）
 - 休暇申請（有給／欠勤／その他）と上長による承認／却下
 - 管理者のユーザー一覧・招待・無効化・ロール変更
 - 勤怠 CSV のエクスポート（S3 ＋ 署名付き URL）
@@ -44,6 +45,7 @@ AWS の主要サービス（Lambda・API Gateway・Cognito・RDS・S3）と、Te
 4. 休暇申請は `pending` → `approved` / `rejected` のみ
 5. 承認操作は申請者の `manager_id` に紐づく上長、または `admin` のみ
 6. ユーザー登録は管理者が Cognito に作成し、アプリ DB の `users` と同期する
+7. 最初の `admin` はブートストラップ手順（コンソールまたは Terraform／スクリプト）で作成する。アプリの招待 API だけでは鶏卵になるため、運用手順として別途定義する（詳細は設計スペック）
 
 ## 5. 非機能要件
 
@@ -51,7 +53,7 @@ AWS の主要サービス（Lambda・API Gateway・Cognito・RDS・S3）と、Te
 |------|------|
 | 環境 | 単一 `dev`（`ap-northeast-1`） |
 | 可用性 | 学習用。シングル AZ RDS、NAT Gateway 1 つ |
-| セキュリティ | API は Cognito JWT 必須。RDS 非公開。S3 は公開禁止 |
+| セキュリティ | API は原則 Cognito JWT 必須（例外: `GET /health` のみ認証なし）。RDS 非公開。S3 は公開禁止 |
 | 観測性 | CloudWatch Logs / Metrics / Alarms / 簡易ダッシュボード |
 | コスト | 学習用途。`db.t4g.micro`、不要リソースは最小化 |
 | 言語 | UI・ドキュメントは日本語。コード識別子は英語 |

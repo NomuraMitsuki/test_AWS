@@ -14,7 +14,7 @@
 |------|------|
 | MVP 範囲 | 標準（打刻・休暇承認・ユーザー管理・CSV） |
 | フロント宿主 | Amplify Hosting |
-| ネットワーク | VPC 内完結（Lambda / RDS プライベート） |
+| ネットワーク | Lambda / RDS は VPC プライベート配置。Amplify・API Gateway・Cognito・S3 等のマネージドサービスは VPC 外 |
 | 環境数 | dev 単一 |
 | ユーザー登録 | 管理者招待のみ |
 | API 構成 | ドメイン別 Lambda + HTTP API（案1） |
@@ -69,6 +69,16 @@ Browser
 - Groups: `employee`, `manager`, `admin`
 - アプリクライアント（SPA / Amplify 向け）
 
+### 4.4.1 最初の admin ブートストラップ
+
+アプリの `POST /users`（招待）は JWT 付き admin が前提のため、**最初の1人は手動で作る**。
+
+1. AWS コンソールまたは CLI で Cognito User Pool にユーザーを作成し、グループ `admin` に追加する（仮パスワード発行）
+2. RDS の `users` に同じメール／`cognito_sub`／`role=admin`／`status=active` の行を挿入する（マイグレーション直後のシード SQL または運用スクリプト）
+3. その admin でログインし、以降のユーザーはアプリの招待画面から作成する
+
+Terraform での完全自動シードは学習コストを上げるため必須としない。手順書として本節と要件定義を正とする。
+
 ### 4.5 RDS PostgreSQL
 
 - `db.t4g.micro`、シングル AZ、プライベートサブネット
@@ -83,9 +93,10 @@ Browser
 
 ## 5. 認可モデル
 
-1. API Gateway で JWT 検証（未認証は 401）
+1. API Gateway で JWT 検証（未認証は 401）。例外は `GET /health` のみ
 2. Lambda で Cognito Groups ＋ DB の `users.role` / `manager_id` を確認
 3. 他者データへのアクセスは manager（配下のみ）または admin
+4. 一覧・エクスポートの `scope` は `self` / `team` / `all` で統一する
 
 ## 6. エラーモデル
 
