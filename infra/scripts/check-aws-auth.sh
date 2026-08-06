@@ -20,8 +20,12 @@ if ! CALLER="$(aws sts get-caller-identity --output json 2>&1)"; then
 ERROR: AWS 資格情報がありません、または無効です。
 
 次のいずれかを設定してください（詳細: docs/infra/aws-auth-bootstrap.md）:
+  - 推奨: ./infra/scripts/tf-dev.sh auth（aws login + export-credentials）
   - 環境変数: AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY [/ AWS_SESSION_TOKEN]
   - プロファイル: AWS_PROFILE + aws sso login（または aws configure）
+
+aws login のみだと Terraform が資格情報を拾えないことがあります。
+その場合は eval "$(aws configure export-credentials --format env)" を挟むか、tf-dev.sh を使ってください。
 EOF
   echo "$CALLER" >&2
   exit 1

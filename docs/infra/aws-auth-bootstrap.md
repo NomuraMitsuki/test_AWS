@@ -48,27 +48,58 @@ export AWS_PROFILE=attendance-dev
 aws sts get-caller-identity
 ```
 
-## B. 認証確認スクリプト
+### A-4. `aws login`（ブラウザログイン）
+
+```bash
+aws login
+aws sts get-caller-identity
+```
+
+`aws login` の資格情報は AWS CLI では使えるが、Terraform の AWS provider が直接拾えないことがある。その場合は次を挟む（[`tf-dev.sh`](../../infra/scripts/tf-dev.sh) が自動化する）:
+
+```bash
+eval "$(aws configure export-credentials --format env)"
+```
+
+## B. 一括スクリプト（推奨）
+
+リポジトリルートから:
+
+```bash
+./infra/scripts/tf-dev.sh auth    # login（必要時）+ export-credentials + 確認
+./infra/scripts/tf-dev.sh plan    # 上記のあと terraform plan -out=tfplan
+./infra/scripts/tf-dev.sh apply   # plan のあと apply（対話確認あり）
+```
+
+認証確認だけなら従来どおり:
 
 ```bash
 ./infra/scripts/check-aws-auth.sh
 ```
 
-成功時のみ `terraform plan` に進む。
-
 ## C. 初回 plan / apply（W-108）
 
 W-108 の完了条件: `terraform fmt` / `validate` / **資格情報付き `plan`**。OIDC を有効にするには続けて **初回 `apply`** が必要（これも W-108 の残作業として扱う）。
+
+推奨（ローカル PC）:
+
+```bash
+./infra/scripts/tf-dev.sh plan
+# 差分を確認（RDS が publicly_accessible でないこと、S3 がパブリックでないこと）
+./infra/scripts/tf-dev.sh apply
+```
+
+手動で回す場合:
 
 ```bash
 cd infra/envs/dev
 cp -n terraform.tfvars.example terraform.tfvars   # 初回のみ
 # リモート state にする場合は providers.tf の backend "s3" を有効化し、先に bucket/lock を用意してから:
+eval "$(aws configure export-credentials --format env)"   # aws login 利用時
 terraform init
 terraform fmt -check -recursive ../..
 terraform validate
 terraform plan -out=tfplan
-# 差分を確認（RDS が publicly_accessible でないこと、S3 がパブリックでないこと）
 terraform apply tfplan
 ```
 
@@ -106,6 +137,7 @@ terraform output gha_backend_role_arn
 | 症状 | 確認 |
 |------|------|
 | `Unable to locate credentials` | `AWS_PROFILE` / 環境変数 / `aws sts get-caller-identity` |
-| `ExpiredToken` | SSO 再ログイン、またはセッション更新 |
+| CLI の sts は通るが Terraform だけ失敗 | `aws login` 利用時は `export-credentials` が必要。`./infra/scripts/tf-dev.sh plan` を使う |
+| `ExpiredToken` | `aws login` / SSO 再ログイン、またはセッション更新 |
 | OIDC plan がスキップ／失敗 | Secrets にロール ARN があるか、初回 apply 済みか |
 | `AccessDenied` on IAM OIDC | 初回プリンシパルに `iam:CreateOpenIDConnectProvider` 等があるか |

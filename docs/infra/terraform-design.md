@@ -25,6 +25,7 @@ infra/
     github_oidc/  # GitHub Actions OIDC provider + roles
   scripts/
     check-aws-auth.sh
+    tf-dev.sh           # aws login + export-credentials + plan/apply
 ```
 
 ## モジュール責務

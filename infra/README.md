@@ -7,9 +7,16 @@
 手順の詳細: [docs/infra/aws-auth-bootstrap.md](../docs/infra/aws-auth-bootstrap.md)
 
 ```bash
-# 資格情報を設定したうえで
+# 推奨: aws login（必要時）+ export-credentials + terraform を一括
+./infra/scripts/tf-dev.sh auth
+./infra/scripts/tf-dev.sh plan
+./infra/scripts/tf-dev.sh apply   # 対話確認あり（課金リソースに注意）
+
+# 認証確認のみ
 ./infra/scripts/check-aws-auth.sh
 ```
+
+`aws login` だけだと Terraform が資格情報を拾えないことがある。`tf-dev.sh` は `aws configure export-credentials` を挟んで回避する。
 
 OIDC ロールは初回 apply 後に初めて作られるため、**最初の plan/apply はローカル等の一時資格情報**で行う（state はローカルのままなので、永続環境で apply するか先にリモート state 化する。詳細は認証手順）。成功後に次を GitHub Secrets へ登録する:
 
@@ -19,12 +26,16 @@ OIDC ロールは初回 apply 後に初めて作られるため、**最初の pl
 ## ローカル検証
 
 ```bash
+# 一括（推奨）
+./infra/scripts/tf-dev.sh plan
+
+# または手動
 cd infra/envs/dev
 cp terraform.tfvars.example terraform.tfvars   # 必要なら編集
+eval "$(aws configure export-credentials --format env)"   # aws login 利用時
 terraform init
 terraform fmt -recursive ../..
 terraform validate
-# AWS 資格情報がある場合のみ（先に check-aws-auth.sh）
 terraform plan
 ```
 
