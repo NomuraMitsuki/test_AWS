@@ -84,7 +84,10 @@ paths:
   /attendance/me:
     get:
       tags: [attendance]
-      summary: 自身の打刻履歴
+      summary: 自身の打刻履歴（互換エイリアス）
+      description: |
+        `GET /attendance/records?scope=self` と同等。
+        新規実装・画面は `/attendance/records` を正とし、本パスは本人履歴の短縮用エイリアスとして残す。
       security:
         - cognitoJwt: []
       parameters:
@@ -167,6 +170,9 @@ paths:
     get:
       tags: [attendance]
       summary: 月次勤務時間サマリ
+      description: |
+        既定は本人。`user_id` 指定時は他者サマリ。
+        manager は配下（`users.manager_id` が自分）に限定。admin は全体可。権限外は 403。
       security:
         - cognitoJwt: []
       parameters:
@@ -184,7 +190,9 @@ paths:
             maximum: 12
         - name: user_id
           in: query
-          description: manager/admin のみ他者指定可
+          description: |
+            他者指定。manager は配下のみ、admin は任意。
+            未指定時は呼び出し元本人。
           schema:
             type: string
             format: uuid

@@ -15,27 +15,24 @@
 | W-003 | 日本語表記ルール（`.cursor/rules`）の追加 | 完了 | PR #2 |
 | W-004 | 本 WBS の作成・維持 | 完了 | PR #2 で作成。以降は随時更新 |
 | W-005 | PR 作成時の設計資料レビュールール追加 | 完了 | PR #3 / `pr-design-review` |
-| W-016 | Nit | 設計スペックのネットワーク文言を明確化 | 完了 | R-007 / PR #3 |
-| W-017 | Should | `/attendance/me` と `/attendance/records?scope=self` の役割整理を資料に明記 | 未着手 | PR前レビュー R-001 |
-| W-018 | Should | 休暇承認画面（S10）の一覧取得 API を画面資料に明記 | 未着手 | PR前レビュー R-002 |
-| W-019 | Should | 配下サマリの画面導線（S06/S07）を要件と揃える | 未着手 | PR前レビュー R-003 |
-| W-020 | Should | `/attendance/summary` の manager 配下限定を OpenAPI 説明に明記 | 未着手 | PR前レビュー R-004 |
 
 ---
 
 ## 1. 設計資料のフォローアップ（レビュー指摘）
 
-スモークレビュー由来。実装コードより先に資料を直す想定。
-
 | ID | 重大度 | 作業 | ステータス | 由来 |
 |----|--------|------|------------|------|
 | W-010 | Must | leave の `scope` 値を統一（OpenAPI の `me` と export/ER の `self`） | 完了 | R-001 / PR #3 |
-| W-011 | Should | manager の配下勤怠閲覧を画面・API に明記（または要件を絞って整合） | 完了 | R-002 / PR #3 |
+| W-011 | Should | manager の配下勤怠閲覧を画面・API に明記 | 完了 | R-002 / PR #3 |
 | W-012 | Should | `GET /health` の JWT 例外を要件／OpenAPI 説明で明記 | 完了 | R-003 / PR #3 |
 | W-013 | Should | 最初の `admin` ブートストラップ手順を資料に追記 | 完了 | R-004 / PR #3 |
-| W-014 | Nit | Phase 1 計画の二重配置を解消または役割分担を明記 | 完了 | R-005 / PR #3 |
+| W-014 | Nit | Phase 1 計画の二重配置を解消 | 完了 | R-005 / PR #3 |
 | W-015 | Nit | ER の承認待ちインデックス説明を修正 | 完了 | R-006 / PR #3 |
 | W-016 | Nit | 設計スペックのネットワーク文言を明確化 | 完了 | R-007 / PR #3 |
+| W-017 | Should | `/attendance/me` と `/records` の役割整理 | 完了 | PR #4 |
+| W-018 | Should | 休暇承認画面（S10）の一覧取得 API を明記 | 完了 | PR #4 |
+| W-019 | Should | 配下サマリの画面導線（S06/S07）を揃える | 完了 | PR #4 |
+| W-020 | Should | `/attendance/summary` の配下限定を OpenAPI に明記 | 完了 | PR #4 |
 
 ---
 
@@ -45,15 +42,15 @@
 
 | ID | 作業 | ステータス | メモ |
 |----|------|------------|------|
-| W-100 | Terraform レイアウト bootstrap（`infra/envs/dev`） | 未着手 | |
-| W-101 | network モジュール（VPC / NAT / SG） | 未着手 | |
-| W-102 | cognito モジュール | 未着手 | |
-| W-103 | data モジュール（RDS + Secrets Manager） | 未着手 | |
-| W-104 | storage モジュール（S3 exports） | 未着手 | |
-| W-105 | monitoring 骨格 | 未着手 | |
-| W-106 | github_oidc モジュール | 未着手 | |
-| W-107 | dev 合成 + infra 用 GitHub Actions（plan まで） | 未着手 | |
-| W-108 | 検証ゲート（fmt / validate / plan） | 未着手 | AWS 資格情報が必要 |
+| W-100 | Terraform レイアウト bootstrap（`infra/envs/dev`） | 完了 | PR #4 |
+| W-101 | network モジュール（VPC / NAT / SG） | 完了 | PR #4 |
+| W-102 | cognito モジュール | 完了 | PR #4 |
+| W-103 | data モジュール（RDS + Secrets Manager） | 完了 | PR #4 |
+| W-104 | storage モジュール（S3 exports） | 完了 | PR #4 |
+| W-105 | monitoring 骨格 | 完了 | PR #4 |
+| W-106 | github_oidc モジュール | 完了 | PR #4 |
+| W-107 | dev 合成 + infra 用 GitHub Actions（plan まで） | 完了 | PR #4 |
+| W-108 | 検証ゲート（fmt / validate / plan） | 進行中 | fmt/validate 済み。plan/apply は AWS 認証後 |
 
 ---
 
@@ -75,5 +72,6 @@
 ## 更新ルール
 
 1. 新しい大きな作業が出たら ID を採番して追記する（設計フォローは `W-01x`、基盤は `W-1xx`、アプリは `W-2xx`）。
-2. 設計レビューで出た Must/Should は、修正 PR を切る前に本表へ落とす。
+2. 設計レビューで出た Must / Should は、修正しない場合は本表へ落としてから PR を作成する（詳細は `.cursor/rules/pr-design-review.mdc`）。
 3. 完了したらステータスを `完了` にし、関連 PR 番号をメモに残す。
+4. **キリのよいタイミング**（例: Phase 単位の PR マージ後）でチャットコンテキストを `/summarize` するとよい。

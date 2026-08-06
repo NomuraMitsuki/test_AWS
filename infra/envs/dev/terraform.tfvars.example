@@ -1,0 +1,6 @@
+project_name     = "attendance"
+environment      = "dev"
+aws_region       = "ap-northeast-1"
+github_org_repo  = "NomuraMitsuki/test_AWS"
+db_instance_class = "db.t4g.micro"
+# alarm_email    = "you@example.com"

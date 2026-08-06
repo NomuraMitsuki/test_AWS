@@ -39,8 +39,10 @@ Next.js + API Gateway + Lambda + Cognito + RDS + S3 による勤怠管理アプ�
 
 ```text
 docs/       # 設計資料
-infra/      # Terraform
+infra/      # Terraform（Phase 1）
 backend/    # Lambda (Python)
 frontend/   # Next.js
 .github/workflows/
 ```
+
+Infra の使い方は [infra/README.md](infra/README.md) を参照。
