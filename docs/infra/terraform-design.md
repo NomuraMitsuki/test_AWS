@@ -34,8 +34,8 @@ infra/
 | data | RDS PostgreSQL `db.t4g.micro`, Secrets Manager, parameter group |
 | storage | S3 bucket, Block Public Access, lifecycle（任意） |
 | api | Lambda×4+, HTTP API, routes, JWT authorizer, IAM roles, VPC config |
-| monitoring | CloudWatch Log groups, metric alarms, dashboard |
-| github_oidc | OIDC provider, deploy roles（infra/backend/frontend） |
+| monitoring | CloudWatch ダッシュボード骨格、SNS（アラーム本体は Phase 後半 / W-270） |
+| github_oidc | OIDC provider, deploy roles（infra / backend。frontend は Amplify 連携時に追加） |
 
 ## State 管理
 

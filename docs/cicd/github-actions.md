@@ -15,7 +15,7 @@
 | PR（`infra/**`） | `terraform fmt` / `validate` / `plan`（コメント投稿は任意） |
 | push to `main`（`infra/**`） | plan → **environment: dev の approval** → apply |
 
-権限: `github_oidc` モジュールが発行する `attendance-dev-infra` ロール（必要最小の Terraform 権限）。
+権限: `github_oidc` モジュールが発行する `attendance-dev-gha-infra` ロール（必要最小の Terraform 権限へ後で絞る）。
 
 ### 2. `backend.yml` — Lambda
 
