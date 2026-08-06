@@ -23,13 +23,13 @@
 
 | ID | 重大度 | 作業 | ステータス | 由来 |
 |----|--------|------|------------|------|
-| W-010 | Must | leave の `scope` 値を統一（OpenAPI の `me` と export/ER の `self`） | 完了 | R-001 → `self`/`team`/`all` に統一 |
-| W-011 | Should | manager の配下勤怠閲覧を画面・API に明記（または要件を絞って整合） | 完了 | R-002 → S07 + `/attendance/records` |
-| W-012 | Should | `GET /health` の JWT 例外を要件／OpenAPI 説明で明記 | 完了 | R-003 |
-| W-013 | Should | 最初の `admin` ブートストラップ手順を資料に追記 | 完了 | R-004 → スペック 4.4.1 |
-| W-014 | Nit | Phase 1 計画の二重配置を解消または役割分担を明記 | 完了 | R-005 → superpowers 側をリンク化 |
-| W-015 | Nit | ER の承認待ちインデックス説明を修正 | 完了 | R-006 |
-| W-016 | Nit | 設計スペックのネットワーク文言を明確化 | 完了 | R-007 |
+| W-010 | Must | leave の `scope` 値を統一（OpenAPI の `me` と export/ER の `self`） | 完了 | R-001 / PR #3 |
+| W-011 | Should | manager の配下勤怠閲覧を画面・API に明記（または要件を絞って整合） | 完了 | R-002 / PR #3 |
+| W-012 | Should | `GET /health` の JWT 例外を要件／OpenAPI 説明で明記 | 完了 | R-003 / PR #3 |
+| W-013 | Should | 最初の `admin` ブートストラップ手順を資料に追記 | 完了 | R-004 / PR #3 |
+| W-014 | Nit | Phase 1 計画の二重配置を解消または役割分担を明記 | 完了 | R-005 / PR #3 |
+| W-015 | Nit | ER の承認待ちインデックス説明を修正 | 完了 | R-006 / PR #3 |
+| W-016 | Nit | 設計スペックのネットワーク文言を明確化 | 完了 | R-007 / PR #3 |
 
 ---
 
