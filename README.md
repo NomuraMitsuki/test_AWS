@@ -18,6 +18,7 @@ Next.js + API Gateway + Lambda + Cognito + RDS + S3 による勤怠管理アプ�
 | CI/CD 設計 | [docs/cicd/github-actions.md](docs/cicd/github-actions.md) |
 | 監視設計 | [docs/ops/monitoring.md](docs/ops/monitoring.md) |
 | Phase 1 実装計画 | [docs/plans/2026-08-05-phase1-terraform-foundation.md](docs/plans/2026-08-05-phase1-terraform-foundation.md) |
+| 作業一覧（WBS） | [docs/wbs.md](docs/wbs.md) |
 
 ## 設計資料レビュー
 

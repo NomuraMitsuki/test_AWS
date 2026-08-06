@@ -1,32 +1,32 @@
 ---
 name: review-design-docs
-description: Use when the user asks to review design docs, check docs consistency, find gaps in requirements docs, or run a design-document review for this repo.
+description: Use when the user asks to review design docs, check docs consistency, find requirement gaps in docs, or says 設計資料をレビューして / ドキュメントの整合性を確認して for this repo.
 ---
 
-# Review design docs
+# 設計資料レビュー
 
-## Overview
+## 概要
 
-Run a structured review of this repository's design documents. Keep the parent agent's context small: delegate the heavy reading to the readonly subagent.
+このリポジトリの設計資料を構造化レビューする。親エージェントのコンテキストを小さく保つため、横断読込は readonly サブエージェントへ委譲する。
 
-## Instructions for the parent agent
+## 親エージェント向け手順
 
-1. Do **not** open or skim the full `docs/` tree yourself.
-2. Do **not** load `.cursor/skills/review-design-docs/references/checklist.md` into the parent context (the subagent reads it).
-3. Launch the **design-doc-reviewer** subagent in the **foreground** (wait for completion).
-4. Pass a Task prompt that includes all of the following:
-   - Default review root: `docs/` (override only if the user named specific paths)
-   - Any user focus areas (e.g. "API only", "auth flow")
-   - Instruction to read `.cursor/skills/review-design-docs/references/checklist.md` first
-   - Instruction to follow that checklist's severity/categories/output format exactly
-   - Instruction: readonly — do not edit files; return findings only
-5. When the subagent returns, present its findings to the user.
-   - You may lightly reformat headings for readability.
-   - Do **not** re-read the docs to second-guess or expand the review.
-   - If the subagent failed, report the failure; do not silently fall back to a full parent-side review.
+1. 親自身で `docs/` 全体を開いたりざっと読んだりしない。
+2. 親コンテキストに `.cursor/skills/review-design-docs/references/checklist.md` を読み込まない（サブエージェントが読む）。
+3. **design-doc-reviewer** サブエージェントを **フォアグラウンド**（完了待ち）で起動する。
+4. Task プロンプトに次をすべて含める:
+   - 既定のレビュー対象: `docs/`（ユーザーがパスを指定した場合のみ絞る）
+   - ユーザー指定の焦点（例: 「API のみ」「認証まわり」）
+   - 先に `.cursor/skills/review-design-docs/references/checklist.md` を読むこと
+   - チェックリストの重大度・カテゴリ・出力形式に厳密に従うこと
+   - readonly: ファイルを編集せず、指摘のみ返すこと
+5. サブエージェントの結果をユーザーへ提示する。
+   - 見出しの軽い整形は可。
+   - 親が docs を再読込してレビューを上書き・拡張しない。
+   - サブエージェント失敗時は失敗を報告し、親側の全件レビューへ黙ってフォールバックしない。
 
-## When NOT to use
+## 使わない場面
 
-- Code review of `infra/`, `backend/`, or `frontend/` implementations
-- Writing or rewriting design docs (use normal editing flow)
-- One-line factual questions about a single known file (just answer; no full review)
+- `infra/` / `backend/` / `frontend/` の実装コードレビュー
+- 設計資料の新規作成・大幅な書き直し（通常の編集フローで行う）
+- 既知の単一ファイルに関する一行の事実確認（レビュー起動は不要）
