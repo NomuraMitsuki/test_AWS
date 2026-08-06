@@ -36,6 +36,7 @@ infra/
     terraform.tfvars.example
   scripts/
     check-aws-auth.sh
+    tf-dev.sh                 # aws login + export-credentials + plan/apply
   modules/
     network/
     cognito/
