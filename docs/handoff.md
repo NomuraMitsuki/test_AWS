@@ -9,22 +9,22 @@ AWS 学習用の勤怠管理アプリ。Phase 1 Terraform、W-200〜W-250（API 
 ## リポジトリ
 
 - GitHub: `NomuraMitsuki/test_AWS`
-- 作業ブランチ: **`cursor/w260-cicd-a099`**（W-260 実装）
-- 直近マージ: PR #1〜#14
+- 作業ブランチ: **`cursor/w260-cicd-a099`**（マージ後は `main`）
+- 直近マージ: PR #1〜#14（W-260 は PR #15）
 
 ## 完了していること
 
 - 設計資料一式（`docs/`）
 - 設計レビュー担当 / 日本語ルール / PR 作成時レビュー
 - **実装委譲**: skill `implement-with-subagent` + agent `implementation-worker` + rule `delegate-implementation`（W-006）
-- WBS: W-001〜020, W-100〜108, W-006, W-200〜W-250、**W-260 実装完了（apply / Secrets なし・WBS ステータスは親が更新）**
+- WBS: W-001〜020, W-100〜108, W-006, W-200〜W-260 完了（apply / Secrets なし）。W-109 は未着手（ブロック解除済み）
 - Terraform Phase 1〜7（api CORS / amplify モジュール含む）コード
 - backend: `health` + `attendance` + `leave` + `users` + `exports`（pytest）+ `migrations/001`〜`003`
 - frontend: Next.js 14（S01〜S12）+ Amplify Auth + API クライアント
 - **CI/CD（W-260）**:
   - `.github/workflows/backend.yml` — pytest / compileall 必須、main で任意 Lambda deploy
   - `.github/workflows/frontend.yml` — lint/build 必須、main で任意 Amplify `start-job`（`AWS_ROLE_ARN_INFRA` + `AMPLIFY_APP_ID`）
-  - `.github/workflows/infra.yml` — validate 必須、main で plan→apply 骨格（`environment: dev`）
+  - `.github/workflows/infra.yml` — fmt + validate 必須、main で plan→apply 骨格（`environment: dev`）
   - 正本: [docs/cicd/github-actions.md](cicd/github-actions.md)
 - Amplify: Terraform モジュールで Hosting（auto build 可）。Actions の `start-job` は補助
 - **認証手順**: [docs/infra/aws-auth-bootstrap.md](infra/aws-auth-bootstrap.md)
