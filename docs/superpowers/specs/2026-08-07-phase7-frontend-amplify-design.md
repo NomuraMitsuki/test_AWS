@@ -68,16 +68,16 @@ infra/envs/dev/             # amplify 接続・CORS / 環境変数の配線
 |----|------|----------|
 | S01 | `/login` | Cognito のみ |
 | S02 | `/login/new-password` | Cognito のみ |
-| S03 | `/` | 当日打刻状態。manager/admin は承認待ち件数 |
-| S04 | `/attendance` | 出勤／退勤 |
+| S03 | `/` | **専用ダッシュボード API は作らない。** 当日打刻: `GET /attendance/records?scope=self`（当日分）。manager/admin の承認待ち件数: `GET /leave-requests?scope=team\|all&status=pending` の件数 |
+| S04 | `/attendance` | `POST /attendance/clock-in` / `POST /attendance/clock-out`。表示用に当日レコード取得可 |
 | S05 | `/attendance/history` | `GET /attendance/records?scope=self` |
-| S06 | `/attendance/summary` | `GET /attendance/summary` |
-| S07 | `/attendance/team` | `GET /attendance/records?scope=team\|all` |
+| S06 | `/attendance/summary` | `GET /attendance/summary`。本人は `user_id` なし。S07 から配下を選ぶと `user_id` 付き |
+| S07 | `/attendance/team` | `GET /attendance/records?scope=team\|all`。行から S06 へ |
 | S08 | `/leave` | `GET /leave-requests?scope=self` |
 | S09 | `/leave/new` | `POST /leave-requests` |
-| S10 | `/leave/approvals` | pending 一覧＋承認／却下 |
-| S11 | `/admin/users` | users 一覧・招待・更新 |
-| S12 | `/exports` | `POST /exports/attendance` → 署名付き URL |
+| S10 | `/leave/approvals` | `GET /leave-requests?scope=team\|all&status=pending` ＋ approve/reject |
+| S11 | `/admin/users` | `GET/POST /users`、`PATCH /users/{id}` |
+| S12 | `/exports` | `POST /exports/attendance`（body: `from_date`, `to_date`, `scope`）。応答の署名付き URL でダウンロード |
 
 ### 6.1 UI 方針
 
@@ -104,13 +104,15 @@ infra/envs/dev/             # amplify 接続・CORS / 環境変数の配線
 
 ### 8.2 API CORS
 
-- Phase 2 で未設定だった CORS を、Amplify オリジン（変数、例: `https://main.<appId>.amplifyapp.com` およびローカル `http://localhost:3000`）に限定して許可
+- Phase 2 で未設定だった CORS を許可オリジン変数で設定する
+- **本番相当（Amplify）:** `https://main.<appId>.amplifyapp.com`（app id / branch から解決、または明示リスト）
+- **ローカル開発例外:** `http://localhost:3000` を許可リストに含める（親設計・Terraform 設計も同方針）
 - メソッド・ヘッダはフロントの `fetch` に必要な最小（`Authorization` / `Content-Type` 等）
 - credentials cookie は使わない（Bearer のみ）
 
 ### 8.3 Cognito
 
-既存 App Client（secret なし、USER_SRP / PASSWORD）をそのまま利用。本 Phase でクライアント設定を変える必要があれば最小差分のみ。
+既存 App Client（secret なし、`ALLOW_USER_SRP_AUTH` / `ALLOW_USER_PASSWORD_AUTH` / refresh）をそのまま利用。本 Phase でクライアント設定を変える必要があれば最小差分のみ。
 
 ## 9. 検証
 
@@ -120,5 +122,9 @@ infra/envs/dev/             # amplify 接続・CORS / 環境変数の配線
 
 ## 10. 完了後の位置づけ
 
-- WBS W-250 を完了（親がステータス更新）
+実装完了時に親（または実装スコープ）で次も同期する:
+
+- `docs/wbs.md` W-250 ステータス
+- `docs/handoff.md`（次作業・直近マージ）
+- 親設計 §8・README 索引・`docs/infra/terraform-design.md`（本スペック承認時点で先行更新済みなら差分のみ）
 - 次: W-260（CI 完成）またはユーザー方針に従い W-109（API・フロント完了後の再 apply / Secrets）
