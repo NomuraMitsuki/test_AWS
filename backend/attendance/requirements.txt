@@ -1,0 +1,2 @@
+# Runtime deps: none for unit-tested in-memory path.
+# Production DB driver (e.g. psycopg) is added when wiring live RDS.
