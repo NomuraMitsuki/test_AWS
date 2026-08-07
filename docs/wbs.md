@@ -52,7 +52,7 @@
 | W-106 | github_oidc モジュール | 完了 | PR #4 |
 | W-107 | dev 合成 + infra 用 GitHub Actions（plan まで） | 完了 | PR #4 |
 | W-108 | 検証ゲート（fmt / validate / plan）＋初回 apply（OIDC 用） | 完了 | PR #6。ローカルで plan/apply 成功を確認後、課金抑制のため destroy 済み |
-| W-109 | GitHub Secrets（OIDC ロール ARN）登録と CI plan 有効化 | 未着手 | **API（W-210〜）およびフロント（W-250）完了まで着手しない。** その後再 apply → `AWS_ROLE_ARN_INFRA` / `AWS_ROLE_ARN_BACKEND` 登録。リモート state 化も検討（[aws-auth-bootstrap.md](infra/aws-auth-bootstrap.md) §D） |
+| W-109 | GitHub Secrets（OIDC ロール ARN）登録と CI plan 有効化 | ブロック | **API（W-210〜）およびフロント（W-250）完了まで着手しない。** その後再 apply → `AWS_ROLE_ARN_INFRA` / `AWS_ROLE_ARN_BACKEND` 登録。リモート state 化も検討（[aws-auth-bootstrap.md](infra/aws-auth-bootstrap.md) §D） |
 
 ---
 
