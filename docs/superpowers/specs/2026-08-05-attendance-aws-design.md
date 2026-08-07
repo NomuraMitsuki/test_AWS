@@ -50,7 +50,7 @@ Browser
 - HTTP API
 - Cognito JWT Authorizer
 - ルートをドメイン別 Lambda にマッピング
-- CORS: Amplify オリジンのみ
+- CORS: Amplify オリジンを許可。ローカル開発例外として `http://localhost:3000` も許可（詳細: [Phase 7](2026-08-07-phase7-frontend-amplify-design.md)）
 
 ### 4.3 Lambda（Python）
 
@@ -132,7 +132,7 @@ frontend/       # Next.js 14
 5. 休暇・承認 — [Phase 4 スペック](2026-08-07-phase4-leave-api-design.md) / [実装計画](../plans/2026-08-07-phase4-leave-api.md)（W-220）
 6. ユーザー管理 — [Phase 5 スペック](2026-08-07-phase5-users-api-design.md) / [実装計画](../plans/2026-08-07-phase5-users-api.md)（W-230）
 7. エクスポート — [Phase 6 スペック](2026-08-07-phase6-exports-api-design.md) / [実装計画](../plans/2026-08-07-phase6-exports-api.md)（W-240）
-8. フロント + Amplify
+8. フロント + Amplify — [Phase 7 スペック](2026-08-07-phase7-frontend-amplify-design.md)（W-250）。実装計画は同 Phase の plans を参照
 9. CI/CD 完成
 10. 監視仕上げ
 
@@ -151,3 +151,4 @@ frontend/       # Next.js 14
 - [Phase 4 休暇 API 設計](2026-08-07-phase4-leave-api-design.md)
 - [Phase 5 ユーザー API 設計](2026-08-07-phase5-users-api-design.md)
 - [Phase 6 エクスポート API 設計](2026-08-07-phase6-exports-api-design.md)
+- [Phase 7 フロント + Amplify 設計](2026-08-07-phase7-frontend-amplify-design.md)

@@ -49,4 +49,16 @@ terraform plan
 | storage | exports 用 S3（公開禁止） |
 | monitoring | SNS + CloudWatch ダッシュボード骨格 |
 | github_oidc | GitHub Actions OIDC ロール |
-| api | HTTP API / Cognito JWT authorizer / health Lambda（`GET /health` は認証なし）/ attendance・leave・users・exports Lambda（VPC 内・JWT 必須ルート。exports は S3 Put/Presign IAM） |
+| api | HTTP API / Cognito JWT authorizer / health Lambda（`GET /health` は認証なし）/ attendance・leave・users・exports Lambda（VPC 内・JWT 必須ルート。exports は S3 Put/Presign IAM）/ CORS（`cors_allow_origins`） |
+| amplify | Amplify Hosting（Next.js / `frontend`）。Cognito・API URL を環境変数で渡す。GitHub トークンは sensitive（空でも validate 可） |
+
+## フロント（ローカル）
+
+```bash
+cd frontend
+cp .env.example .env.local   # Cognito / API URL を記入（コミットしない）
+npm ci
+npm run dev
+```
+
+API CORS は `cors_allow_localhost=true`（既定）で `http://localhost:3000` を許可。Amplify オリジンは apply 後に `terraform output amplify_default_branch_url` を `cors_amplify_origin` へ設定する（循環依存回避）。

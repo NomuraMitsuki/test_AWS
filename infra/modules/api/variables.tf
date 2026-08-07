@@ -71,3 +71,9 @@ variable "exports_bucket_arn" {
   type        = string
   description = "CSV エクスポート用 S3 バケット ARN（PutObject / GetObject IAM スコープ）"
 }
+
+variable "cors_allow_origins" {
+  type        = list(string)
+  description = "HTTP API CORS 許可オリジン（Amplify URL / localhost 等）"
+  default     = []
+}

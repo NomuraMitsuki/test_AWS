@@ -20,7 +20,8 @@ infra/
     cognito/      # User Pool, groups, app client
     data/         # RDS, Secrets Manager, subnet group
     storage/      # S3 exports bucket
-    api/          # HTTP API, JWT authorizer, Lambda, IAM
+    api/          # HTTP API, JWT authorizer, Lambda, IAM, CORS
+    amplify/      # Amplify Hosting app + branch（Next.js / frontend）
     monitoring/   # Log groups, alarms, dashboard
     github_oidc/  # GitHub Actions OIDC provider + roles
   scripts/
@@ -36,7 +37,8 @@ infra/
 | cognito | User Pool（セルフサインアップ無効）, Groups, App Client, Domain（任意） |
 | data | RDS PostgreSQL `db.t4g.micro`, Secrets Manager, parameter group |
 | storage | S3 bucket, Block Public Access, lifecycle（任意） |
-| api | HTTP API, Cognito JWT authorizer, health Lambda（VPC 外・`GET /health` 認証なし）, attendance Lambda（VPC 内・JWT 必須の打刻/履歴/サマリ）, leave Lambda（VPC 内・JWT 必須の休暇申請/承認/却下）, users Lambda（VPC 内・JWT 必須の一覧/招待/更新・Cognito Admin IAM）, exports Lambda（VPC 内・JWT 必須の勤怠 CSV エクスポート・S3 Put/Presign IAM） |
+| api | HTTP API, Cognito JWT authorizer, health Lambda（VPC 外・`GET /health` 認証なし）, attendance Lambda（VPC 内・JWT 必須の打刻/履歴/サマリ）, leave Lambda（VPC 内・JWT 必須の休暇申請/承認/却下）, users Lambda（VPC 内・JWT 必須の一覧/招待/更新・Cognito Admin IAM）, exports Lambda（VPC 内・JWT 必須の勤怠 CSV エクスポート・S3 Put/Presign IAM）, CORS（Amplify オリジン + ローカル `http://localhost:3000`） |
+| amplify | Amplify Hosting アプリ + branch（ルート `frontend`、Next.js）。環境変数（Cognito / API URL）。GitHub 連携トークンは sensitive 変数 |
 | monitoring | CloudWatch ダッシュボード骨格、SNS（アラーム本体は Phase 後半 / W-270） |
 | github_oidc | OIDC provider, deploy roles（infra / backend。frontend は Amplify 連携時に追加） |
 
@@ -55,7 +57,9 @@ infra/
 | environment | `dev` | 環境名 |
 | aws_region | `ap-northeast-1` | |
 | db_instance_class | `db.t4g.micro` | |
-| amplify_app_id / branch | （後から） | CORS オリジン解決用 |
+| cors_allow_localhost | `true`（dev） | `http://localhost:3000` を CORS に含めるか |
+| cors_amplify_origin | Amplify の default branch URL | CORS 用（例: `https://main.<appId>.amplifyapp.com`）。`amplify` と `api` の循環回避のため初回は空、apply 後に `amplify_default_branch_url` 出力を設定 |
+| amplify_github_access_token | （sensitive・任意） | Amplify の GitHub 連携。空でも `validate` 可。apply 前に設定 |
 | github_org_repo | `owner/repo` | OIDC 信頼条件 |
 
 ## セキュリティ方針
@@ -72,7 +76,7 @@ infra/
 2. `network` → `cognito` → `data` → `storage`
 3. `api`（health / attendance / leave / users / exports を zip）
 4. `monitoring` / `github_oidc`
-5. Amplify アプリは Terraform またはコンソール＋ドキュメント連携
+5. `amplify`（Hosting）。API CORS の localhost は `cors_allow_localhost`。Amplify オリジンは apply 後に `cors_amplify_origin` へ反映（`api`↔`amplify` 循環回避）
 
 ## コスト抑制メモ
 
