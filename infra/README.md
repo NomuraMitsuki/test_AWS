@@ -49,4 +49,4 @@ terraform plan
 | storage | exports 用 S3（公開禁止） |
 | monitoring | SNS + CloudWatch ダッシュボード骨格 |
 | github_oidc | GitHub Actions OIDC ロール |
-| api | HTTP API / Cognito JWT authorizer / health Lambda（`GET /health` は認証なし）/ attendance・leave Lambda（VPC 内・JWT 必須ルート） |
+| api | HTTP API / Cognito JWT authorizer / health Lambda（`GET /health` は認証なし）/ attendance・leave・users Lambda（VPC 内・JWT 必須ルート） |

@@ -1,6 +1,6 @@
 """ドメイン別 Lambda ディレクトリをトップレベルモジュールとして読み込む。
 
-health / attendance / leave がいずれも `handler.py` を持つため、PYTHONPATH を
+health / attendance / leave / users がいずれも `handler.py` を持つため、PYTHONPATH を
 並べるだけではモジュールキャッシュが衝突する。テストは本ヘルパ経由で
 対象ディレクトリだけを先頭に載せ替えて import する。
 """
@@ -13,8 +13,8 @@ from pathlib import Path
 from types import ModuleType
 
 BACKEND = Path(__file__).resolve().parents[1]
-_LAMBDA_DIRS = ("health", "attendance", "leave")
-_LAMBDA_MODULES = ("handler", "auth", "service", "repository", "errors")
+_LAMBDA_DIRS = ("health", "attendance", "leave", "users")
+_LAMBDA_MODULES = ("handler", "auth", "service", "repository", "errors", "cognito")
 
 
 def import_lambda(name: str) -> ModuleType:

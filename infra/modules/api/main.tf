@@ -314,3 +314,128 @@ resource "aws_lambda_permission" "leave_apigw" {
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.http.execution_arn}/*/*"
 }
+
+# -----------------------------------------------------------------------------
+# users Lambda（VPC 内）+ JWT 必須ルート + Cognito Admin
+# -----------------------------------------------------------------------------
+
+resource "aws_iam_role" "users_lambda" {
+  name               = "${var.name_prefix}-users-lambda"
+  assume_role_policy = data.aws_iam_policy_document.lambda_assume.json
+}
+
+resource "aws_iam_role_policy_attachment" "users_basic" {
+  role       = aws_iam_role.users_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "users_vpc" {
+  role       = aws_iam_role.users_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+}
+
+data "aws_iam_policy_document" "users_secrets" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "secretsmanager:GetSecretValue",
+    ]
+    resources = [var.db_secret_arn]
+  }
+}
+
+resource "aws_iam_role_policy" "users_secrets" {
+  name   = "${var.name_prefix}-users-secrets"
+  role   = aws_iam_role.users_lambda.id
+  policy = data.aws_iam_policy_document.users_secrets.json
+}
+
+data "aws_iam_policy_document" "users_cognito" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "cognito-idp:AdminCreateUser",
+      "cognito-idp:AdminAddUserToGroup",
+      "cognito-idp:AdminRemoveUserFromGroup",
+      "cognito-idp:AdminDeleteUser",
+      "cognito-idp:AdminGetUser",
+      "cognito-idp:AdminListGroupsForUser",
+    ]
+    resources = [var.cognito_user_pool_arn]
+  }
+}
+
+resource "aws_iam_role_policy" "users_cognito" {
+  name   = "${var.name_prefix}-users-cognito"
+  role   = aws_iam_role.users_lambda.id
+  policy = data.aws_iam_policy_document.users_cognito.json
+}
+
+data "archive_file" "users" {
+  type        = "zip"
+  source_dir  = var.users_source_dir
+  output_path = "${path.module}/.build/users.zip"
+  excludes    = ["__pycache__", "*.pyc", "requirements.txt"]
+}
+
+resource "aws_lambda_function" "users" {
+  function_name = "${var.name_prefix}-users"
+  role          = aws_iam_role.users_lambda.arn
+  handler       = "handler.handler"
+  runtime       = "python3.12"
+
+  filename         = data.archive_file.users.output_path
+  source_code_hash = data.archive_file.users.output_base64sha256
+
+  environment {
+    variables = {
+      DB_SECRET_ARN        = var.db_secret_arn
+      COGNITO_USER_POOL_ID = var.cognito_user_pool_id
+    }
+  }
+
+  vpc_config {
+    subnet_ids         = var.private_subnet_ids
+    security_group_ids = [var.lambda_security_group_id]
+  }
+}
+
+resource "aws_apigatewayv2_integration" "users" {
+  api_id                 = aws_apigatewayv2_api.http.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.users.invoke_arn
+  integration_method     = "POST"
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "users_list" {
+  api_id             = aws_apigatewayv2_api.http.id
+  route_key          = "GET /users"
+  target             = "integrations/${aws_apigatewayv2_integration.users.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_jwt.id
+}
+
+resource "aws_apigatewayv2_route" "users_invite" {
+  api_id             = aws_apigatewayv2_api.http.id
+  route_key          = "POST /users"
+  target             = "integrations/${aws_apigatewayv2_integration.users.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_jwt.id
+}
+
+resource "aws_apigatewayv2_route" "users_update" {
+  api_id             = aws_apigatewayv2_api.http.id
+  route_key          = "PATCH /users/{id}"
+  target             = "integrations/${aws_apigatewayv2_integration.users.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_jwt.id
+}
+
+resource "aws_lambda_permission" "users_apigw" {
+  statement_id  = "AllowAPIGatewayInvokeUsers"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.users.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.http.execution_arn}/*/*"
+}

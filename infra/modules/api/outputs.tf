@@ -14,6 +14,10 @@ output "leave_lambda_function_name" {
   value = aws_lambda_function.leave.function_name
 }
 
+output "users_lambda_function_name" {
+  value = aws_lambda_function.users.function_name
+}
+
 output "http_api_id" {
   value = aws_apigatewayv2_api.http.id
 }

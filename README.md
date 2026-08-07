@@ -25,6 +25,8 @@ Next.js + API Gateway + Lambda + Cognito + RDS + S3 による勤怠管理アプ�
 | Phase 3 実装計画 | [docs/superpowers/plans/2026-08-07-phase3-attendance-api.md](docs/superpowers/plans/2026-08-07-phase3-attendance-api.md) |
 | Phase 4 設計（休暇 API） | [docs/superpowers/specs/2026-08-07-phase4-leave-api-design.md](docs/superpowers/specs/2026-08-07-phase4-leave-api-design.md) |
 | Phase 4 実装計画 | [docs/superpowers/plans/2026-08-07-phase4-leave-api.md](docs/superpowers/plans/2026-08-07-phase4-leave-api.md) |
+| Phase 5 設計（ユーザー API） | [docs/superpowers/specs/2026-08-07-phase5-users-api-design.md](docs/superpowers/specs/2026-08-07-phase5-users-api-design.md) |
+| Phase 5 実装計画 | [docs/superpowers/plans/2026-08-07-phase5-users-api.md](docs/superpowers/plans/2026-08-07-phase5-users-api.md) |
 | 作業一覧（WBS） | [docs/wbs.md](docs/wbs.md) |
 | ハンドオフ（新スレッド用） | [docs/handoff.md](docs/handoff.md) |
 
