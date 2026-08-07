@@ -29,8 +29,8 @@
 - POST /exports/attendance — scope 認可、CSV 生成、モック S3、200 with download_url
 - invalid dates → 400; forbidden scope → 403
 
-- [ ] pytest green (all suites)
-- [ ] Commit: `feat(backend): add exports API handlers and tests (W-240)`
+- [x] pytest green (all suites)
+- [x] Commit: `feat(backend): add exports API handlers and tests (W-240)`
 
 ---
 
@@ -38,8 +38,8 @@
 
 - Modify `infra/modules/api/*`, `infra/envs/dev/*` — pass exports bucket name/arn from storage module
 
-- [ ] terraform fmt + validate
-- [ ] Commit: `feat(infra): wire exports Lambda JWT route and S3 IAM (W-240)`
+- [x] terraform fmt + validate
+- [x] Commit: `feat(infra): wire exports Lambda JWT route and S3 IAM (W-240)`
 
 ---
 
@@ -48,7 +48,7 @@
 - infra README, terraform-design, handoff（次は W-250）, README 索引, parent §8 Phase 6
 - Do not edit docs/wbs.md
 
-- [ ] Commit + push `cursor/w240-exports-api-a099`
+- [x] Commit + push `cursor/w240-exports-api-a099`
 
 ---
 

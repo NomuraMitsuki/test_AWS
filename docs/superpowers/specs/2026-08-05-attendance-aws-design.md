@@ -131,7 +131,7 @@ frontend/       # Next.js 14
 4. 勤怠コア — [Phase 3 スペック](2026-08-07-phase3-attendance-api-design.md) / [実装計画](../plans/2026-08-07-phase3-attendance-api.md)（W-210）
 5. 休暇・承認 — [Phase 4 スペック](2026-08-07-phase4-leave-api-design.md) / [実装計画](../plans/2026-08-07-phase4-leave-api.md)（W-220）
 6. ユーザー管理 — [Phase 5 スペック](2026-08-07-phase5-users-api-design.md) / [実装計画](../plans/2026-08-07-phase5-users-api.md)（W-230）
-7. エクスポート
+7. エクスポート — [Phase 6 スペック](2026-08-07-phase6-exports-api-design.md) / [実装計画](../plans/2026-08-07-phase6-exports-api.md)（W-240）
 8. フロント + Amplify
 9. CI/CD 完成
 10. 監視仕上げ
@@ -150,3 +150,4 @@ frontend/       # Next.js 14
 - [Phase 3 勤怠 API 設計](2026-08-07-phase3-attendance-api-design.md)
 - [Phase 4 休暇 API 設計](2026-08-07-phase4-leave-api-design.md)
 - [Phase 5 ユーザー API 設計](2026-08-07-phase5-users-api-design.md)
+- [Phase 6 エクスポート API 設計](2026-08-07-phase6-exports-api-design.md)
