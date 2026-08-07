@@ -26,6 +26,8 @@ admin 向けユーザー一覧・招待・更新 API を users Lambda + Terrafor
 
 JWT 必須。employee / manager は 403。
 
+admin 判定の正は DB `users.role=admin`（Cognito groups は補助）。未登録または `status=disabled` は 403（Phase 3 と同じ）。
+
 ## 4. 招待フロー（本番想定）
 
 1. Cognito `AdminCreateUser`（仮パスワード）+ グループ付与

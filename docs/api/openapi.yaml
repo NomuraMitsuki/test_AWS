@@ -341,6 +341,7 @@ paths:
     get:
       tags: [users]
       summary: ユーザー一覧（admin）
+      description: admin のみ。employee / manager は 403。
       security:
         - cognitoJwt: []
       responses:
@@ -355,11 +356,14 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "403":
           $ref: "#/components/responses/Forbidden"
     post:
       tags: [users]
       summary: ユーザー招待（admin）
+      description: admin のみ。メール重複は 409。
       security:
         - cognitoJwt: []
       requestBody:
@@ -375,6 +379,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "403":
           $ref: "#/components/responses/Forbidden"
         "409":
@@ -384,6 +390,9 @@ paths:
     patch:
       tags: [users]
       summary: ユーザー更新（ロール・上長・無効化）
+      description: |
+        admin のみ。存在しない id は 404。
+        更新可能: role / manager_id / status（name は本 Phase 対象外）。
       security:
         - cognitoJwt: []
       parameters:
@@ -406,8 +415,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "403":
           $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
 
   /exports/attendance:
     post:
@@ -592,9 +605,8 @@ components:
 
     UserUpdate:
       type: object
+      description: 更新可能フィールド（name は本 Phase 対象外）
       properties:
-        name:
-          type: string
         role:
           type: string
           enum: [employee, manager, admin]
@@ -618,12 +630,14 @@ components:
           type: string
         role:
           type: string
+          enum: [employee, manager, admin]
         manager_id:
           type: string
           format: uuid
           nullable: true
         status:
           type: string
+          enum: [active, disabled]
 
     ExportRequest:
       type: object
