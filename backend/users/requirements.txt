@@ -1,0 +1,3 @@
+# Runtime deps: none for unit-tested in-memory path.
+# Production uses boto3 (Lambda runtime) for Cognito Admin API.
+# Production DB driver (e.g. psycopg) is added when wiring live RDS.
