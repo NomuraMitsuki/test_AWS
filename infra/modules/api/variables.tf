@@ -21,3 +21,23 @@ variable "health_source_dir" {
   type        = string
   description = "backend/health のソースディレクトリ（archive_file 用）"
 }
+
+variable "attendance_source_dir" {
+  type        = string
+  description = "backend/attendance のソースディレクトリ（archive_file 用）"
+}
+
+variable "private_subnet_ids" {
+  type        = list(string)
+  description = "attendance Lambda を配置するプライベートサブネット"
+}
+
+variable "lambda_security_group_id" {
+  type        = string
+  description = "attendance Lambda 用セキュリティグループ"
+}
+
+variable "db_secret_arn" {
+  type        = string
+  description = "RDS 接続情報 Secrets Manager ARN（GetSecretValue 用）"
+}

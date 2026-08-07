@@ -36,9 +36,13 @@ module "github_oidc" {
 module "api" {
   source = "../../modules/api"
 
-  name_prefix          = local.name_prefix
-  cognito_user_pool_id = module.cognito.user_pool_id
-  cognito_client_id    = module.cognito.client_id
-  cognito_issuer_url   = module.cognito.issuer_url
-  health_source_dir    = "${path.root}/../../../backend/health"
+  name_prefix              = local.name_prefix
+  cognito_user_pool_id     = module.cognito.user_pool_id
+  cognito_client_id        = module.cognito.client_id
+  cognito_issuer_url       = module.cognito.issuer_url
+  health_source_dir        = "${path.root}/../../../backend/health"
+  attendance_source_dir    = "${path.root}/../../../backend/attendance"
+  private_subnet_ids       = module.network.private_subnet_ids
+  lambda_security_group_id = module.network.lambda_security_group_id
+  db_secret_arn            = module.data.db_secret_arn
 }
