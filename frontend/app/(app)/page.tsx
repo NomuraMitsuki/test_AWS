@@ -3,11 +3,17 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { apiFetch, errorMessage } from "@/lib/api/client";
-import type { AttendanceRecord, ListResponse } from "@/lib/api/types";
+import type {
+  AttendanceRecord,
+  LeaveRequest,
+  ListResponse,
+} from "@/lib/api/types";
+import { getRoles } from "@/lib/auth/session";
 import { formatDateTime, todayLocalDate } from "@/lib/dates";
 
 export default function DashboardPage() {
   const [todayRecord, setTodayRecord] = useState<AttendanceRecord | null>(null);
+  const [pendingCount, setPendingCount] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -15,10 +21,19 @@ export default function DashboardPage() {
     void (async () => {
       const today = todayLocalDate();
       try {
-        const data = await apiFetch<ListResponse<AttendanceRecord>>(
+        const roles = await getRoles();
+        const attendance = await apiFetch<ListResponse<AttendanceRecord>>(
           `/attendance/records?scope=self&from=${today}&to=${today}`,
         );
-        setTodayRecord(data.items[0] ?? null);
+        setTodayRecord(attendance.items[0] ?? null);
+
+        if (roles.includes("manager") || roles.includes("admin")) {
+          const scope = roles.includes("admin") ? "all" : "team";
+          const leave = await apiFetch<ListResponse<LeaveRequest>>(
+            `/leave-requests?scope=${scope}&status=pending`,
+          );
+          setPendingCount(leave.items.length);
+        }
       } catch (err) {
         setError(errorMessage(err));
       } finally {
@@ -47,6 +62,16 @@ export default function DashboardPage() {
           <p>
             <Link href="/attendance">打刻画面へ</Link>
           </p>
+
+          {pendingCount !== null ? (
+            <>
+              <h2>承認待ち休暇</h2>
+              <p>
+                {pendingCount} 件 —{" "}
+                <Link href="/leave/approvals">承認画面へ</Link>
+              </p>
+            </>
+          ) : null}
         </>
       ) : null}
     </section>
