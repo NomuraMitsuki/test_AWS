@@ -53,14 +53,14 @@ Next.js + API Gateway + Lambda + Cognito + RDS + S3 による勤怠管理アプ�
 - Storage: S3（CSVエクスポート）
 - IaC: Terraform / CI: GitHub Actions (OIDC) / Ops: CloudWatch
 
-## リポジトリ構成（予定）
+## リポジトリ構成
 
 ```text
 docs/       # 設計資料
-infra/      # Terraform（Phase 1）
+infra/      # Terraform（modules + envs/dev。Amplify / API CORS 含む）
 backend/    # Lambda (Python)
-frontend/   # Next.js
+frontend/   # Next.js 14（Amplify Auth + API Gateway クライアント）
 .github/workflows/
 ```
 
-Infra の使い方は [infra/README.md](infra/README.md) を参照。
+Infra の使い方は [infra/README.md](infra/README.md) を参照。フロントのローカル起動も同 README。
