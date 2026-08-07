@@ -45,7 +45,10 @@ module "api" {
   attendance_source_dir    = "${path.root}/../../../backend/attendance"
   leave_source_dir         = "${path.root}/../../../backend/leave"
   users_source_dir         = "${path.root}/../../../backend/users"
+  exports_source_dir       = "${path.root}/../../../backend/exports"
   private_subnet_ids       = module.network.private_subnet_ids
   lambda_security_group_id = module.network.lambda_security_group_id
   db_secret_arn            = module.data.db_secret_arn
+  exports_bucket_name      = module.storage.exports_bucket_name
+  exports_bucket_arn       = module.storage.exports_bucket_arn
 }

@@ -439,3 +439,108 @@ resource "aws_lambda_permission" "users_apigw" {
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.http.execution_arn}/*/*"
 }
+
+# -----------------------------------------------------------------------------
+# exports Lambda（VPC 内）+ JWT 必須ルート + S3 Put/Presign
+# -----------------------------------------------------------------------------
+
+resource "aws_iam_role" "exports_lambda" {
+  name               = "${var.name_prefix}-exports-lambda"
+  assume_role_policy = data.aws_iam_policy_document.lambda_assume.json
+}
+
+resource "aws_iam_role_policy_attachment" "exports_basic" {
+  role       = aws_iam_role.exports_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "exports_vpc" {
+  role       = aws_iam_role.exports_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+}
+
+data "aws_iam_policy_document" "exports_secrets" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "secretsmanager:GetSecretValue",
+    ]
+    resources = [var.db_secret_arn]
+  }
+}
+
+resource "aws_iam_role_policy" "exports_secrets" {
+  name   = "${var.name_prefix}-exports-secrets"
+  role   = aws_iam_role.exports_lambda.id
+  policy = data.aws_iam_policy_document.exports_secrets.json
+}
+
+data "aws_iam_policy_document" "exports_s3" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:PutObject",
+      "s3:GetObject",
+    ]
+    resources = ["${var.exports_bucket_arn}/*"]
+  }
+}
+
+resource "aws_iam_role_policy" "exports_s3" {
+  name   = "${var.name_prefix}-exports-s3"
+  role   = aws_iam_role.exports_lambda.id
+  policy = data.aws_iam_policy_document.exports_s3.json
+}
+
+data "archive_file" "exports" {
+  type        = "zip"
+  source_dir  = var.exports_source_dir
+  output_path = "${path.module}/.build/exports.zip"
+  excludes    = ["__pycache__", "*.pyc", "requirements.txt"]
+}
+
+resource "aws_lambda_function" "exports" {
+  function_name = "${var.name_prefix}-exports"
+  role          = aws_iam_role.exports_lambda.arn
+  handler       = "handler.handler"
+  runtime       = "python3.12"
+
+  filename         = data.archive_file.exports.output_path
+  source_code_hash = data.archive_file.exports.output_base64sha256
+
+  environment {
+    variables = {
+      DB_SECRET_ARN       = var.db_secret_arn
+      EXPORTS_BUCKET_NAME = var.exports_bucket_name
+    }
+  }
+
+  vpc_config {
+    subnet_ids         = var.private_subnet_ids
+    security_group_ids = [var.lambda_security_group_id]
+  }
+}
+
+resource "aws_apigatewayv2_integration" "exports" {
+  api_id                 = aws_apigatewayv2_api.http.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.exports.invoke_arn
+  integration_method     = "POST"
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "exports_attendance" {
+  api_id             = aws_apigatewayv2_api.http.id
+  route_key          = "POST /exports/attendance"
+  target             = "integrations/${aws_apigatewayv2_integration.exports.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_jwt.id
+}
+
+resource "aws_lambda_permission" "exports_apigw" {
+  statement_id  = "AllowAPIGatewayInvokeExports"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.exports.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.http.execution_arn}/*/*"
+}

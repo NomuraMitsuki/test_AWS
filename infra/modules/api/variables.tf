@@ -42,9 +42,14 @@ variable "users_source_dir" {
   description = "backend/users のソースディレクトリ（archive_file 用）"
 }
 
+variable "exports_source_dir" {
+  type        = string
+  description = "backend/exports のソースディレクトリ（archive_file 用）"
+}
+
 variable "private_subnet_ids" {
   type        = list(string)
-  description = "ドメイン Lambda（attendance / leave / users）を配置するプライベートサブネット"
+  description = "ドメイン Lambda（attendance / leave / users / exports）を配置するプライベートサブネット"
 }
 
 variable "lambda_security_group_id" {
@@ -55,4 +60,14 @@ variable "lambda_security_group_id" {
 variable "db_secret_arn" {
   type        = string
   description = "RDS 接続情報 Secrets Manager ARN（GetSecretValue 用）"
+}
+
+variable "exports_bucket_name" {
+  type        = string
+  description = "CSV エクスポート用 S3 バケット名"
+}
+
+variable "exports_bucket_arn" {
+  type        = string
+  description = "CSV エクスポート用 S3 バケット ARN（PutObject / GetObject IAM スコープ）"
 }

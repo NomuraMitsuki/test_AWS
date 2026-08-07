@@ -426,6 +426,9 @@ paths:
     post:
       tags: [exports]
       summary: 勤怠 CSV エクスポート
+      description: |
+        JWT 必須。`scope` は勤怠一覧と同じ（employee は self のみ、manager は team、admin は all）。
+        日付不正（from_date > to_date 等）は 400。
       security:
         - cognitoJwt: []
       requestBody:
@@ -441,6 +444,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ExportResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "403":
           $ref: "#/components/responses/Forbidden"
 
@@ -656,6 +663,7 @@ components:
 
     ExportResult:
       type: object
+      required: [export_job_id, download_url, expires_in]
       properties:
         export_job_id:
           type: string

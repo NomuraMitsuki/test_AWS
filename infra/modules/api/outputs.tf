@@ -18,6 +18,10 @@ output "users_lambda_function_name" {
   value = aws_lambda_function.users.function_name
 }
 
+output "exports_lambda_function_name" {
+  value = aws_lambda_function.exports.function_name
+}
+
 output "http_api_id" {
   value = aws_apigatewayv2_api.http.id
 }
