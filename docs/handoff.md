@@ -39,6 +39,7 @@ AWS 学習用の勤怠管理アプリ。Phase 1 Terraform はローカル apply 
 
 - ユーザー向け文書・PR 本文は日本語
 - 複数ステップの実装は親が抱え込まず `implement-with-subagent` → `implementation-worker`
+- 実装完了後の **WBS ステータス更新と PR 操作は親**が行う
 - `docs/**` 等を含む **PR 新規作成直前**に設計資料レビュー
 - 進捗は `docs/wbs.md` を更新
 

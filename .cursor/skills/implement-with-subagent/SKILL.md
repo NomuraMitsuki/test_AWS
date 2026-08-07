@@ -22,12 +22,14 @@ description: Use when implementing WBS tasks or multi-step feature/bugfix work s
    - **ブランチ名**
    - **検証コマンド**（例: `pytest`, `cd infra/envs/dev && terraform validate`）
    - **コミット方針**（日本語メッセージ可、秘密情報を含めない）
-   - **PR は作成しない**（push まで、または親が指定した範囲まで）
+   - **PR 操作はしない**（`create_pr` / `update_pr` 等。push まで、または親が指定した範囲まで）
+   - 付随 docs（OpenAPI 等）を子スコープに含めるかどうか
    - 定義ファイル `.cursor/agents/implementation-worker.md` に従うこと
 5. サブエージェントの完了報告を受け、ユーザーへ簡潔に要約する。
    - 親が同じ実装をやり直し・上書き拡張しない。
    - サブエージェント失敗時は失敗を報告し、親側の全実装へ黙ってフォールバックしない。
-6. その後の **設計資料レビュー**（該当時）と **PR 作成** は親が行う（`pr-design-review` / `review-design-docs`）。
+   - **WBS ステータス更新**（`docs/wbs.md`）は親が行う。
+6. その後の **設計資料レビュー**（該当時）と **PR 作成・更新** は親が行う（`pr-design-review` / `review-design-docs`）。
 
 ## 使わない場面
 
@@ -38,6 +40,7 @@ description: Use when implementing WBS tasks or multi-step feature/bugfix work s
 
 ## 子にやらせないこと（親が保持）
 
-- `ManagePullRequest` の `create_pr`
+- `ManagePullRequest` 全般（`create_pr` / `update_pr` / コメント等）
 - `docs/` 横断の設計資料レビュー
+- WBS ステータスの確定更新（完了報告を受けて親が更新）
 - ユーザーとの方針合意・スコープ変更の最終決定
