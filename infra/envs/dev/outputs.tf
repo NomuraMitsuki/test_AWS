@@ -73,3 +73,20 @@ output "exports_lambda_function_name" {
 output "http_api_id" {
   value = module.api.http_api_id
 }
+
+output "amplify_app_id" {
+  value = module.amplify.app_id
+}
+
+output "amplify_default_domain" {
+  value = module.amplify.default_domain
+}
+
+output "amplify_default_branch_url" {
+  value       = module.amplify.default_branch_url
+  description = "API CORS 用に cors_amplify_origin へ設定する URL"
+}
+
+output "cors_allow_origins" {
+  value = local.cors_allow_origins
+}

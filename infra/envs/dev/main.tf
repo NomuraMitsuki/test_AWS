@@ -51,4 +51,18 @@ module "api" {
   db_secret_arn            = module.data.db_secret_arn
   exports_bucket_name      = module.storage.exports_bucket_name
   exports_bucket_arn       = module.storage.exports_bucket_arn
+  cors_allow_origins       = local.cors_allow_origins
+}
+
+module "amplify" {
+  source = "../../modules/amplify"
+
+  name_prefix                 = local.name_prefix
+  repository_url              = var.amplify_repository_url
+  github_access_token         = var.amplify_github_access_token
+  branch_name                 = var.amplify_branch_name
+  aws_region                  = var.aws_region
+  cognito_user_pool_id        = module.cognito.user_pool_id
+  cognito_user_pool_client_id = module.cognito.client_id
+  api_base_url                = module.api.api_endpoint
 }

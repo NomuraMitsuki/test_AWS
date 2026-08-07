@@ -41,6 +41,17 @@ resource "aws_lambda_function" "health" {
 resource "aws_apigatewayv2_api" "http" {
   name          = "${var.name_prefix}-http"
   protocol_type = "HTTP"
+
+  dynamic "cors_configuration" {
+    for_each = length(var.cors_allow_origins) > 0 ? [1] : []
+    content {
+      allow_headers     = ["authorization", "content-type"]
+      allow_methods     = ["GET", "POST", "PATCH", "OPTIONS"]
+      allow_origins     = var.cors_allow_origins
+      allow_credentials = false
+      max_age           = 300
+    }
+  }
 }
 
 resource "aws_apigatewayv2_stage" "default" {
