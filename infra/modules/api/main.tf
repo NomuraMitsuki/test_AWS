@@ -203,3 +203,114 @@ resource "aws_lambda_permission" "attendance_apigw" {
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.http.execution_arn}/*/*"
 }
+
+# -----------------------------------------------------------------------------
+# leave Lambda（VPC 内）+ JWT 必須ルート
+# -----------------------------------------------------------------------------
+
+resource "aws_iam_role" "leave_lambda" {
+  name               = "${var.name_prefix}-leave-lambda"
+  assume_role_policy = data.aws_iam_policy_document.lambda_assume.json
+}
+
+resource "aws_iam_role_policy_attachment" "leave_basic" {
+  role       = aws_iam_role.leave_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "leave_vpc" {
+  role       = aws_iam_role.leave_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+}
+
+data "aws_iam_policy_document" "leave_secrets" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "secretsmanager:GetSecretValue",
+    ]
+    resources = [var.db_secret_arn]
+  }
+}
+
+resource "aws_iam_role_policy" "leave_secrets" {
+  name   = "${var.name_prefix}-leave-secrets"
+  role   = aws_iam_role.leave_lambda.id
+  policy = data.aws_iam_policy_document.leave_secrets.json
+}
+
+data "archive_file" "leave" {
+  type        = "zip"
+  source_dir  = var.leave_source_dir
+  output_path = "${path.module}/.build/leave.zip"
+  excludes    = ["__pycache__", "*.pyc", "requirements.txt"]
+}
+
+resource "aws_lambda_function" "leave" {
+  function_name = "${var.name_prefix}-leave"
+  role          = aws_iam_role.leave_lambda.arn
+  handler       = "handler.handler"
+  runtime       = "python3.12"
+
+  filename         = data.archive_file.leave.output_path
+  source_code_hash = data.archive_file.leave.output_base64sha256
+
+  environment {
+    variables = {
+      DB_SECRET_ARN = var.db_secret_arn
+    }
+  }
+
+  vpc_config {
+    subnet_ids         = var.private_subnet_ids
+    security_group_ids = [var.lambda_security_group_id]
+  }
+}
+
+resource "aws_apigatewayv2_integration" "leave" {
+  api_id                 = aws_apigatewayv2_api.http.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.leave.invoke_arn
+  integration_method     = "POST"
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "leave_list" {
+  api_id             = aws_apigatewayv2_api.http.id
+  route_key          = "GET /leave-requests"
+  target             = "integrations/${aws_apigatewayv2_integration.leave.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_jwt.id
+}
+
+resource "aws_apigatewayv2_route" "leave_create" {
+  api_id             = aws_apigatewayv2_api.http.id
+  route_key          = "POST /leave-requests"
+  target             = "integrations/${aws_apigatewayv2_integration.leave.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_jwt.id
+}
+
+resource "aws_apigatewayv2_route" "leave_approve" {
+  api_id             = aws_apigatewayv2_api.http.id
+  route_key          = "POST /leave-requests/{id}/approve"
+  target             = "integrations/${aws_apigatewayv2_integration.leave.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_jwt.id
+}
+
+resource "aws_apigatewayv2_route" "leave_reject" {
+  api_id             = aws_apigatewayv2_api.http.id
+  route_key          = "POST /leave-requests/{id}/reject"
+  target             = "integrations/${aws_apigatewayv2_integration.leave.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_jwt.id
+}
+
+resource "aws_lambda_permission" "leave_apigw" {
+  statement_id  = "AllowAPIGatewayInvokeLeave"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.leave.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.http.execution_arn}/*/*"
+}

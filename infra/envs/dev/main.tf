@@ -42,6 +42,7 @@ module "api" {
   cognito_issuer_url       = module.cognito.issuer_url
   health_source_dir        = "${path.root}/../../../backend/health"
   attendance_source_dir    = "${path.root}/../../../backend/attendance"
+  leave_source_dir         = "${path.root}/../../../backend/leave"
   private_subnet_ids       = module.network.private_subnet_ids
   lambda_security_group_id = module.network.lambda_security_group_id
   db_secret_arn            = module.data.db_secret_arn
