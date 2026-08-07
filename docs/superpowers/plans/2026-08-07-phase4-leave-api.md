@@ -31,8 +31,8 @@
 - POST create → 201 pending; invalid dates → 400
 - approve/reject: pending only → else 409; wrong role/team → 403
 
-- [ ] pytest green for leave (+ existing tests still pass)
-- [ ] Commit: `feat(backend): add leave API handlers and tests (W-220)`
+- [x] pytest green for leave (+ existing tests still pass)
+- [x] Commit: `feat(backend): add leave API handlers and tests (W-220)`
 
 ---
 
@@ -44,8 +44,8 @@
 
 **Routes:** GET/POST `/leave-requests`, POST `.../approve`, POST `.../reject`
 
-- [ ] terraform fmt + validate
-- [ ] Commit: `feat(infra): wire leave Lambda and JWT routes (W-220)`
+- [x] terraform fmt + validate
+- [x] Commit: `feat(infra): wire leave Lambda and JWT routes (W-220)`
 
 ---
 
@@ -56,7 +56,7 @@
 - parent design §8 に Phase 4 リンク
 - **Do not** edit `docs/wbs.md`
 
-- [ ] Commit + push `cursor/w220-leave-api-a099`
+- [x] Commit + push `cursor/w220-leave-api-a099`
 
 ---
 

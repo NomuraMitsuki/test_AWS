@@ -129,7 +129,7 @@ frontend/       # Next.js 14
 2. Terraform 基盤（VPC / RDS / Cognito / S3 / CW）
 3. HTTP API + JWT + health — [Phase 2 スペック](2026-08-07-phase2-http-api-health-design.md) / [実装計画](../plans/2026-08-07-phase2-http-api-health.md)（W-200）
 4. 勤怠コア — [Phase 3 スペック](2026-08-07-phase3-attendance-api-design.md) / [実装計画](../plans/2026-08-07-phase3-attendance-api.md)（W-210）
-5. 休暇・承認
+5. 休暇・承認 — [Phase 4 スペック](2026-08-07-phase4-leave-api-design.md) / [実装計画](../plans/2026-08-07-phase4-leave-api.md)（W-220）
 6. ユーザー管理
 7. エクスポート
 8. フロント + Amplify
@@ -148,3 +148,4 @@ frontend/       # Next.js 14
 - [監視設計](../../ops/monitoring.md)
 - [Phase 2 HTTP API + health 設計](2026-08-07-phase2-http-api-health-design.md)
 - [Phase 3 勤怠 API 設計](2026-08-07-phase3-attendance-api-design.md)
+- [Phase 4 休暇 API 設計](2026-08-07-phase4-leave-api-design.md)
