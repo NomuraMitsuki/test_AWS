@@ -36,7 +36,7 @@ infra/
 | cognito | User Pool（セルフサインアップ無効）, Groups, App Client, Domain（任意） |
 | data | RDS PostgreSQL `db.t4g.micro`, Secrets Manager, parameter group |
 | storage | S3 bucket, Block Public Access, lifecycle（任意） |
-| api | HTTP API, Cognito JWT authorizer, health Lambda（VPC 外・`GET /health` 認証なし）, attendance Lambda（VPC 内・JWT 必須の打刻/履歴/サマリ）, leave Lambda（VPC 内・JWT 必須の休暇申請/承認/却下） |
+| api | HTTP API, Cognito JWT authorizer, health Lambda（VPC 外・`GET /health` 認証なし）, attendance Lambda（VPC 内・JWT 必須の打刻/履歴/サマリ）, leave Lambda（VPC 内・JWT 必須の休暇申請/承認/却下）, users Lambda（VPC 内・JWT 必須の一覧/招待/更新・Cognito Admin IAM） |
 | monitoring | CloudWatch ダッシュボード骨格、SNS（アラーム本体は Phase 後半 / W-270） |
 | github_oidc | OIDC provider, deploy roles（infra / backend。frontend は Amplify 連携時に追加） |
 
@@ -70,7 +70,7 @@ infra/
 
 1. bootstrap（state 用 S3/DynamoDB）— 必要なら
 2. `network` → `cognito` → `data` → `storage`
-3. `api`（health は `backend/health`、attendance は `backend/attendance`、leave は `backend/leave` を zip。users / exports は後続）
+3. `api`（health / attendance / leave / users を zip。exports は後続）
 4. `monitoring` / `github_oidc`
 5. Amplify アプリは Terraform またはコンソール＋ドキュメント連携
 

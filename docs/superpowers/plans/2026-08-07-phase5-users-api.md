@@ -29,8 +29,8 @@
 - GET/POST /users, PATCH /users/{id} — admin only
 - invite duplicate email → 409; missing id → 404; non-admin → 403
 
-- [ ] pytest green (all suites)
-- [ ] Commit: `feat(backend): add users API handlers and tests (W-230)`
+- [x] pytest green (all suites)
+- [x] Commit: `feat(backend): add users API handlers and tests (W-230)`
 
 ---
 
@@ -39,8 +39,8 @@
 - Modify `infra/modules/api/*` and `infra/envs/dev/*`
 - IAM: VPC + secrets + Cognito admin actions (UserPool scoped) for invite/group sync
 
-- [ ] terraform fmt + validate
-- [ ] Commit: `feat(infra): wire users Lambda and JWT routes (W-230)`
+- [x] terraform fmt + validate
+- [x] Commit: `feat(infra): wire users Lambda and JWT routes (W-230)`
 
 ---
 
@@ -49,7 +49,7 @@
 - infra README, terraform-design, handoff（次は W-240）, README 索引, parent §8 Phase 5 link
 - Do not edit docs/wbs.md
 
-- [ ] Commit + push `cursor/w230-users-api-a099`
+- [x] Commit + push `cursor/w230-users-api-a099`
 
 ---
 
