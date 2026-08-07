@@ -32,3 +32,13 @@ module "github_oidc" {
   name_prefix     = local.name_prefix
   github_org_repo = var.github_org_repo
 }
+
+module "api" {
+  source = "../../modules/api"
+
+  name_prefix          = local.name_prefix
+  cognito_user_pool_id = module.cognito.user_pool_id
+  cognito_client_id    = module.cognito.client_id
+  cognito_issuer_url   = module.cognito.issuer_url
+  health_source_dir    = "${path.root}/../../../backend/health"
+}

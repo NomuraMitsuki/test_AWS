@@ -60,8 +60,9 @@ Browser
 | `leave` | 休暇申請・承認／却下・一覧 |
 | `users` | 招待・一覧・更新・Cognito 同期 |
 | `exports` | CSV 生成 → S3 → 署名付き URL |
+| `health` | 稼働確認のみ（`GET /health`）。JWT 不要・**VPC 外**（DB 非接続） |
 
-共通: VPC 配置、Secrets Manager から DB 接続情報取得、構造化 JSON ログ。
+ドメイン Lambda（attendance / leave / users / exports）共通: VPC 配置、Secrets Manager から DB 接続情報取得、構造化 JSON ログ。`health` は例外（VPC 外）。詳細: [Phase 2 スペック](2026-08-07-phase2-http-api-health-design.md)。
 
 ### 4.4 Cognito
 
@@ -126,7 +127,7 @@ frontend/       # Next.js 14
 
 1. 設計資料（本 Phase 0）
 2. Terraform 基盤（VPC / RDS / Cognito / S3 / CW）
-3. HTTP API + JWT + health
+3. HTTP API + JWT + health — [Phase 2 スペック](2026-08-07-phase2-http-api-health-design.md) / [実装計画](../plans/2026-08-07-phase2-http-api-health.md)（W-200）
 4. 勤怠コア
 5. 休暇・承認
 6. ユーザー管理
@@ -145,3 +146,4 @@ frontend/       # Next.js 14
 - [Terraform 設計](../../infra/terraform-design.md)
 - [CI/CD 設計](../../cicd/github-actions.md)
 - [監視設計](../../ops/monitoring.md)
+- [Phase 2 HTTP API + health 設計](2026-08-07-phase2-http-api-health-design.md)

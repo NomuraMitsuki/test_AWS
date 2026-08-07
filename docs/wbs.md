@@ -56,11 +56,11 @@
 
 ---
 
-## 3. 以降フェーズ（設計合意済み・未着手）
+## 3. アプリ実装フェーズ
 
 | ID | 作業 | ステータス | メモ |
 |----|------|------------|------|
-| W-200 | HTTP API + JWT + health Lambda | 未着手 | Phase 2 |
+| W-200 | HTTP API + JWT + health Lambda | 完了 | PR #8。apply なし（コード + validate + pytest）。実装は implementation-worker |
 | W-210 | 勤怠 API（打刻・履歴・サマリ） | 未着手 | |
 | W-220 | 休暇申請／承認 API | 未着手 | |
 | W-230 | ユーザー招待・ロール管理 API | 未着手 | W-013 と併せて admin 初期化を考慮 |

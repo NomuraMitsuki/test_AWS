@@ -1,5 +1,6 @@
 # Terraform
 **/.terraform/
+**/modules/**/.build/
 *.tfstate
 *.tfstate.*
 crash.log
