@@ -127,7 +127,7 @@ frontend/       # Next.js 14
 
 1. 設計資料（本 Phase 0）
 2. Terraform 基盤（VPC / RDS / Cognito / S3 / CW）
-3. HTTP API + JWT + health
+3. HTTP API + JWT + health — [Phase 2 スペック](2026-08-07-phase2-http-api-health-design.md) / [実装計画](../plans/2026-08-07-phase2-http-api-health.md)（W-200）
 4. 勤怠コア
 5. 休暇・承認
 6. ユーザー管理
@@ -146,3 +146,4 @@ frontend/       # Next.js 14
 - [Terraform 設計](../../infra/terraform-design.md)
 - [CI/CD 設計](../../cicd/github-actions.md)
 - [監視設計](../../ops/monitoring.md)
+- [Phase 2 HTTP API + health 設計](2026-08-07-phase2-http-api-health-design.md)
