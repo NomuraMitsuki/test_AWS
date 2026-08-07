@@ -1,0 +1,4 @@
+{
+  "name": "attendance-aws-dev",
+  "install": "set -euo pipefail\nTF_VERSION=1.9.8\nif ! command -v terraform >/dev/null 2>&1; then\n  curl -fsSL -o /tmp/terraform.zip \"https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip\"\n  sudo unzip -o /tmp/terraform.zip -d /usr/local/bin\nfi\nif ! command -v aws >/dev/null 2>&1; then\n  curl -fsSL -o /tmp/awscliv2.zip \"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip\"\n  unzip -qo /tmp/awscliv2.zip -d /tmp\n  sudo /tmp/aws/install --update\nfi\nterraform version\naws --version\n"
+}

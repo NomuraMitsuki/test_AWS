@@ -50,7 +50,8 @@
 | W-105 | monitoring 骨格 | 完了 | PR #4 |
 | W-106 | github_oidc モジュール | 完了 | PR #4 |
 | W-107 | dev 合成 + infra 用 GitHub Actions（plan まで） | 完了 | PR #4 |
-| W-108 | 検証ゲート（fmt / validate / plan） | 進行中 | fmt/validate 済み。plan/apply は AWS 認証後 |
+| W-108 | 検証ゲート（fmt / validate / plan）＋初回 apply（OIDC 用） | 完了 | PR #6。ローカルで plan/apply 成功を確認後、課金抑制のため destroy 済み |
+| W-109 | GitHub Secrets（OIDC ロール ARN）登録と CI plan 有効化 | 未着手 | 再 apply 後に `AWS_ROLE_ARN_INFRA` / `AWS_ROLE_ARN_BACKEND` を登録。リモート state 化も検討（[aws-auth-bootstrap.md](infra/aws-auth-bootstrap.md) §D） |
 
 ---
 

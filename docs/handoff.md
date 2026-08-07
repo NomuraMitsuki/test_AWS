@@ -1,51 +1,48 @@
 # ハンドオフ — 新スレッド引き継ぎ用
 
-最終更新: 2026-08-06（PR #4 マージ直後）
+最終更新: 2026-08-07（W-108 完了・リソースは destroy 済み）
 
 ## 一言で
 
-AWS 学習用の勤怠管理アプリ。設計資料と Phase 1 Terraform 骨格まで `main` に入った。次は AWS 認証付き plan/apply（W-108）または Phase 2 API（W-200）。
+AWS 学習用の勤怠管理アプリ。Phase 1 Terraform はローカル apply 成功まで確認済み（その後 destroy）。次は **W-109（再 apply 後の GitHub Secrets / OIDC）** または **W-200（Phase 2 API）**。
 
 ## リポジトリ
 
 - GitHub: `NomuraMitsuki/test_AWS`
-- 作業ブランチ: **`main`（クリーン、origin と同期済み）**
-- 直近マージ: PR #1〜#4
+- 作業ブランチ: マージ後は **`main`**（PR #6）
+- 直近: PR #1〜#4 マージ済み。PR #6 に認証手順 + `tf-dev.sh`
 
 ## 完了していること
 
 - 設計資料一式（`docs/`）
-- 設計レビュー担当: skill + readonly subagent（`.cursor/skills/review-design-docs/`, `.cursor/agents/design-doc-reviewer.md`）
-- 日本語ルール: `.cursor/rules/japanese-language.mdc`
-- **PR 新規作成直前**に設計レビュー必須: `.cursor/rules/pr-design-review.mdc`（ファイル変更の都度ではない）
-- WBS: `docs/wbs.md`（W-001〜020, W-100〜107 完了）
-- Terraform Phase 1 コード: `infra/`（network / cognito / data / storage / monitoring / github_oidc）
-- `terraform validate` 成功済み。**apply は未実施**（AWS 認証が必要）
+- 設計レビュー担当 / 日本語ルール / PR 作成時レビュー
+- WBS: W-001〜020, W-100〜108 完了
+- Terraform Phase 1: コード + ローカル plan/apply 検証（Free Tier 向け RDS backup=1 日）
+- **認証手順**: [docs/infra/aws-auth-bootstrap.md](infra/aws-auth-bootstrap.md)
+- **一括スクリプト**: `./infra/scripts/tf-dev.sh`（`auth` / `plan` / `apply`）
+- AWS リソースは確認後 **destroy 済み**（デフォルト VPC は残る）
 
 ## 次にやること（優先順）
 
-1. **W-108**: AWS 資格情報（または GitHub OIDC）を用意し、`infra/envs/dev` で `terraform plan` / `apply`
+1. **W-109**: 必要になったタイミングで再 `apply` → `gha_*_role_arn` を GitHub Secrets に登録 → CI の OIDC plan を有効化（リモート state も検討）
 2. **W-200**: HTTP API + JWT + health Lambda（Phase 2）
-3. 以降は `docs/wbs.md` の W-210〜 に従う
+3. 以降は `docs/wbs.md` の W-210〜
 
 ## 技術前提（変更しない）
 
 - Next.js 14 / Amplify、API Gateway HTTP API、ドメイン別 Python Lambda
 - Cognito（管理者招待のみ）、RDS PostgreSQL（プライベート）、S3 exports
 - 単一 `dev`、`ap-northeast-1`
-- 詳細: `docs/requirements.md`, `docs/superpowers/specs/2026-08-05-attendance-aws-design.md`
 
 ## 運用ルール（エージェント向け）
 
-- ユーザー向け文書・PR 本文は日本語（`.cursor/rules/japanese-language.mdc`）
-- `docs/**` 等を含む **PR を新規作成する直前**に `review-design-docs` → `design-doc-reviewer` を実行
+- ユーザー向け文書・PR 本文は日本語
+- `docs/**` 等を含む **PR 新規作成直前**に設計資料レビュー
 - 進捗は `docs/wbs.md` を更新
-- Cloud では `/summarize` が効かないことがある → キリで本ファイルと WBS を更新し、新スレッドへ
 
 ## 新スレッドへの貼り付け例
 
 ```text
 @docs/handoff.md と @docs/wbs.md を読んで作業を引き継いでください。
-ブランチは main。次は W-108（terraform plan/apply）からお願いします。
-AWS 認証が無い場合は、認証手順の準備か W-200 のどちらを先にするか確認してください。
+W-108 完了・AWS リソースは destroy 済み。次は W-109（Secrets/OIDC）または W-200。
 ```

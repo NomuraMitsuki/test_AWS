@@ -29,12 +29,14 @@
 infra/
   versions.tf                 # shared version constraints (optional root)
   envs/dev/
-    backend.tf                # S3 backend (or local for first boot)
-    providers.tf
+    providers.tf              # required_providers + backend（local 既定 / S3 はコメント）
     main.tf
     variables.tf
     outputs.tf
     terraform.tfvars.example
+  scripts/
+    check-aws-auth.sh
+    tf-dev.sh                 # aws login + export-credentials + plan/apply
   modules/
     network/
     cognito/
@@ -44,7 +46,6 @@ infra/
     github_oidc/
     api/                      # optional in Phase 1: HTTP API + health Lambda stub
 ```
-
 ---
 
 ## Task 1: Bootstrap Terraform layout
@@ -53,8 +54,7 @@ infra/
 - Create `infra/envs/dev/providers.tf`
 - Create `infra/envs/dev/variables.tf`
 - Create `infra/envs/dev/terraform.tfvars.example`
-- Create `infra/envs/dev/backend.tf` (commented S3 backend + local default)
-
+- Create `infra/envs/dev/providers.tf`（コメントアウトの S3 backend + local 既定）
 - [ ] Create directory tree under `infra/`
 - [ ] Add provider with `region = var.aws_region` default `ap-northeast-1`
 - [ ] Add variables: `project_name`, `environment`, `aws_region`, `github_org_repo`
@@ -161,12 +161,15 @@ infra/
 
 ---
 
-## Task 9: Verification gate
+## Task 9: Verification gate（W-108）
 
-- [ ] `terraform fmt -check -recursive`
-- [ ] `terraform validate` in `envs/dev`
-- [ ] `terraform plan` against a sandbox account (manual; skip if no credentials)
+完了条件: fmt / validate / 資格情報付き plan。OIDC 有効化のため初回 apply も含む（認証・state 手順は [aws-auth-bootstrap.md](../infra/aws-auth-bootstrap.md)）。
+
+- [x] `terraform fmt -check -recursive`（コード側は PR #4 時点で済み）
+- [x] `terraform validate` in `envs/dev`
+- [ ] `terraform plan` against a sandbox account（資格情報＋永続 state 環境）
 - [ ] Confirm no public RDS / no public S3 in plan output
+- [ ] 初回 `terraform apply`（OIDC ロール作成）と GitHub Secrets 登録
 - [ ] Push branch and open/update PR
 
 ---
