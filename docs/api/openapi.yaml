@@ -216,6 +216,9 @@ paths:
     get:
       tags: [leave]
       summary: 休暇申請一覧
+      description: |
+        manager は `scope=team` で配下の申請を閲覧できる。
+        admin は `scope=all` も可。employee は `self` のみ。
       security:
         - cognitoJwt: []
       parameters:
@@ -265,15 +268,20 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/LeaveRequest"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
         "400":
           $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
 
   /leave-requests/{id}/approve:
     post:
       tags: [leave]
       summary: 休暇申請を承認
+      description: |
+        manager は配下の pending のみ、admin は全体の pending を承認可。
+        存在しない id は 404。pending 以外は 409。
       security:
         - cognitoJwt: []
       parameters:
@@ -285,8 +293,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/LeaveRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "403":
           $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
         "409":
           $ref: "#/components/responses/Conflict"
 
@@ -294,6 +306,9 @@ paths:
     post:
       tags: [leave]
       summary: 休暇申請を却下
+      description: |
+        manager は配下の pending のみ、admin は全体の pending を却下可。
+        存在しない id は 404。pending 以外は 409。
       security:
         - cognitoJwt: []
       parameters:
@@ -313,8 +328,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/LeaveRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "403":
           $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
         "409":
           $ref: "#/components/responses/Conflict"
 

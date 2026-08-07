@@ -19,9 +19,9 @@ JWT 必須の休暇 API（一覧・作成・承認・却下）を leave Lambda +
 
 | Method | Path | 備考 |
 |--------|------|------|
-| GET | `/leave-requests` | `scope` + optional `status` |
-| POST | `/leave-requests` | 201 |
-| POST | `/leave-requests/{id}/approve` | manager（配下）/ admin。pending のみ |
+| GET | `/leave-requests` | `scope` + optional `status`。employee は self のみ |
+| POST | `/leave-requests` | 201 / 400（日付不正）/ 401 / 403 |
+| POST | `/leave-requests/{id}/approve` | manager（配下）/ admin。pending のみ。無しは 404、非 pending は 409 |
 | POST | `/leave-requests/{id}/reject` | 同上。optional `reject_reason` |
 
 すべて Cognito JWT 必須。
