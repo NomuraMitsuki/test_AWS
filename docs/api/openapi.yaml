@@ -52,8 +52,10 @@ paths:
                 $ref: "#/components/schemas/AttendanceRecord"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "409":
-          description: 既に出勤済みなど
+          description: 既に出勤済みなど（`ALREADY_CLOCKED_IN`）
           content:
             application/json:
               schema:
@@ -74,8 +76,10 @@ paths:
                 $ref: "#/components/schemas/AttendanceRecord"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "409":
-          description: 未出勤など
+          description: 未出勤または既に退勤済みなど（`NOT_CLOCKED_IN` / `ALREADY_CLOCKED_OUT`）
           content:
             application/json:
               schema:

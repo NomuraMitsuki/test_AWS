@@ -16,8 +16,8 @@ sequenceDiagram
   Web->>APIGW: POST /attendance/clock-in (Bearer JWT)
   APIGW->>APIGW: JWT 検証
   APIGW->>Lambda: 呼び出し
-  Lambda->>RDS: 当日未退勤レコード有無を確認
-  alt 既に出勤済み
+  Lambda->>RDS: 当日（JST）の attendance_records 有無を確認
+  alt 既に当日レコードあり
     Lambda-->>Web: 409 ALREADY_CLOCKED_IN
   else 未打刻
     Lambda->>RDS: INSERT attendance_records

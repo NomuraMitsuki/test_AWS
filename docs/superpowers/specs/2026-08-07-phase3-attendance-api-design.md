@@ -24,18 +24,21 @@ JWT 必須の勤怠 API（打刻・履歴・月次サマリ）を Python Lambda 
 
 | Method | Path | 備考 |
 |--------|------|------|
-| POST | `/attendance/clock-in` | 201 / 409 |
-| POST | `/attendance/clock-out` | 200 / 409 |
+| POST | `/attendance/clock-in` | 201 / 401 / 403 / 409（`ALREADY_CLOCKED_IN`） |
+| POST | `/attendance/clock-out` | 200 / 401 / 403 / 409（`NOT_CLOCKED_IN` / `ALREADY_CLOCKED_OUT`） |
 | GET | `/attendance/records` | `scope=self\|team\|all` |
 | GET | `/attendance/me` | `records?scope=self` のエイリアス |
 | GET | `/attendance/summary` | year/month 必須 |
 
 すべて Cognito JWT 必須（API Gateway JWT authorizer）。
 
+退勤の対象は **JST 当日の未退勤レコード**（W-210）。要件の「直近」跨日退勤は後続課題（本 Phase 非ゴール）。
+
 ## 4. 認可（Lambda 内）
 
 - JWT claims の `sub` / email / Cognito groups を読む
-- DB `users` と突合（なければ 403 またはブートストラップ前提でテスト用モック）
+- **本番:** DB `users` と突合。未登録または `status=disabled` は **403**。ロール判定の正は **`users.role`**（groups は補助。不一致時は DB を優先し 403 としうる）
+- **テスト:** インメモリ users 等のモックでよい（本番経路の代替ではない）
 - `scope=self`: 本人のみ
 - `scope=team`: manager かつ `users.manager_id = 自分`
 - `scope=all`: admin のみ
