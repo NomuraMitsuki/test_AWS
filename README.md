@@ -62,7 +62,7 @@ docs/       # 設計資料
 infra/      # Terraform（modules + envs/dev。Amplify / API CORS 含む）
 backend/    # Lambda (Python)
 frontend/   # Next.js 14（Amplify Auth + API Gateway クライアント）
-.github/workflows/
+.github/workflows/  # infra.yml / backend.yml / frontend.yml（Phase 8 / W-260）
 ```
 
-Infra の使い方は [infra/README.md](infra/README.md) を参照。フロントのローカル起動も同 README。
+Infra の使い方は [infra/README.md](infra/README.md) を参照。フロントのローカル起動も同 README。CI/CD の現状は [docs/cicd/github-actions.md](docs/cicd/github-actions.md) と Phase 8 計画を参照。
