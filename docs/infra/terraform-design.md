@@ -77,5 +77,5 @@ infra/
 ## コスト抑制メモ
 
 - NAT Gateway は 1 つ（AZ 冗長なし）
-- RDS Multi-AZ オフ、バックアップ保持は短め（例: 7 日）
+- RDS Multi-AZ オフ、バックアップ保持は Free Tier 向けに 1 日（有料枠なら延長可）
 - 学習終了時は `terraform destroy` を前提にタグ `Project=attendance` を付与

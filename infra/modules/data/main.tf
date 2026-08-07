@@ -38,7 +38,8 @@ resource "aws_db_instance" "this" {
   publicly_accessible    = false
   multi_az               = false
 
-  backup_retention_period = 7
+  # Free Tier アカウントは保持日数に上限がある（7 だと FreeTierRestrictionError）
+  backup_retention_period = 1
   skip_final_snapshot     = true
   deletion_protection     = false
 
