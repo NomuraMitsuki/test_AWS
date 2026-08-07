@@ -57,8 +57,9 @@ infra/
 | environment | `dev` | 環境名 |
 | aws_region | `ap-northeast-1` | |
 | db_instance_class | `db.t4g.micro` | |
-| amplify_app_id / branch | Amplify 出力または変数 | CORS オリジン解決用（`https://<branch>.<appId>.amplifyapp.com`） |
 | cors_allow_localhost | `true`（dev） | `http://localhost:3000` を CORS に含めるか |
+| cors_amplify_origin | Amplify の default branch URL | CORS 用（例: `https://main.<appId>.amplifyapp.com`）。`amplify` と `api` の循環回避のため初回は空、apply 後に `amplify_default_branch_url` 出力を設定 |
+| amplify_github_access_token | （sensitive・任意） | Amplify の GitHub 連携。空でも `validate` 可。apply 前に設定 |
 | github_org_repo | `owner/repo` | OIDC 信頼条件 |
 
 ## セキュリティ方針
@@ -75,7 +76,7 @@ infra/
 2. `network` → `cognito` → `data` → `storage`
 3. `api`（health / attendance / leave / users / exports を zip）
 4. `monitoring` / `github_oidc`
-5. `amplify`（Hosting）。API CORS は Amplify オリジン確定後に変数反映（ローカル例外は `cors_allow_localhost`）
+5. `amplify`（Hosting）。API CORS の localhost は `cors_allow_localhost`。Amplify オリジンは apply 後に `cors_amplify_origin` へ反映（`api`↔`amplify` 循環回避）
 
 ## コスト抑制メモ
 
