@@ -9,7 +9,7 @@ AWS の主要サービス（Lambda・API Gateway・Cognito・RDS・S3）と、Te
 | ロール | Cognito Group | 概要 |
 |--------|---------------|------|
 | 一般社員 | `employee` | 自身の打刻・履歴・休暇申請・自身データの CSV 出力 |
-| 上長 | `manager` | employee 権限 ＋ 配下メンバーの休暇承認・勤怠閲覧 |
+| 上長 | `manager` | employee 権限 ＋ 配下メンバーの休暇承認・勤怠閲覧・配下 CSV（`scope=team`） |
 | 管理者 | `admin` | ユーザー招待／無効化、ロール割当、全体レポート・CSV |
 
 上長関係は `users.manager_id` による **1段のみ**（組織階層の多段は MVP 外）。

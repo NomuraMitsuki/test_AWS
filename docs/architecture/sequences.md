@@ -90,6 +90,6 @@ sequenceDiagram
   Lambda->>S3: PutObject (CSV)
   Lambda->>S3: 署名付き URL 生成
   Lambda->>RDS: export_jobs を completed に更新
-  Lambda-->>Web: 200 { download_url, expires_in }
+  Lambda-->>Web: 200 { export_job_id, download_url, expires_in }
   Web-->>User: ダウンロード開始
 ```
