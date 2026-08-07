@@ -64,7 +64,7 @@
 | W-210 | 勤怠 API（打刻・履歴・サマリ） | 完了 | PR #10。apply なし（pytest + terraform validate）。実装は implementation-worker |
 | W-220 | 休暇申請／承認 API | 完了 | PR #11。apply なし（pytest + terraform validate）。実装は implementation-worker |
 | W-230 | ユーザー招待・ロール管理 API | 完了 | PR #12。apply なし（pytest + terraform validate）。実装は implementation-worker |
-| W-240 | CSV エクスポート（S3 + 署名付き URL） | 完了 | 本 PR。apply なし（pytest + terraform validate）。実装は implementation-worker |
+| W-240 | CSV エクスポート（S3 + 署名付き URL） | 完了 | PR #13。apply なし（pytest + terraform validate）。実装は implementation-worker |
 | W-250 | Next.js フロント + Amplify | 未着手 | |
 | W-260 | GitHub Actions（backend / frontend）完成 | 未着手 | |
 | W-270 | CloudWatch ダッシュボード・アラーム仕上げ | 未着手 | |
