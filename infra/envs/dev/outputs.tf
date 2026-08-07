@@ -66,6 +66,10 @@ output "users_lambda_function_name" {
   value = module.api.users_lambda_function_name
 }
 
+output "exports_lambda_function_name" {
+  value = module.api.exports_lambda_function_name
+}
+
 output "http_api_id" {
   value = module.api.http_api_id
 }
