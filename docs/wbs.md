@@ -52,7 +52,7 @@
 | W-106 | github_oidc モジュール | 完了 | PR #4 |
 | W-107 | dev 合成 + infra 用 GitHub Actions（plan まで） | 完了 | PR #4 |
 | W-108 | 検証ゲート（fmt / validate / plan）＋初回 apply（OIDC 用） | 完了 | PR #6。ローカルで plan/apply 成功を確認後、課金抑制のため destroy 済み |
-| W-109 | GitHub Secrets（OIDC ロール ARN）登録と CI plan 有効化 | ブロック | **API（W-210〜）およびフロント（W-250）完了まで着手しない。** その後再 apply → `AWS_ROLE_ARN_INFRA` / `AWS_ROLE_ARN_BACKEND` 登録。リモート state 化も検討（[aws-auth-bootstrap.md](infra/aws-auth-bootstrap.md) §D） |
+| W-109 | GitHub Secrets（OIDC ロール ARN）登録と CI plan 有効化 | 未着手 | API・フロント完了済み。再 apply → `AWS_ROLE_ARN_INFRA` / `AWS_ROLE_ARN_BACKEND` 登録。リモート state 化も検討（[aws-auth-bootstrap.md](infra/aws-auth-bootstrap.md) §D） |
 
 ---
 
@@ -66,7 +66,7 @@
 | W-230 | ユーザー招待・ロール管理 API | 完了 | PR #12。apply なし（pytest + terraform validate）。実装は implementation-worker |
 | W-240 | CSV エクスポート（S3 + 署名付き URL） | 完了 | PR #13。apply なし（pytest + terraform validate）。実装は implementation-worker |
 | W-250 | Next.js フロント + Amplify | 完了 | PR #14。apply なし（lint / next build / terraform validate）。実装は implementation-worker。Amplify Actions デプロイは W-260 |
-| W-260 | GitHub Actions（backend / frontend）完成 | 未着手 | Phase 8: backend.yml 新設、frontend start-job、infra apply 骨格含む。Secrets 実登録は W-109 |
+| W-260 | GitHub Actions（backend / frontend）完成 | 完了 | PR #15。backend.yml / frontend start-job / infra apply 骨格。Secrets 実登録は W-109。実装は implementation-worker |
 | W-270 | CloudWatch ダッシュボード・アラーム仕上げ | 未着手 | |
 
 ---

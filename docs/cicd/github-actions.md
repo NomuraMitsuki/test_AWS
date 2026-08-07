@@ -15,7 +15,7 @@
 | トリガー | 現状（実装・W-260） | 目標（W-109 以降） |
 |----------|---------------------|-------------------|
 | PR（`infra/**`） | `fmt` / `validate` 必須。OIDC があれば `plan`（失敗時は注記のみ） | 同左＋ plan コメント投稿 |
-| push to `main`（`infra/**`） | validate 必須。`AWS_ROLE_ARN_INFRA` があれば **plan → `environment: dev` → apply** 骨格。未設定はスキップ＋注記 | リモート state 利用・reviewers 必須化・実際の運用開始 |
+| push to `main`（`infra/**`） | fmt + validate 必須。`AWS_ROLE_ARN_INFRA` があれば **plan → `environment: dev` → apply** 骨格。未設定はスキップ＋注記 | リモート state 利用・reviewers 必須化・実際の運用開始 |
 
 権限: `github_oidc` モジュールが発行する `attendance-dev-gha-infra` ロール（必要最小の Terraform 権限へ後で絞る）。
 

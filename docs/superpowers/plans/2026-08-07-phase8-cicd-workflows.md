@@ -38,12 +38,12 @@ README.md                              # Phase 8 計画リンク
 **Behavior:**
 - PR / push on `backend/**` and workflow file
 - Job `test`: Python 3.12, `pip install -r` 各関数の requirements + pytest, `python -m compileall backend`, `pytest backend/tests`
-- Job `deploy` (push main only): `if: ${{ secrets.AWS_ROLE_ARN_BACKEND != '' }}`。未設定時は別ジョブまたは step で注記のみ（workflow を赤にしない）
-- deploy: OIDC → 各ディレクトリを zip（requirements を同梱する簡易スクリプト可）→ `aws lambda update-function-code`
+- Job-level `if` では `secrets` 不可のため **`deploy-gate` → outputs → `deploy` / `deploy-skip-note`**（[github-actions.md](../../cicd/github-actions.md) と同じ）
+- deploy: OIDC → 各ディレクトリを zip（requirements を同梱）→ `aws lambda update-function-code`
 - 関数名: `vars.LAMBDA_HEALTH_NAME` 等、デフォルト `attendance-dev-health` など
 
-- [ ] ローカル: `cd /workspace && python -m compileall backend && pytest backend/tests` グリーン
-- [ ] Commit: `ci: add backend.yml with pytest and optional Lambda deploy (W-260)`
+- [x] ローカル: `cd /workspace && python -m compileall backend && pytest backend/tests` グリーン
+- [x] Commit: `ci: add backend.yml with pytest and optional Lambda deploy (W-260)`
 
 ---
 
@@ -54,11 +54,11 @@ README.md                              # Phase 8 計画リンク
 
 **Behavior:**
 - 既存 lint-build 維持
-- Job `amplify-job` (push main only): `if: ${{ vars.AMPLIFY_APP_ID != '' && secrets.AWS_ROLE_ARN_INFRA != '' }}`
+- **`amplify-gate` → outputs** で `AMPLIFY_APP_ID` かつ `AWS_ROLE_ARN_INFRA` を確認
 - OIDC with `AWS_ROLE_ARN_INFRA` → `aws amplify start-job --app-id ... --branch-name main --job-type RELEASE`
-- 条件非該当時はスキップ（必須ゲートは lint-build のみ）
+- 条件非該当時はスキップ注記（必須ゲートは lint-build のみ）
 
-- [ ] Commit: `ci: add optional Amplify start-job on frontend main (W-260)`
+- [x] Commit: `ci: add optional Amplify start-job on frontend main (W-260)`
 
 ---
 
@@ -68,16 +68,16 @@ README.md                              # Phase 8 計画リンク
 - Modify: `.github/workflows/infra.yml`
 
 **Behavior:**
-- validate 必須のまま
+- fmt + validate 常時必須
 - PR plan: 現状維持（Secret 無し時注記）
-- 新規 job `apply` (push main only):
-  - `if: ${{ secrets.AWS_ROLE_ARN_INFRA != '' }}` — 未設定ならスキップ＋注記ジョブ
+- 新規 **`apply-gate` → `apply` / skip-note`** (push main only):
+  - Secret 未設定ならスキップ＋注記
   - `environment: dev`
-  - OIDC → init → plan → apply（`-auto-approve` は environment 承認後。学習用骨格）
+  - OIDC → init → plan → apply（environment 承認後。学習用骨格）
   - Secret 設定後の失敗はジョブ失敗（continue-on-error しない）
   - コメント／docs で「リモート state 整備前は CI apply しない」と注意
 
-- [ ] Commit: `ci: add infra main apply skeleton with environment dev (W-260)`
+- [x] Commit: `ci: add infra main apply skeleton with environment dev (W-260)`
 
 ---
 
@@ -89,8 +89,8 @@ README.md                              # Phase 8 計画リンク
 - Modify: `README.md`（Phase 8 計画リンク）
 - Do not edit `docs/wbs.md`
 
-- [ ] Commit: `docs: sync Phase 8 CI/CD workflows and handoff (W-260)`
-- [ ] Push `cursor/w260-cicd-a099`
+- [x] Commit: `docs: sync Phase 8 CI/CD workflows and handoff (W-260)`
+- [x] Push `cursor/w260-cicd-a099`
 
 ---
 

@@ -37,7 +37,7 @@ GitHub Actions の **backend / frontend** を完成させ、あわせて既存 *
 | トリガー | 内容 | 必須 |
 |----------|------|------|
 | PR / push（lint/build） | 現状維持（ダミー `NEXT_PUBLIC_*`） | 必須 |
-| push `main` | 任意: `aws amplify start-job`（`AMPLIFY_APP_ID`、branch=`main`） | `AMPLIFY_APP_ID` 未設定ならスキップ |
+| push `main` | 任意: `aws amplify start-job`（`AMPLIFY_APP_ID`、branch=`main`） | `AMPLIFY_APP_ID` または `AWS_ROLE_ARN_INFRA` 未設定ならスキップ |
 
 Hosting の GitHub 接続による自動ビルドを主経路とする。Actions の `start-job` は補助。
 
