@@ -1,0 +1,111 @@
+name: Backend
+
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend.yml"
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend.yml"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r backend/requirements-dev.txt
+          for req in backend/*/requirements.txt; do
+            python -m pip install -r "$req"
+          done
+      - name: Compile
+        run: python -m compileall backend
+      - name: Pytest
+        run: python -m pytest backend/tests -q
+
+  # job-level if では secrets コンテキストが使えないため、有無を output で渡す
+  deploy-gate:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    outputs:
+      can_deploy: ${{ steps.check.outputs.can_deploy }}
+    steps:
+      - id: check
+        env:
+          AWS_ROLE_ARN_BACKEND: ${{ secrets.AWS_ROLE_ARN_BACKEND }}
+        run: |
+          if [ -n "${AWS_ROLE_ARN_BACKEND}" ]; then
+            echo "can_deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "can_deploy=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  deploy:
+    needs: deploy-gate
+    if: needs.deploy-gate.outputs.can_deploy == 'true'
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: ap-northeast-1
+      LAMBDA_HEALTH_NAME: ${{ vars.LAMBDA_HEALTH_NAME || 'attendance-dev-health' }}
+      LAMBDA_ATTENDANCE_NAME: ${{ vars.LAMBDA_ATTENDANCE_NAME || 'attendance-dev-attendance' }}
+      LAMBDA_LEAVE_NAME: ${{ vars.LAMBDA_LEAVE_NAME || 'attendance-dev-leave' }}
+      LAMBDA_USERS_NAME: ${{ vars.LAMBDA_USERS_NAME || 'attendance-dev-users' }}
+      LAMBDA_EXPORTS_NAME: ${{ vars.LAMBDA_EXPORTS_NAME || 'attendance-dev-exports' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_BACKEND }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Package and update Lambda functions
+        run: |
+          set -euo pipefail
+          package_and_deploy() {
+            local dir="$1"
+            local function_name="$2"
+            local work
+            work="$(mktemp -d)"
+            # requirements に実パッケージがあれば同梱（コメントのみならスキップ）
+            if grep -Eqv '^\s*(#|$)' "backend/${dir}/requirements.txt"; then
+              python -m pip install -r "backend/${dir}/requirements.txt" -t "${work}" --quiet
+            fi
+            cp -r "backend/${dir}/." "${work}/"
+            find "${work}" -type d -name '__pycache__' -exec rm -rf {} + 2>/dev/null || true
+            (cd "${work}" && zip -qr "/tmp/${dir}.zip" .)
+            aws lambda update-function-code \
+              --function-name "${function_name}" \
+              --zip-file "fileb:///tmp/${dir}.zip"
+            rm -rf "${work}"
+          }
+          package_and_deploy health "${LAMBDA_HEALTH_NAME}"
+          package_and_deploy attendance "${LAMBDA_ATTENDANCE_NAME}"
+          package_and_deploy leave "${LAMBDA_LEAVE_NAME}"
+          package_and_deploy users "${LAMBDA_USERS_NAME}"
+          package_and_deploy exports "${LAMBDA_EXPORTS_NAME}"
+
+  deploy-skip-note:
+    needs: deploy-gate
+    if: needs.deploy-gate.outputs.can_deploy == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Note when backend deploy credentials missing
+        run: |
+          echo "Lambda deploy は secrets.AWS_ROLE_ARN_BACKEND が未設定のためスキップしました。"
+          echo "pytest / compileall までは必須ゲートです。Secrets 登録は W-109。"
