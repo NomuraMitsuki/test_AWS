@@ -4,7 +4,12 @@ variable "name_prefix" {
 
 variable "cognito_user_pool_id" {
   type        = string
-  description = "Cognito User Pool ID（JWT authorizer 用）"
+  description = "Cognito User Pool ID（JWT authorizer / users Lambda 用）"
+}
+
+variable "cognito_user_pool_arn" {
+  type        = string
+  description = "Cognito User Pool ARN（users Lambda の Admin API IAM スコープ）"
 }
 
 variable "cognito_client_id" {
@@ -32,9 +37,14 @@ variable "leave_source_dir" {
   description = "backend/leave のソースディレクトリ（archive_file 用）"
 }
 
+variable "users_source_dir" {
+  type        = string
+  description = "backend/users のソースディレクトリ（archive_file 用）"
+}
+
 variable "private_subnet_ids" {
   type        = list(string)
-  description = "ドメイン Lambda（attendance / leave）を配置するプライベートサブネット"
+  description = "ドメイン Lambda（attendance / leave / users）を配置するプライベートサブネット"
 }
 
 variable "lambda_security_group_id" {
