@@ -9,8 +9,8 @@ AWS 学習用の勤怠管理アプリ。Phase 1 Terraform、W-200〜W-240（API�
 ## リポジトリ
 
 - GitHub: `NomuraMitsuki/test_AWS`
-- 作業ブランチ: **`cursor/w250-frontend-a099`**（マージ後は `main`）
-- 直近マージ: PR #1〜#13（W-250 は PR #14 予定）
+- 作業ブランチ: **`cursor/w260-cicd-a099`**（W-260 設計中）
+- 直近マージ: PR #1〜#14
 
 ## 完了していること
 
@@ -28,8 +28,8 @@ AWS 学習用の勤怠管理アプリ。Phase 1 Terraform、W-200〜W-240（API�
 
 ## 次にやること（優先順）
 
-1. **W-260**: GitHub Actions（backend / frontend）完成。Amplify デプロイ連携など
-2. **W-109**: **API（W-210〜）およびフロント（W-250）完了後**に再 apply → GitHub Secrets / OIDC CI（それまで着手しない）。Amplify apply 時は `amplify_github_access_token` と `cors_amplify_origin` の設定に注意
+1. **W-260**: GitHub Actions 完成（`backend.yml`、frontend 任意 `start-job`、infra apply 骨格）。Secrets 実登録はしない
+2. **W-109**: 再 apply → GitHub Secrets / OIDC CI。Amplify apply 時は `amplify_github_access_token` と `cors_amplify_origin` の設定に注意
 
 ## 技術前提（変更しない）
 

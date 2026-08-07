@@ -66,7 +66,7 @@
 | W-230 | ユーザー招待・ロール管理 API | 完了 | PR #12。apply なし（pytest + terraform validate）。実装は implementation-worker |
 | W-240 | CSV エクスポート（S3 + 署名付き URL） | 完了 | PR #13。apply なし（pytest + terraform validate）。実装は implementation-worker |
 | W-250 | Next.js フロント + Amplify | 完了 | PR #14。apply なし（lint / next build / terraform validate）。実装は implementation-worker。Amplify Actions デプロイは W-260 |
-| W-260 | GitHub Actions（backend / frontend）完成 | 未着手 | |
+| W-260 | GitHub Actions（backend / frontend）完成 | 未着手 | Phase 8: backend.yml 新設、frontend start-job、infra apply 骨格含む。Secrets 実登録は W-109 |
 | W-270 | CloudWatch ダッシュボード・アラーム仕上げ | 未着手 | |
 
 ---
