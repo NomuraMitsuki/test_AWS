@@ -45,3 +45,15 @@ output "gha_backend_role_arn" {
 output "cloudwatch_dashboard_name" {
   value = module.monitoring.dashboard_name
 }
+
+output "api_endpoint" {
+  value = module.api.api_endpoint
+}
+
+output "health_lambda_function_name" {
+  value = module.api.health_lambda_function_name
+}
+
+output "http_api_id" {
+  value = module.api.http_api_id
+}

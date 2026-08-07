@@ -36,7 +36,7 @@ infra/
 | cognito | User Pool（セルフサインアップ無効）, Groups, App Client, Domain（任意） |
 | data | RDS PostgreSQL `db.t4g.micro`, Secrets Manager, parameter group |
 | storage | S3 bucket, Block Public Access, lifecycle（任意） |
-| api | Lambda×4+, HTTP API, routes, JWT authorizer, IAM roles, VPC config |
+| api | HTTP API, Cognito JWT authorizer, health Lambda（VPC 外）, `GET /health`（認証なし）。勤怠等ドメイン Lambda は後続 |
 | monitoring | CloudWatch ダッシュボード骨格、SNS（アラーム本体は Phase 後半 / W-270） |
 | github_oidc | OIDC provider, deploy roles（infra / backend。frontend は Amplify 連携時に追加） |
 
