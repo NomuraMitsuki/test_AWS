@@ -57,15 +57,16 @@ ensure_aws_session() {
 }
 
 export_creds_for_terraform() {
-  if ! aws configure export-credentials --help >/dev/null 2>&1; then
-    echo "ERROR: aws configure export-credentials が使えません。AWS CLI v2 の更新を確認してください。" >&2
-    exit 1
-  fi
-
+  # --help の終了コードは AWS CLI によって非 0 になり得るため、存在チェックに使わない。
   echo "→ aws configure export-credentials を環境変数へ展開（Terraform 用）"
   local creds
   if ! creds="$(aws configure export-credentials --format env 2>&1)"; then
-    echo "ERROR: export-credentials に失敗しました:" >&2
+    cat <<'EOF' >&2
+ERROR: export-credentials に失敗しました。
+
+aws login / SSO のセッションが有効か確認し、AWS CLI v2 が
+`aws configure export-credentials --format env` をサポートしているか確認してください。
+EOF
     echo "$creds" >&2
     exit 1
   fi
