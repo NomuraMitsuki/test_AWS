@@ -17,7 +17,7 @@ AWS 学習用の勤怠管理アプリ。Phase 1 Terraform はローカル apply 
 - 設計資料一式（`docs/`）
 - 設計レビュー担当 / 日本語ルール / PR 作成時レビュー
 - **実装委譲**: skill `implement-with-subagent` + agent `implementation-worker` + rule `delegate-implementation`（W-006）
-- WBS: W-001〜020, W-100〜108, W-006 完了。W-109 未着手。W-200 は実装ブランチ上でコード完了（WBS ステータスは親が更新）
+- WBS: W-001〜020, W-100〜108, W-006, **W-200 完了**（apply なし）。W-109 未着手
 - Terraform Phase 1: コード + ローカル plan/apply 検証（Free Tier 向け RDS backup=1 日）
 - **Phase 2（W-200）**: `backend/health` + `infra/modules/api` + `envs/dev` 配線（apply は未実施）
 - **認証手順**: [docs/infra/aws-auth-bootstrap.md](infra/aws-auth-bootstrap.md)
@@ -26,9 +26,9 @@ AWS 学習用の勤怠管理アプリ。Phase 1 Terraform はローカル apply 
 
 ## 次にやること（優先順）
 
-1. **W-200**: 設計レビュー → PR 作成・マージ。WBS を完了にする（親）
+1. **W-210**: 勤怠 API（打刻・履歴・サマリ）。実装は `implementation-worker` へ委譲
 2. **W-109**: 必要になったタイミングで再 `apply` → GitHub Secrets / OIDC CI
-3. 以降は `docs/wbs.md` の W-210〜
+3. 以降は `docs/wbs.md` の W-220〜
 
 ## 技術前提（変更しない）
 

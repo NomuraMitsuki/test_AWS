@@ -60,8 +60,9 @@ Browser
 | `leave` | 休暇申請・承認／却下・一覧 |
 | `users` | 招待・一覧・更新・Cognito 同期 |
 | `exports` | CSV 生成 → S3 → 署名付き URL |
+| `health` | 稼働確認のみ（`GET /health`）。JWT 不要・**VPC 外**（DB 非接続） |
 
-共通: VPC 配置、Secrets Manager から DB 接続情報取得、構造化 JSON ログ。
+ドメイン Lambda（attendance / leave / users / exports）共通: VPC 配置、Secrets Manager から DB 接続情報取得、構造化 JSON ログ。`health` は例外（VPC 外）。詳細: [Phase 2 スペック](2026-08-07-phase2-http-api-health-design.md)。
 
 ### 4.4 Cognito
 

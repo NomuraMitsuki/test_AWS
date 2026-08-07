@@ -70,7 +70,7 @@ infra/
 
 1. bootstrap（state 用 S3/DynamoDB）— 必要なら
 2. `network` → `cognito` → `data` → `storage`
-3. `api`（Lambda コードの初回はプレースホルダ可）
+3. `api`（health Lambda は `backend/health` を zip。勤怠等ドメイン Lambda は後続）
 4. `monitoring` / `github_oidc`
 5. Amplify アプリは Terraform またはコンソール＋ドキュメント連携
 

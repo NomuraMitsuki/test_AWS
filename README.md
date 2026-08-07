@@ -19,12 +19,12 @@ Next.js + API Gateway + Lambda + Cognito + RDS + S3 による勤怠管理アプ�
 | CI/CD 設計 | [docs/cicd/github-actions.md](docs/cicd/github-actions.md) |
 | 監視設計 | [docs/ops/monitoring.md](docs/ops/monitoring.md) |
 | Phase 1 実装計画 | [docs/plans/2026-08-05-phase1-terraform-foundation.md](docs/plans/2026-08-05-phase1-terraform-foundation.md) |
+| Phase 2 設計（HTTP API + health） | [docs/superpowers/specs/2026-08-07-phase2-http-api-health-design.md](docs/superpowers/specs/2026-08-07-phase2-http-api-health-design.md) |
+| Phase 2 実装計画 | [docs/superpowers/plans/2026-08-07-phase2-http-api-health.md](docs/superpowers/plans/2026-08-07-phase2-http-api-health.md) |
 | 作業一覧（WBS） | [docs/wbs.md](docs/wbs.md) |
 | ハンドオフ（新スレッド用） | [docs/handoff.md](docs/handoff.md) |
 
 ## 設計資料レビュー
-
-### 設計資料レビュー
 
 設計資料の要件漏れ・矛盾・誤字を確認するときは、チャットで「設計資料をレビューして」と依頼するか `/review-design-docs` を使います。メインエージェントは起動のみ行い、readonly の `design-doc-reviewer` サブエージェントが `docs/` を横断して指摘リストを返します（定義: [`.cursor/skills/review-design-docs/`](.cursor/skills/review-design-docs/) / [`.cursor/agents/design-doc-reviewer.md`](.cursor/agents/design-doc-reviewer.md)）。
 
