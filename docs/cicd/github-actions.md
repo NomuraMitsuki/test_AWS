@@ -27,12 +27,14 @@
 
 ### 3. `frontend.yml` — Amplify / Next.js
 
-| トリガー | 内容 |
-|----------|------|
-| PR（`frontend/**`） | `npm ci` / lint / build |
-| push to `main`（`frontend/**`） | Amplify へ連携（Amplify の GitHub 接続を主、または Actions から `amplify start-job`） |
+| トリガー | 現状（実装・W-250） | 目標（W-260） |
+|----------|---------------------|---------------|
+| PR（`frontend/**`） | `npm ci` / lint / `next build`（ダミー env 可） | 同左 |
+| push to `main`（`frontend/**`） | 同上（lint/build のみ。Actions からの Amplify デプロイジョブは未実装） | Amplify へ連携（GitHub 接続による Hosting 自動ビルドを主、または Actions から `amplify start-job`） |
 
 環境変数（Cognito User Pool ID、App Client ID、API Base URL）は Amplify 環境変数または GitHub Environments に保持。
+
+**境界:** W-250 の Terraform `amplify` モジュールは Hosting 側の `enable_auto_build` 等を定義しうる。W-260 は **GitHub Actions 側**の完成（任意の `amplify start-job` 等）を指す。
 
 ## ブランチ戦略（学習用）
 

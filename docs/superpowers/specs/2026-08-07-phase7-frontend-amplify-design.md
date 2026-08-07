@@ -127,4 +127,5 @@ infra/envs/dev/             # amplify 接続・CORS / 環境変数の配線
 - `docs/wbs.md` W-250 ステータス
 - `docs/handoff.md`（次作業・直近マージ）
 - 親設計 §8・README 索引・`docs/infra/terraform-design.md`（本スペック承認時点で先行更新済みなら差分のみ）
+- `docs/cicd/github-actions.md`（`frontend.yml` の現状＝lint/build、Amplify デプロイ目標＝W-260）
 - 次: W-260（CI 完成）またはユーザー方針に従い W-109（API・フロント完了後の再 apply / Secrets）

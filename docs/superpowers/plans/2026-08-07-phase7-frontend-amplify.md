@@ -75,8 +75,8 @@ infra/envs/dev/{main,variables,outputs,terraform.tfvars}
 - `NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID`
 - `NEXT_PUBLIC_API_BASE_URL`
 
-- [ ] `npm ci` / lint / `next build`（ダミー env）
-- [ ] Commit: `feat(frontend): scaffold Next.js auth and API client (W-250)`
+- [x] `npm ci` / lint / `next build`（ダミー env）
+- [x] Commit: `feat(frontend): scaffold Next.js auth and API client (W-250)`
 
 ---
 
@@ -91,8 +91,8 @@ infra/envs/dev/{main,variables,outputs,terraform.tfvars}
 - S06: `GET /attendance/summary`（任意 query `user_id`, `year_month`）
 - S07: `GET /attendance/records?scope=team|all`（manager/admin）。`RequireRole`。行から summary へ `user_id` 付き遷移
 
-- [ ] lint / build
-- [ ] Commit: `feat(frontend): add attendance screens (W-250)`
+- [x] lint / build
+- [x] Commit: `feat(frontend): add attendance screens (W-250)`
 
 ---
 
@@ -108,8 +108,8 @@ infra/envs/dev/{main,variables,outputs,terraform.tfvars}
 - S11: `GET/POST /users`, `PATCH /users/{id}`（admin）
 - S12: `POST /exports/attendance` body `{ from_date, to_date, scope }` → `download_url` を `window.open` またはダウンロード。URL を画面に残さない
 
-- [ ] lint / build（全画面ルートがビルドに含まれること）
-- [ ] Commit: `feat(frontend): add leave users exports dashboard (W-250)`
+- [x] lint / build（全画面ルートがビルドに含まれること）
+- [x] Commit: `feat(frontend): add leave users exports dashboard (W-250)`
 
 ---
 
@@ -132,8 +132,8 @@ infra/envs/dev/{main,variables,outputs,terraform.tfvars}
 - allow methods: GET, POST, PATCH, OPTIONS（必要なもの）
 - allow credentials: false
 
-- [ ] `terraform fmt` / `terraform init -backend=false` / `terraform validate` in `infra/envs/dev`
-- [ ] Commit: `feat(infra): add Amplify module and API CORS (W-250)`
+- [x] `terraform fmt` / `terraform init -backend=false` / `terraform validate` in `infra/envs/dev`
+- [x] Commit: `feat(infra): add Amplify module and API CORS (W-250)`
 
 ---
 
@@ -143,8 +143,8 @@ infra/envs/dev/{main,variables,outputs,terraform.tfvars}
 - Create: `.github/workflows/frontend.yml` — PR / push on `frontend/**` で `npm ci` / lint / `next build`（ダミー env）。Amplify deploy ジョブは作らない（W-260）
 - Modify: `README.md`（Phase 7 計画リンク）, `docs/infra/terraform-design.md`（実装と食い違う点のみ）, `infra/README.md`, `docs/handoff.md`（実装完了後の事実。**次作業は W-260 / W-109 方針**）。`docs/wbs.md` は触らない
 
-- [ ] Commit: `docs: sync Phase 7 frontend plan and handoff (W-250)`
-- [ ] Push `cursor/w250-frontend-a099`
+- [x] Commit: `docs: sync Phase 7 frontend plan and handoff (W-250)`
+- [x] Push `cursor/w250-frontend-a099`
 
 ---
 

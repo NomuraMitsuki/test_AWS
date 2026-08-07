@@ -9,8 +9,8 @@ AWS 学習用の勤怠管理アプリ。Phase 1 Terraform、W-200〜W-240（API�
 ## リポジトリ
 
 - GitHub: `NomuraMitsuki/test_AWS`
-- 作業ブランチ: **`main`**（W-250 は `cursor/w250-frontend-a099` で実装）
-- 直近マージ: PR #1〜#12
+- 作業ブランチ: **`cursor/w250-frontend-a099`**（マージ後は `main`）
+- 直近マージ: PR #1〜#13（W-250 は PR #14 予定）
 
 ## 完了していること
 
@@ -20,7 +20,8 @@ AWS 学習用の勤怠管理アプリ。Phase 1 Terraform、W-200〜W-240（API�
 - WBS: W-001〜020, W-100〜108, W-006, W-200〜W-240、**W-250 実装完了（apply なし・WBS ステータスは親が更新）**
 - Terraform Phase 1〜7（api CORS / amplify モジュール含む）コード
 - backend: `health` + `attendance` + `leave` + `users` + `exports`（pytest）+ `migrations/001`〜`003`
-- frontend: Next.js 14（S01〜S12）+ Amplify Auth + API クライアント。CI は `.github/workflows/frontend.yml`（lint/build のみ。Amplify デプロイは W-260）
+- frontend: Next.js 14（S01〜S12）+ Amplify Auth + API クライアント。CI は `.github/workflows/frontend.yml`（lint/build のみ）
+- Amplify: Terraform モジュールで Hosting（auto build 可）。**Actions からのデプロイジョブ完成は W-260**（Hosting の auto build 自体は W-250）
 - **認証手順**: [docs/infra/aws-auth-bootstrap.md](infra/aws-auth-bootstrap.md)
 - **一括スクリプト**: `./infra/scripts/tf-dev.sh`
 - AWS リソースは確認後 **destroy 済み**（再 apply は未実施）

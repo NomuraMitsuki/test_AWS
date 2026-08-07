@@ -15,7 +15,7 @@
 | S09 | 休暇申請作成 | `/leave/new` | 全ロール | 種別・期間・理由 |
 | S10 | 休暇承認 | `/leave/approvals` | manager, admin | `GET /leave-requests?scope=team\|all&status=pending` を表示し、承認／却下 |
 | S11 | ユーザー管理 | `/admin/users` | admin | 一覧・招待・無効化・ロール／上長変更 |
-| S12 | エクスポート | `/exports` | 全ロール（範囲は権限依存） | 期間指定 → CSV ダウンロード |
+| S12 | エクスポート | `/exports` | 全ロール（範囲は権限依存） | 期間指定 → `POST /exports/attendance` → 署名付き URL で CSV ダウンロード |
 
 ## 画面遷移
 
