@@ -28,6 +28,8 @@ Next.js + API Gateway + Lambda + Cognito + RDS + S3 による勤怠管理アプ�
 
 設計関連ファイルを含む **PR を新規作成する直前** にも、ルール [`.cursor/rules/pr-design-review.mdc`](.cursor/rules/pr-design-review.mdc) により同じレビューを走らせます（ファイル変更の都度ではありません）。
 
+複数ステップの実装（WBS・`infra/` / `backend/` / `frontend/`）は、親のコンテキスト圧迫を避けるため `implementation-worker` サブエージェントへ委譲します（[`.cursor/skills/implement-with-subagent/`](.cursor/skills/implement-with-subagent/) / [`.cursor/agents/implementation-worker.md`](.cursor/agents/implementation-worker.md) / ルール [`.cursor/rules/delegate-implementation.mdc`](.cursor/rules/delegate-implementation.mdc)）。
+
 ## 技術スタック（確定）
 
 - Frontend: Next.js 14 (App Router) / TypeScript / Amplify Hosting

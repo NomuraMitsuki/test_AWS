@@ -15,6 +15,7 @@
 | W-003 | 日本語表記ルール（`.cursor/rules`）の追加 | 完了 | PR #2 |
 | W-004 | 本 WBS の作成・維持 | 完了 | PR #2 で作成。以降は随時更新 |
 | W-005 | PR 作成時の設計資料レビュールール追加 | 完了 | PR #3 / `pr-design-review` |
+| W-006 | 実装委譲（スキル＋サブエージェント＋ルール）の追加 | 完了 | `implement-with-subagent` / `implementation-worker` / `delegate-implementation` |
 
 ---
 
