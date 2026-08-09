@@ -1,6 +1,8 @@
 "use client";
 
 import { getIdToken } from "@/lib/auth/session";
+import { isDemoMode } from "@/lib/demo/mode";
+import { mockApiFetch } from "@/lib/demo/mockApi";
 import type { ApiError } from "./types";
 
 function apiBaseUrl(): string {
@@ -33,6 +35,10 @@ export async function apiFetch<T>(
   path: string,
   init: RequestInit = {},
 ): Promise<T> {
+  if (isDemoMode()) {
+    return mockApiFetch<T>(path, init);
+  }
+
   const token = await getIdToken();
   if (!token) {
     throw { status: 401, message: "ログインが必要です" } satisfies ApiError;

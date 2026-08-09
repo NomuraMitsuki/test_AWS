@@ -11,7 +11,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    configureAmplify();
+    if (process.env.NEXT_PUBLIC_DEMO_MODE !== "true") {
+      configureAmplify();
+    }
     void isAuthenticated().then((ok) => {
       if (!ok) {
         router.replace("/login");

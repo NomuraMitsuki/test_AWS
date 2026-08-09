@@ -31,6 +31,10 @@ AWS 学習用の勤怠管理アプリ。Phase 1 Terraform、W-200〜W-240（API�
 1. **W-260**: GitHub Actions（backend / frontend）完成。Amplify デプロイ連携など
 2. **W-109**: **API（W-210〜）およびフロント（W-250）完了後**に再 apply → GitHub Secrets / OIDC CI（それまで着手しない）。Amplify apply 時は `amplify_github_access_token` と `cors_amplify_origin` の設定に注意
 
+## フロント画面レビュー（デモモード）
+
+Cognito / API なしで UI 確認するときは `frontend/README.md` のデモモード（`NEXT_PUBLIC_DEMO_MODE=true`）を使う。本番 Amplify では設定しない。
+
 ## 技術前提（変更しない）
 
 - Next.js 14 / Amplify、API Gateway HTTP API、ドメイン別 Python Lambda

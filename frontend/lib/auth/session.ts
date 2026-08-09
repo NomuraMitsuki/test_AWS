@@ -1,6 +1,11 @@
 "use client";
 
 import { fetchAuthSession, getCurrentUser, signOut } from "aws-amplify/auth";
+import { isDemoMode } from "@/lib/demo/mode";
+import {
+  clearDemoSession,
+  getDemoSession,
+} from "@/lib/demo/session";
 import { configureAmplify } from "./amplify";
 
 export type Role = "employee" | "manager" | "admin";
@@ -12,6 +17,9 @@ function asRole(value: string): Role | null {
 }
 
 export async function getIdToken(): Promise<string | null> {
+  if (isDemoMode()) {
+    return getDemoSession() ? "demo-id-token" : null;
+  }
   configureAmplify();
   try {
     const session = await fetchAuthSession();
@@ -22,6 +30,10 @@ export async function getIdToken(): Promise<string | null> {
 }
 
 export async function getGroups(): Promise<string[]> {
+  if (isDemoMode()) {
+    const demo = getDemoSession();
+    return demo ? [demo.role] : [];
+  }
   configureAmplify();
   try {
     const session = await fetchAuthSession();
@@ -46,6 +58,9 @@ export async function hasRole(role: Role): Promise<boolean> {
 }
 
 export async function isAuthenticated(): Promise<boolean> {
+  if (isDemoMode()) {
+    return getDemoSession() !== null;
+  }
   configureAmplify();
   try {
     await getCurrentUser();
@@ -56,6 +71,10 @@ export async function isAuthenticated(): Promise<boolean> {
 }
 
 export async function logout(): Promise<void> {
+  if (isDemoMode()) {
+    clearDemoSession();
+    return;
+  }
   configureAmplify();
   await signOut();
 }
