@@ -33,7 +33,7 @@ AWS 学習用の勤怠管理アプリ。Phase 1 Terraform、W-200〜W-240（API�
 
 ## フロント画面レビュー（デモモード）
 
-Cognito / API なしで UI 確認するときは `frontend/README.md` のデモモード（`NEXT_PUBLIC_DEMO_MODE=true`）を使う。本番 Amplify では設定しない。
+Cognito / API なしで UI 確認するときは `cd frontend && npm run dev:demo`（詳細は `frontend/README.md`）。本番 Amplify では `NEXT_PUBLIC_DEMO_MODE` を設定しない。
 
 ## 技術前提（変更しない）
 
