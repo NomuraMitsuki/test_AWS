@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getRoles, logout, type Role } from "@/lib/auth/session";
+import { isDemoMode } from "@/lib/demo/mode";
 
 type NavItem = {
   href: string;
@@ -48,6 +49,7 @@ export function AppHeader() {
   return (
     <header className="app-header">
       <div className="app-header-brand">勤怠管理</div>
+      {isDemoMode() ? <span className="demo-badge">デモモード</span> : null}
       <nav className="app-header-nav" aria-label="メイン">
         {NAV_ITEMS.filter((item) => canSee(item, roles)).map((item) => (
           <Link key={item.href} href={item.href}>

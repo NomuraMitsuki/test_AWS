@@ -1,6 +1,6 @@
 # ハンドオフ — 新スレッド引き継ぎ用
 
-最終更新: 2026-08-07（W-250 フロント + Amplify 実装後。次は W-260 / W-109 方針）
+最終更新: 2026-08-09（フロント デモモード追加。UI レビュー用）
 
 ## 一言で
 
@@ -9,8 +9,8 @@ AWS 学習用の勤怠管理アプリ。Phase 1 Terraform、W-200〜W-240（API�
 ## リポジトリ
 
 - GitHub: `NomuraMitsuki/test_AWS`
-- 作業ブランチ: **`cursor/w250-frontend-a099`**（マージ後は `main`）
-- 直近マージ: PR #1〜#13（W-250 は PR #14 予定）
+- 作業ブランチ: **`cursor/frontend-demo-mock-a099`**（デモ UI レビュー用）
+- 直近マージ: PR #1〜#14
 
 ## 完了していること
 
@@ -30,6 +30,10 @@ AWS 学習用の勤怠管理アプリ。Phase 1 Terraform、W-200〜W-240（API�
 
 1. **W-260**: GitHub Actions（backend / frontend）完成。Amplify デプロイ連携など
 2. **W-109**: **API（W-210〜）およびフロント（W-250）完了後**に再 apply → GitHub Secrets / OIDC CI（それまで着手しない）。Amplify apply 時は `amplify_github_access_token` と `cors_amplify_origin` の設定に注意
+
+## フロント画面レビュー（デモモード）
+
+Cognito / API なしで UI 確認するときは `cd frontend && npm run dev:demo`（詳細は `frontend/README.md`）。本番 Amplify では `NEXT_PUBLIC_DEMO_MODE` を設定しない。
 
 ## 技術前提（変更しない）
 
