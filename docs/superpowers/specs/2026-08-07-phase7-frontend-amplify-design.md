@@ -45,6 +45,7 @@ infra/envs/dev/             # amplify 接続・CORS / 環境変数の配線
 | `NEXT_PUBLIC_COGNITO_USER_POOL_ID` | User Pool ID |
 | `NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID` | App Client ID（secret なし） |
 | `NEXT_PUBLIC_API_BASE_URL` | API Gateway ベース URL |
+| `NEXT_PUBLIC_DEMO_MODE` | ローカル／レビュー専用。`true` で Cognito/API Mock。**Amplify 環境変数には載せない** |
 
 ローカル用は `.env.example` を置き、実値はコミットしない。
 
