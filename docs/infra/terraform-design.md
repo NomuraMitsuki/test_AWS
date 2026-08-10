@@ -22,7 +22,7 @@ infra/
     storage/      # S3 exports bucket
     api/          # HTTP API, JWT authorizer, Lambda, IAM, CORS
     amplify/      # Amplify Hosting app + branch（Next.js / frontend）
-    monitoring/   # Log groups, alarms, dashboard
+    monitoring/   # SNS, CloudWatch dashboard, alarms
     github_oidc/  # GitHub Actions OIDC provider + roles
   scripts/
     check-aws-auth.sh
@@ -39,7 +39,7 @@ infra/
 | storage | S3 bucket, Block Public Access, lifecycle（任意） |
 | api | HTTP API, Cognito JWT authorizer, health Lambda（VPC 外・`GET /health` 認証なし）, attendance Lambda（VPC 内・JWT 必須の打刻/履歴/サマリ）, leave Lambda（VPC 内・JWT 必須の休暇申請/承認/却下）, users Lambda（VPC 内・JWT 必須の一覧/招待/更新・Cognito Admin IAM）, exports Lambda（VPC 内・JWT 必須の勤怠 CSV エクスポート・S3 Put/Presign IAM）, CORS（Amplify オリジン + ローカル `http://localhost:3000`） |
 | amplify | Amplify Hosting アプリ + branch（ルート `frontend`、Next.js）。環境変数（Cognito / API URL）。GitHub 連携トークンは sensitive 変数 |
-| monitoring | CloudWatch ダッシュボード骨格、SNS（アラーム本体は Phase 後半 / W-270） |
+| monitoring | SNS（`${name_prefix}-alarms`・email 任意）、CloudWatch ダッシュボード（API / Lambda×5 / RDS / ERROR ログ）、アラーム（Lambda Errors×5・API 5xx・Latency p99・RDS CPU/Connections）。`http_api_id` / `lambda_function_names` / `db_instance_id` を api・data から受け取る（正本: [monitoring.md](../ops/monitoring.md)） |
 | github_oidc | OIDC provider, deploy roles（infra / backend）。Amplify `start-job` は学習用に infra ロール流用（W-260）。専用 frontend ロールは後続の IAM 整理でよい |
 
 ## State 管理
@@ -75,7 +75,7 @@ infra/
 1. bootstrap（state 用 S3/DynamoDB）— 必要なら
 2. `network` → `cognito` → `data` → `storage`
 3. `api`（health / attendance / leave / users / exports を zip）
-4. `monitoring` / `github_oidc`
+4. `monitoring`（api / data の出力に依存）/ `github_oidc`
 5. `amplify`（Hosting）。API CORS の localhost は `cors_allow_localhost`。Amplify オリジンは apply 後に `cors_amplify_origin` へ反映（`api`↔`amplify` 循環回避）
 
 ## コスト抑制メモ
