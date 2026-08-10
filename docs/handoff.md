@@ -9,15 +9,15 @@ AWS 学習用の勤怠管理アプリ。Phase 1 Terraform、W-200〜W-260（API 
 ## リポジトリ
 
 - GitHub: `NomuraMitsuki/test_AWS`
-- 作業ブランチ: **`main`**（W-270 実装ブランチ: `cursor/w270-monitoring-a099`）
-- 直近マージ: PR #1〜#16（デモモード #16、W-260 #15）
+- 作業ブランチ: **`cursor/w270-monitoring-a099`**（マージ後は `main`）
+- 直近マージ: PR #1〜#16（W-270 は PR #18）
 
 ## 完了していること
 
 - 設計資料一式（`docs/`）
 - 設計レビュー担当 / 日本語ルール / PR 作成時レビュー
 - **実装委譲**: skill `implement-with-subagent` + agent `implementation-worker` + rule `delegate-implementation`（W-006）
-- WBS: W-001〜020, W-100〜108, W-006, W-200〜W-260 完了（apply / Secrets なし）。W-270 はコード実装済み（WBS ステータス更新は親）。W-109 は未着手（ブロック解除済み）
+- WBS: W-001〜020, W-100〜108, W-006, W-200〜W-270 完了（apply / Secrets なし）。W-109 は未着手（ブロック解除済み）
 - Terraform Phase 1〜7（api CORS / amplify モジュール含む）+ Phase 9 monitoring 仕上げコード
 - backend: `health` + `attendance` + `leave` + `users` + `exports`（pytest）+ `migrations/001`〜`003`
 - frontend: Next.js 14（S01〜S12）+ Amplify Auth + API クライアント

@@ -46,7 +46,7 @@ README.md                              # Phase 9 計画リンク
   - Log widgets for `/aws/lambda/<name>` ERROR filter（可能な範囲）
 - SNS topic / email subscription は維持
 
-- [ ] Commit: `feat(infra): expand CloudWatch dashboard widgets (W-270)`
+- [x] Commit: `feat(infra): expand CloudWatch dashboard widgets (W-270)`
 
 ---
 
@@ -64,7 +64,7 @@ README.md                              # Phase 9 計画リンク
 
 HTTP API メトリクスの Namespace / MetricName は AWS ドキュメントに合わせる（`AWS/ApiGateway` の `5xx` / `Latency` 等。ApiId ディメンション）。
 
-- [ ] Commit: `feat(infra): add CloudWatch alarms for Lambda API RDS (W-270)`
+- [x] Commit: `feat(infra): add CloudWatch alarms for Lambda API RDS (W-270)`
 
 ---
 
@@ -88,8 +88,8 @@ HTTP API メトリクスの Namespace / MetricName は AWS ドキュメントに
 - Modify: `docs/infra/terraform-design.md`（monitoring 責務）, `docs/handoff.md`（次は W-109）, `README.md`（Phase 9 計画リンク）, `docs/ops/monitoring.md`（食い違いのみ）
 - Do not edit `docs/wbs.md`
 
-- [ ] Commit: `docs: sync Phase 9 monitoring polish and handoff (W-270)`
-- [ ] Push `cursor/w270-monitoring-a099`
+- [x] Commit: `docs: sync Phase 9 monitoring polish and handoff (W-270)`
+- [x] Push `cursor/w270-monitoring-a099`
 
 ---
 
