@@ -6,10 +6,10 @@
 
 ## ログ
 
-| ソース | Log group（案） | 保持 |
-|--------|------------------|------|
-| Lambda attendance/leave/users/exports | `/aws/lambda/attendance-dev-*` | 14 日 |
-| API Gateway アクセスログ | `/aws/apigateway/attendance-dev` | 14 日 |
+| ソース | Log group | 保持 |
+|--------|-----------|------|
+| Lambda health / attendance / leave / users / exports | `/aws/lambda/attendance-dev-*` | 14 日（IaC 管理は後続可） |
+| API Gateway アクセスログ | `/aws/apigateway/attendance-dev` | 14 日（未整備・W-270 非スコープ） |
 
 Lambda は JSON 構造化ログ（`level`, `message`, `request_id`, `user_sub` など）。  
 PII（メール全文など）は必要最小限。パスワードは絶対に出さない。
@@ -18,24 +18,24 @@ PII（メール全文など）は必要最小限。パスワードは絶対に�
 
 | アラーム | 条件（初期値） | 意味 |
 |----------|----------------|------|
-| Lambda Errors | エラー > 0 が 1 分×3 | 関数障害 |
+| Lambda Errors（関数ごと×5） | エラー > 0 が 1 分×3 | 関数障害（health / attendance / leave / users / exports） |
 | API 5XX | 5xx count >= 5 / 5 分 | API 異常 |
 | API Latency p99 | p99 > 3000ms / 5 分 | 遅延（VPC Cold start 含む） |
 | RDS CPU | CPUUtilization > 80% / 10 分 | DB 過負荷 |
-| RDS Connections | DatabaseConnections が高い状態が継続 | 接続枯渇の兆候 |
+| RDS Connections | DatabaseConnections > 40 / 10 分 | 接続枯渇の兆候（学習用 micro 初期値） |
 
 通知先: SNS トピック → 学習用メール（任意）。未設定でもアラーム作成までは行う。
 
 ## ダッシュボード
 
-名前: `attendance-dev-overview`
+名前: `attendance-dev-overview`（実装済み・W-270。apply 後にコンソールで確認）
 
-ウィジェット案:
+ウィジェット:
 
 1. API Gateway: 4xx / 5xx / count / latency
-2. Lambda: invocations / errors / duration（関数別）
+2. Lambda: invocations / errors / duration（関数別×5）
 3. RDS: CPU / connections / free storage
-4. 最近の Lambda エラーログ（ログウィジェット）
+4. 最近の Lambda エラーログ（ログウィジェット。メッセージに ERROR を含む行）
 
 ## ランブック（簡易）
 
@@ -60,6 +60,6 @@ PII（メール全文など）は必要最小限。パスワードは絶対に�
 
 ## バックアップ・復旧（学習用）
 
-- RDS 自動バックアップ（保持 7 日）
+- RDS 自動バックアップ（保持は Terraform 実装どおり **1 日**。Free Tier 向け。延長は後続）
 - `terraform destroy` 前に必要なデータはエクスポート
 - S3 エクスポートオブジェクトは lifecycle で 30 日削除（任意）

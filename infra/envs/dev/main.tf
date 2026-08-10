@@ -21,12 +21,6 @@ module "storage" {
   name_prefix = local.name_prefix
 }
 
-module "monitoring" {
-  source      = "../../modules/monitoring"
-  name_prefix = local.name_prefix
-  alarm_email = var.alarm_email
-}
-
 module "github_oidc" {
   source          = "../../modules/github_oidc"
   name_prefix     = local.name_prefix
@@ -52,6 +46,22 @@ module "api" {
   exports_bucket_name      = module.storage.exports_bucket_name
   exports_bucket_arn       = module.storage.exports_bucket_arn
   cors_allow_origins       = local.cors_allow_origins
+}
+
+module "monitoring" {
+  source      = "../../modules/monitoring"
+  name_prefix = local.name_prefix
+  alarm_email = var.alarm_email
+
+  http_api_id = module.api.http_api_id
+  lambda_function_names = {
+    health     = module.api.health_lambda_function_name
+    attendance = module.api.attendance_lambda_function_name
+    leave      = module.api.leave_lambda_function_name
+    users      = module.api.users_lambda_function_name
+    exports    = module.api.exports_lambda_function_name
+  }
+  db_instance_id = module.data.db_instance_id
 }
 
 module "amplify" {

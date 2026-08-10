@@ -33,6 +33,8 @@ Next.js + API Gateway + Lambda + Cognito + RDS + S3 による勤怠管理アプ�
 | Phase 7 実装計画 | [docs/superpowers/plans/2026-08-07-phase7-frontend-amplify.md](docs/superpowers/plans/2026-08-07-phase7-frontend-amplify.md) |
 | Phase 8 設計（CI/CD） | [docs/superpowers/specs/2026-08-07-phase8-cicd-workflows-design.md](docs/superpowers/specs/2026-08-07-phase8-cicd-workflows-design.md) |
 | Phase 8 実装計画 | [docs/superpowers/plans/2026-08-07-phase8-cicd-workflows.md](docs/superpowers/plans/2026-08-07-phase8-cicd-workflows.md) |
+| Phase 9 設計（監視仕上げ） | [docs/superpowers/specs/2026-08-10-phase9-monitoring-polish-design.md](docs/superpowers/specs/2026-08-10-phase9-monitoring-polish-design.md) |
+| Phase 9 実装計画 | [docs/superpowers/plans/2026-08-10-phase9-monitoring-polish.md](docs/superpowers/plans/2026-08-10-phase9-monitoring-polish.md) |
 | 作業一覧（WBS） | [docs/wbs.md](docs/wbs.md) |
 | ハンドオフ（新スレッド用） | [docs/handoff.md](docs/handoff.md) |
 
