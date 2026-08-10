@@ -14,6 +14,7 @@ Phase 1 の monitoring 骨格を、`monitoring.md` どおりのダッシュボ�
 - terraform apply / 実アラーム発火 E2E
 - W-109（Secrets / 再 apply）
 - API Gateway アクセスログの本格整備（本 Phase はメトリクス＋Lambda エラーログに限定）
+- Lambda ロググループの保持期間（14 日）の Terraform 管理 — 後続可。本 Phase は既存／実行時作成グループをダッシュボードが名前参照する
 - 過剰なカスタムメトリクス、外部オンコール連携
 
 ## 3. 方針（採用案 A）
@@ -39,7 +40,7 @@ Phase 1 の monitoring 骨格を、`monitoring.md` どおりのダッシュボ�
 | API 5XX | 5xx ≥ 5 / 5 分 | SNS |
 | API Latency p99 | p99 > 3000ms / 5 分 | SNS |
 | RDS CPU | CPUUtilization > 80% / 10 分 | SNS |
-| RDS Connections | DatabaseConnections > 40 / 10 分 | SNS |
+| RDS Connections | DatabaseConnections > 40 / 10 分（正本 `monitoring.md` の初期値として実装時に同期） | SNS |
 
 - SNS: 既存 `${name_prefix}-alarms`
 - `alarm_email` が空なら購読なし（トピック＋アラームは作成）
@@ -48,16 +49,17 @@ Phase 1 の monitoring 骨格を、`monitoring.md` どおりのダッシュボ�
 
 `monitoring` 変数（追加）:
 
-- `http_api_id`
-- `lambda_function_names`（map または 5 個別）
-- `rds_instance_id`
+- `http_api_id` ← `module.api.http_api_id`
+- `lambda_function_names`（map または 5 個別）← api の各 `*_lambda_function_name`
+- `db_instance_id` ← `module.data.db_instance_id`（出力名に合わせる）
 
 `infra/envs/dev`: `module.api` / `module.data` の出力を渡す。monitoring は api / data に依存。
 
 ## 7. 検証
 
 - `terraform fmt` / `init -backend=false` / `validate` in `infra/envs/dev`
-- docs: `monitoring.md`（実装と差分があれば同期）、`terraform-design.md`、handoff、README 索引、親設計フェーズリンク
+- 実装完了時 docs: `monitoring.md`・`terraform-design.md`・handoff を同期（README 索引・親 §10 リンクは設計 PR で先行可）
+- 実装計画: [plans 配下に Phase 9 計画を書く](../plans/)（スペック承認後）
 - `docs/wbs.md` ステータス更新は親
 
 ## 8. 完了後

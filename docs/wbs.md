@@ -67,7 +67,7 @@
 | W-240 | CSV エクスポート（S3 + 署名付き URL） | 完了 | PR #13。apply なし（pytest + terraform validate）。実装は implementation-worker |
 | W-250 | Next.js フロント + Amplify | 完了 | PR #14。apply なし（lint / next build / terraform validate）。実装は implementation-worker。Amplify Actions デプロイは W-260 |
 | W-260 | GitHub Actions（backend / frontend）完成 | 完了 | PR #15。backend.yml / frontend start-job / infra apply 骨格。Secrets 実登録は W-109。実装は implementation-worker |
-| W-270 | CloudWatch ダッシュボード・アラーム仕上げ | 未着手 | Phase 9: ダッシュボード＋主要アラーム（apply なし）。設計: phase9-monitoring-polish |
+| W-270 | CloudWatch ダッシュボード・アラーム仕上げ | 未着手 | Phase 9: ダッシュボード＋主要アラーム（apply なし）。[設計](superpowers/specs/2026-08-10-phase9-monitoring-polish-design.md) |
 
 ---
 

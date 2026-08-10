@@ -153,3 +153,4 @@ frontend/       # Next.js 14
 - [Phase 6 エクスポート API 設計](2026-08-07-phase6-exports-api-design.md)
 - [Phase 7 フロント + Amplify 設計](2026-08-07-phase7-frontend-amplify-design.md)
 - [Phase 8 CI/CD ワークフロー設計](2026-08-07-phase8-cicd-workflows-design.md)
+- [Phase 9 監視仕上げ設計](2026-08-10-phase9-monitoring-polish-design.md)

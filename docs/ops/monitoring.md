@@ -8,8 +8,8 @@
 
 | ソース | Log group（案） | 保持 |
 |--------|------------------|------|
-| Lambda attendance/leave/users/exports | `/aws/lambda/attendance-dev-*` | 14 日 |
-| API Gateway アクセスログ | `/aws/apigateway/attendance-dev` | 14 日 |
+| Lambda health / attendance / leave / users / exports | `/aws/lambda/attendance-dev-*` | 14 日（IaC 管理は後続可） |
+| API Gateway アクセスログ | `/aws/apigateway/attendance-dev` | 14 日（W-270 非スコープ） |
 
 Lambda は JSON 構造化ログ（`level`, `message`, `request_id`, `user_sub` など）。  
 PII（メール全文など）は必要最小限。パスワードは絶対に出さない。
@@ -22,7 +22,7 @@ PII（メール全文など）は必要最小限。パスワードは絶対に�
 | API 5XX | 5xx count >= 5 / 5 分 | API 異常 |
 | API Latency p99 | p99 > 3000ms / 5 分 | 遅延（VPC Cold start 含む） |
 | RDS CPU | CPUUtilization > 80% / 10 分 | DB 過負荷 |
-| RDS Connections | DatabaseConnections が高い状態が継続 | 接続枯渇の兆候 |
+| RDS Connections | DatabaseConnections > 40 / 10 分 | 接続枯渇の兆候（学習用 micro 初期値） |
 
 通知先: SNS トピック → 学習用メール（任意）。未設定でもアラーム作成までは行う。
 
