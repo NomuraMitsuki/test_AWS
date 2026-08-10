@@ -200,3 +200,24 @@ button.btn-secondary {
   margin-top: 0;
   margin-bottom: 1rem;
 }
+
+.demo-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #7a4a00;
+  background: #fff3cd;
+  border: 1px solid #e0c36a;
+  border-radius: 4px;
+  padding: 0.15rem 0.45rem;
+}
+
+.demo-role-actions {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.demo-role-actions .btn {
+  width: 100%;
+}

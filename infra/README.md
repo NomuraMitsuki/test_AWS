@@ -61,4 +61,6 @@ npm ci
 npm run dev
 ```
 
+Cognito / API なしの画面確認は `cd frontend && npm run dev:demo`（[frontend/README.md](../frontend/README.md)）。**Amplify には `NEXT_PUBLIC_DEMO_MODE` を設定しない。**
+
 API CORS は `cors_allow_localhost=true`（既定）で `http://localhost:3000` を許可。Amplify オリジンは apply 後に `terraform output amplify_default_branch_url` を `cors_amplify_origin` へ設定する（循環依存回避）。

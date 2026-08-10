@@ -1,6 +1,10 @@
 # ハンドオフ — 新スレッド引き継ぎ用
 
+<<<<<<< HEAD
 最終更新: 2026-08-07（W-260 CI/CD ワークフロー実装後。次は W-109 / W-270）
+=======
+最終更新: 2026-08-09（フロント デモモード追加。UI レビュー用）
+>>>>>>> origin/main
 
 ## 一言で
 
@@ -9,8 +13,13 @@ AWS 学習用の勤怠管理アプリ。Phase 1 Terraform、W-200〜W-250（API 
 ## リポジトリ
 
 - GitHub: `NomuraMitsuki/test_AWS`
+<<<<<<< HEAD
 - 作業ブランチ: **`cursor/w260-cicd-a099`**（マージ後は `main`）
 - 直近マージ: PR #1〜#14（W-260 は PR #15）
+=======
+- 作業ブランチ: **`cursor/frontend-demo-mock-a099`**（デモ UI レビュー用）
+- 直近マージ: PR #1〜#14
+>>>>>>> origin/main
 
 ## 完了していること
 
@@ -35,6 +44,10 @@ AWS 学習用の勤怠管理アプリ。Phase 1 Terraform、W-200〜W-250（API 
 
 1. **W-109**: 再 apply → GitHub Secrets / OIDC CI。Amplify apply 時は `amplify_github_access_token` と `cors_amplify_origin` の設定に注意。リモート state 整備前は CI apply しない
 2. **W-270**: CloudWatch ダッシュボード／アラーム仕上げ
+
+## フロント画面レビュー（デモモード）
+
+Cognito / API なしで UI 確認するときは `cd frontend && npm run dev:demo`（詳細は `frontend/README.md`）。本番 Amplify では `NEXT_PUBLIC_DEMO_MODE` を設定しない。
 
 ## 技術前提（変更しない）
 
