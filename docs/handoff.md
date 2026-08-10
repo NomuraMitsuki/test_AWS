@@ -1,25 +1,16 @@
 # ハンドオフ — 新スレッド引き継ぎ用
 
-<<<<<<< HEAD
-最終更新: 2026-08-07（W-260 CI/CD ワークフロー実装後。次は W-109 / W-270）
-=======
-最終更新: 2026-08-09（フロント デモモード追加。UI レビュー用）
->>>>>>> origin/main
+最終更新: 2026-08-10（W-260 CI/CD を main にマージ。デモモード込み）
 
 ## 一言で
 
-AWS 学習用の勤怠管理アプリ。Phase 1 Terraform、W-200〜W-250（API / フロント）、**W-260（GitHub Actions CI/CD 完成）** までコード実装済み（apply / Secrets 実登録なし）。**次は W-109（再 apply / Secrets）または W-270（監視仕上げ）**。
+AWS 学習用の勤怠管理アプリ。Phase 1 Terraform、W-200〜W-250（API / フロント）、**W-260（GitHub Actions CI/CD 完成）** までコード実装済み（apply / Secrets 実登録なし）。フロントはデモモード（`npm run dev:demo`）あり。**次は W-109（再 apply / Secrets）または W-270（監視仕上げ）**。
 
 ## リポジトリ
 
 - GitHub: `NomuraMitsuki/test_AWS`
-<<<<<<< HEAD
-- 作業ブランチ: **`cursor/w260-cicd-a099`**（マージ後は `main`）
-- 直近マージ: PR #1〜#14（W-260 は PR #15）
-=======
-- 作業ブランチ: **`cursor/frontend-demo-mock-a099`**（デモ UI レビュー用）
-- 直近マージ: PR #1〜#14
->>>>>>> origin/main
+- 作業ブランチ: **`main`**
+- 直近マージ: PR #1〜#16（デモモード #16、W-260 #15）
 
 ## 完了していること
 
