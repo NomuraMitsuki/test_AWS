@@ -24,29 +24,8 @@ locals {
       i == 0 ? ["AWS/Lambda", "Duration", "FunctionName", var.lambda_function_names[key]] : ["...", "Duration", ".", var.lambda_function_names[key]],
       [{ stat = "Average", label = key }]
     )
-  }
-
-  lambda_error_log_widgets = [
-    for i, key in local.lambda_keys : {
-      type   = "log"
-      x      = (i % 2) * 12
-      y      = 32 + floor(i / 2) * 6
-      width  = 12
-      height = 6
-      properties = {
-        query  = <<-EOT
-          SOURCE '/aws/lambda/${var.lambda_function_names[key]}'
-          | filter @message like /(?i)ERROR/
-          | fields @timestamp, @message
-          | sort @timestamp desc
-          | limit 20
-        EOT
-        region = local.region
-        title  = "Lambda ERROR — ${key}"
-        view   = "table"
-      }
-    }
   ]
+
 }
 
 resource "aws_sns_topic" "alarms" {
@@ -179,4 +158,106 @@ resource "aws_cloudwatch_dashboard" "overview" {
       ]
     )
   })
+}
+
+resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
+  for_each = var.lambda_function_names
+
+  alarm_name          = "${var.name_prefix}-lambda-${each.key}-errors"
+  alarm_description   = "Lambda ${each.key} Errors > 0 for 3 consecutive minutes"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 3
+  metric_name         = "Errors"
+  namespace           = "AWS/Lambda"
+  period              = 60
+  statistic           = "Sum"
+  threshold           = 0
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    FunctionName = each.value
+  }
+
+  alarm_actions = [aws_sns_topic.alarms.arn]
+  ok_actions    = [aws_sns_topic.alarms.arn]
+}
+
+resource "aws_cloudwatch_metric_alarm" "api_5xx" {
+  alarm_name          = "${var.name_prefix}-api-5xx"
+  alarm_description   = "HTTP API 5xx >= 5 in 5 minutes"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = 1
+  metric_name         = "5xx"
+  namespace           = "AWS/ApiGateway"
+  period              = 300
+  statistic           = "Sum"
+  threshold           = 5
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    ApiId = var.http_api_id
+  }
+
+  alarm_actions = [aws_sns_topic.alarms.arn]
+  ok_actions    = [aws_sns_topic.alarms.arn]
+}
+
+resource "aws_cloudwatch_metric_alarm" "api_latency_p99" {
+  alarm_name          = "${var.name_prefix}-api-latency-p99"
+  alarm_description   = "HTTP API Latency p99 > 3000ms in 5 minutes"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 1
+  metric_name         = "Latency"
+  namespace           = "AWS/ApiGateway"
+  period              = 300
+  extended_statistic  = "p99"
+  threshold           = 3000
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    ApiId = var.http_api_id
+  }
+
+  alarm_actions = [aws_sns_topic.alarms.arn]
+  ok_actions    = [aws_sns_topic.alarms.arn]
+}
+
+resource "aws_cloudwatch_metric_alarm" "rds_cpu" {
+  alarm_name          = "${var.name_prefix}-rds-cpu"
+  alarm_description   = "RDS CPUUtilization > 80% for 10 minutes"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 2
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/RDS"
+  period              = 300
+  statistic           = "Average"
+  threshold           = 80
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    DBInstanceIdentifier = var.db_instance_id
+  }
+
+  alarm_actions = [aws_sns_topic.alarms.arn]
+  ok_actions    = [aws_sns_topic.alarms.arn]
+}
+
+resource "aws_cloudwatch_metric_alarm" "rds_connections" {
+  alarm_name          = "${var.name_prefix}-rds-connections"
+  alarm_description   = "RDS DatabaseConnections > 40 for 10 minutes"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 2
+  metric_name         = "DatabaseConnections"
+  namespace           = "AWS/RDS"
+  period              = 300
+  statistic           = "Average"
+  threshold           = 40
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    DBInstanceIdentifier = var.db_instance_id
+  }
+
+  alarm_actions = [aws_sns_topic.alarms.arn]
+  ok_actions    = [aws_sns_topic.alarms.arn]
 }
