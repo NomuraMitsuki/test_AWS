@@ -77,8 +77,8 @@ HTTP API メトリクスの Namespace / MetricName は AWS ドキュメントに
 - `module.monitoring` に `http_api_id = module.api.http_api_id`, lambda map from api outputs, `db_instance_id = module.data.db_instance_id`
 - monitoring ブロックを api / data の後に置くか、参照で暗黙依存
 
-- [ ] `cd infra/envs/dev && terraform fmt -recursive ../.. && terraform init -backend=false && terraform validate`
-- [ ] Commit: `feat(infra): wire monitoring module to api and rds (W-270)`
+- [x] `cd infra/envs/dev && terraform fmt -recursive ../.. && terraform init -backend=false && terraform validate`
+- [x] Commit: `feat(infra): wire monitoring module to api and rds (W-270)`
 
 ---
 
