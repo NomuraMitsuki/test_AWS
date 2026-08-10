@@ -64,3 +64,62 @@ jobs:
         if: steps.plan.outcome != 'success'
         run: |
           echo "terraform plan は AWS 認証（secrets.AWS_ROLE_ARN_INFRA）が必要です。validate までは必須ゲートです。"
+
+  # main 向け plan → apply 骨格（学習用）。
+  # 注意: リモート state 整備前は CI apply しないこと（ローカル state のまま apply しない）。
+  # 運用開始（実際に apply を通す）は W-109（Secrets・再 apply・リモート state）後。
+  # job-level if では secrets コンテキストが使えないため、有無を output で渡す
+  apply-gate:
+    needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    outputs:
+      can_apply: ${{ steps.check.outputs.can_apply }}
+    steps:
+      - id: check
+        env:
+          AWS_ROLE_ARN_INFRA: ${{ secrets.AWS_ROLE_ARN_INFRA }}
+        run: |
+          if [ -n "${AWS_ROLE_ARN_INFRA}" ]; then
+            echo "can_apply=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "can_apply=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  apply:
+    needs: apply-gate
+    if: needs.apply-gate.outputs.can_apply == 'true'
+    runs-on: ubuntu-latest
+    environment: dev
+    defaults:
+      run:
+        working-directory: infra/envs/dev
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.8"
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_INFRA }}
+          aws-region: ap-northeast-1
+      - name: Terraform init
+        # リモート state 化後は -backend=false を外す（現状は学習用骨格）
+        run: terraform init -backend=false
+      - name: Terraform plan
+        run: terraform plan -input=false -no-color -out=tfplan
+      - name: Terraform apply
+        # environment: dev の承認後に実行。Secret 設定後の失敗はジョブ失敗とする。
+        run: terraform apply -input=false -auto-approve tfplan
+
+  apply-skip-note:
+    needs: apply-gate
+    if: needs.apply-gate.outputs.can_apply == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Note when infra apply credentials missing
+        run: |
+          echo "terraform apply は secrets.AWS_ROLE_ARN_INFRA が未設定のためスキップしました。"
+          echo "validate までは必須ゲートです。運用開始は W-109（Secrets・リモート state）後。"
+          echo "注意: リモート state 整備前は CI apply しないでください。"

@@ -133,7 +133,7 @@ frontend/       # Next.js 14
 6. ユーザー管理 — [Phase 5 スペック](2026-08-07-phase5-users-api-design.md) / [実装計画](../plans/2026-08-07-phase5-users-api.md)（W-230）
 7. エクスポート — [Phase 6 スペック](2026-08-07-phase6-exports-api-design.md) / [実装計画](../plans/2026-08-07-phase6-exports-api.md)（W-240）
 8. フロント + Amplify — [Phase 7 スペック](2026-08-07-phase7-frontend-amplify-design.md)（W-250）。実装計画は同 Phase の plans を参照
-9. CI/CD 完成
+9. CI/CD 完成 — [Phase 8 スペック](2026-08-07-phase8-cicd-workflows-design.md)（W-260）
 10. 監視仕上げ
 
 ## 9. 関連ドキュメント
@@ -152,3 +152,4 @@ frontend/       # Next.js 14
 - [Phase 5 ユーザー API 設計](2026-08-07-phase5-users-api-design.md)
 - [Phase 6 エクスポート API 設計](2026-08-07-phase6-exports-api-design.md)
 - [Phase 7 フロント + Amplify 設計](2026-08-07-phase7-frontend-amplify-design.md)
+- [Phase 8 CI/CD ワークフロー設計](2026-08-07-phase8-cicd-workflows-design.md)

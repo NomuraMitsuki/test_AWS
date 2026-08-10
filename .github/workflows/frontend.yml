@@ -12,6 +12,7 @@ on:
       - ".github/workflows/frontend.yml"
 
 permissions:
+  id-token: write
   contents: read
 
 jobs:
@@ -38,3 +39,49 @@ jobs:
           NEXT_PUBLIC_COGNITO_USER_POOL_ID: ap-northeast-1_dummy
           NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID: dummyclient
           NEXT_PUBLIC_API_BASE_URL: https://example.execute-api.ap-northeast-1.amazonaws.com
+
+  # job-level if では secrets コンテキストが使えないため、有無を output で渡す
+  amplify-gate:
+    needs: lint-build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    outputs:
+      can_start: ${{ steps.check.outputs.can_start }}
+    steps:
+      - id: check
+        env:
+          AWS_ROLE_ARN_INFRA: ${{ secrets.AWS_ROLE_ARN_INFRA }}
+          AMPLIFY_APP_ID: ${{ vars.AMPLIFY_APP_ID }}
+        run: |
+          if [ -n "${AWS_ROLE_ARN_INFRA}" ] && [ -n "${AMPLIFY_APP_ID}" ]; then
+            echo "can_start=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "can_start=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  amplify-job:
+    needs: amplify-gate
+    if: needs.amplify-gate.outputs.can_start == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_INFRA }}
+          aws-region: ap-northeast-1
+      - name: Start Amplify job
+        run: |
+          aws amplify start-job \
+            --app-id "${{ vars.AMPLIFY_APP_ID }}" \
+            --branch-name main \
+            --job-type RELEASE
+
+  amplify-skip-note:
+    needs: amplify-gate
+    if: needs.amplify-gate.outputs.can_start == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Note when Amplify start-job credentials missing
+        run: |
+          echo "Amplify start-job は vars.AMPLIFY_APP_ID または secrets.AWS_ROLE_ARN_INFRA が未設定のためスキップしました。"
+          echo "lint/build までは必須ゲートです。Hosting の GitHub 自動ビルドが主経路です。"

@@ -40,7 +40,7 @@ infra/
 | api | HTTP API, Cognito JWT authorizer, health Lambda（VPC 外・`GET /health` 認証なし）, attendance Lambda（VPC 内・JWT 必須の打刻/履歴/サマリ）, leave Lambda（VPC 内・JWT 必須の休暇申請/承認/却下）, users Lambda（VPC 内・JWT 必須の一覧/招待/更新・Cognito Admin IAM）, exports Lambda（VPC 内・JWT 必須の勤怠 CSV エクスポート・S3 Put/Presign IAM）, CORS（Amplify オリジン + ローカル `http://localhost:3000`） |
 | amplify | Amplify Hosting アプリ + branch（ルート `frontend`、Next.js）。環境変数（Cognito / API URL）。GitHub 連携トークンは sensitive 変数 |
 | monitoring | CloudWatch ダッシュボード骨格、SNS（アラーム本体は Phase 後半 / W-270） |
-| github_oidc | OIDC provider, deploy roles（infra / backend。frontend は Amplify 連携時に追加） |
+| github_oidc | OIDC provider, deploy roles（infra / backend）。Amplify `start-job` は学習用に infra ロール流用（W-260）。専用 frontend ロールは後続の IAM 整理でよい |
 
 ## State 管理
 

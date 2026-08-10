@@ -31,6 +31,8 @@ Next.js + API Gateway + Lambda + Cognito + RDS + S3 による勤怠管理アプ�
 | Phase 6 実装計画 | [docs/superpowers/plans/2026-08-07-phase6-exports-api.md](docs/superpowers/plans/2026-08-07-phase6-exports-api.md) |
 | Phase 7 設計（フロント + Amplify） | [docs/superpowers/specs/2026-08-07-phase7-frontend-amplify-design.md](docs/superpowers/specs/2026-08-07-phase7-frontend-amplify-design.md) |
 | Phase 7 実装計画 | [docs/superpowers/plans/2026-08-07-phase7-frontend-amplify.md](docs/superpowers/plans/2026-08-07-phase7-frontend-amplify.md) |
+| Phase 8 設計（CI/CD） | [docs/superpowers/specs/2026-08-07-phase8-cicd-workflows-design.md](docs/superpowers/specs/2026-08-07-phase8-cicd-workflows-design.md) |
+| Phase 8 実装計画 | [docs/superpowers/plans/2026-08-07-phase8-cicd-workflows.md](docs/superpowers/plans/2026-08-07-phase8-cicd-workflows.md) |
 | 作業一覧（WBS） | [docs/wbs.md](docs/wbs.md) |
 | ハンドオフ（新スレッド用） | [docs/handoff.md](docs/handoff.md) |
 
@@ -60,7 +62,7 @@ docs/       # 設計資料
 infra/      # Terraform（modules + envs/dev。Amplify / API CORS 含む）
 backend/    # Lambda (Python)
 frontend/   # Next.js 14（Amplify Auth + API Gateway クライアント）
-.github/workflows/
+.github/workflows/  # infra.yml / backend.yml / frontend.yml（Phase 8 / W-260）
 ```
 
-Infra の使い方は [infra/README.md](infra/README.md) を参照。フロントのローカル起動も同 README。
+Infra の使い方は [infra/README.md](infra/README.md) を参照。フロントのローカル起動も同 README。CI/CD の現状は [docs/cicd/github-actions.md](docs/cicd/github-actions.md) と Phase 8 計画を参照。
