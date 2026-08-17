@@ -8,7 +8,7 @@ AWS 学習用の勤怠管理アプリ。W-001〜270・W-109・W-280 のコード
 
 ## リポジトリ
 
-- GitHub: `NomuraMitsuki/test_AWS`（**private**）
+- GitHub: `NomuraMitsuki/test_AWS`（公開準備中。アカウント ID / 個人メールはコミットしない）
 - 作業ブランチ: **`main`**（W-281 は PR 待ちのとき `cursor/tf-dev-up-down-a099`）
 - 直近の本体運用: Mac で apply → Linux zip → invoke → Cognito admin → ローカル `npm run dev` まで確認済み。Amplify の GitHub 公開はしない
 
@@ -29,6 +29,7 @@ AWS 学習用の勤怠管理アプリ。W-001〜270・W-109・W-280 のコード
 - **認証・立ち上げ手順**: [docs/infra/aws-auth-bootstrap.md](infra/aws-auth-bootstrap.md)
 - **一括スクリプト**: `./infra/scripts/tf-dev.sh`（本体専用。bootstrap 非対象）
 - bootstrap は **Mac で apply 済み**。**destroy しない**
+- 公開用に `infra/envs/dev/backend.hcl` はプレースホルダ（`REPLACE_AFTER_BOOTSTRAP`）。アカウント ID はコミットしない。Mac の init / apply / destroy ではローカルだけ実名に書き換える
 
 ## 次にやること（優先順）
 
@@ -42,12 +43,12 @@ AWS 学習用の勤怠管理アプリ。W-001〜270・W-109・W-280 のコード
    再立ち上げ:
 
    ```bash
-   ./infra/scripts/tf-dev.sh up --admin-email mitsuki3553@gmail.com
+   ./infra/scripts/tf-dev.sh up --admin-email you@example.com
    cd frontend && npm run dev
    ```
 
-   `up` / `down` とも `[y/N]`。bootstrap は触らない。手順正本: [aws-auth-bootstrap.md](infra/aws-auth-bootstrap.md)
-2. GitHub Secrets は **Repository secrets** に入っている（OIDC 失敗は未登録ではなく ARN / 信頼ポリシーの切り分け）。Environment `dev` の secrets は空でよい
+   `up` / `down` とも `[y/N]`。bootstrap は触らない。`backend.hcl` はローカルで実名にしてコミットしない。手順正本: [aws-auth-bootstrap.md](infra/aws-auth-bootstrap.md)
+2. GitHub Secrets は **Repository secrets** に入っていると、プレースホルダの `backend.hcl` では CI plan が赤になる。plan / apply を止めるなら `AWS_ROLE_ARN_INFRA` を消す。Environment `dev` の secrets は空でよい
 3. Amplify の GitHub 接続は必須ではない（公開しない方針）
 
 ## フロント画面レビュー（デモモード）

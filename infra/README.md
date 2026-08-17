@@ -6,7 +6,7 @@
 
 手順の詳細: [docs/infra/aws-auth-bootstrap.md](../docs/infra/aws-auth-bootstrap.md)
 
-**Cloud Agent では apply しない。** 次はユーザーの Mac で bootstrap → `backend.hcl` コミット → 本体 apply → Secrets。
+**Cloud Agent では apply しない。** 次はユーザーの Mac で bootstrap → `backend.hcl` に実名（**公開時はコミットしない**）→ 本体 apply。CI plan / apply を止めるなら `AWS_ROLE_ARN_INFRA` を消す。
 
 ```bash
 # 1) state 用 S3 / DynamoDB（tf-dev.sh は使わない）
@@ -14,7 +14,7 @@ cd infra/bootstrap
 eval "$(aws configure export-credentials --format env)"  # aws login 利用時
 terraform init
 terraform apply
-# 出力を infra/envs/dev/backend.hcl に書いてコミット
+# 出力を infra/envs/dev/backend.hcl に書く（公開時はコミットしない）
 
 # 2) 本体の再立ち上げ / 停止（推奨）
 ./infra/scripts/tf-dev.sh up --admin-email you@example.com

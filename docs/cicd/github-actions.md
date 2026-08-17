@@ -19,7 +19,7 @@
 
 権限: `github_oidc` モジュールが発行する `attendance-dev-gha-infra` ロール（必要最小の Terraform 権限へ後で絞る）。
 
-本体 state は S3 + DynamoDB（`infra/bootstrap` が作成。`backend.hcl` をコミット）。validate だけは backend に接続しない。手順の正本: [docs/infra/aws-auth-bootstrap.md](../infra/aws-auth-bootstrap.md)。
+本体 state は S3 + DynamoDB（`infra/bootstrap` が作成）。`backend.hcl` は gitignore しないが、**公開時はプレースホルダのままコミット**し、アカウント ID を含む実名は Mac ローカルだけに置く。validate だけは backend に接続しない。手順の正本: [docs/infra/aws-auth-bootstrap.md](../infra/aws-auth-bootstrap.md)。プレースホルダのまま Secret が残ると plan / apply は赤になる。止めるなら `AWS_ROLE_ARN_INFRA` を消す（未設定ならスキップ＋注記）。
 
 ### 2. `backend.yml` — Lambda
 
@@ -62,7 +62,7 @@ feature/*  →  PR  →  main (dev)
 
 ## 必要な GitHub 設定
 
-1. **Mac** で `infra/bootstrap` を apply し、`backend.hcl` をコミットしたうえで `infra/envs/dev` を apply する（手順: [docs/infra/aws-auth-bootstrap.md](../infra/aws-auth-bootstrap.md)）。Cloud Agent では apply しない
+1. **Mac** で `infra/bootstrap` を apply し、`backend.hcl` に実名を書いて（**公開リポジトリではコミットしない**）`infra/envs/dev` を apply する（手順: [docs/infra/aws-auth-bootstrap.md](../infra/aws-auth-bootstrap.md)）。Cloud Agent では apply しない
 2. IAM ロールの信頼ポリシーで `repo:ORG/REPO:*` または `ref:refs/heads/main` に制限（モジュール既定）
 3. Repository Environments: `dev` — apply ジョブで使用。Required reviewers は付けられるプランなら必須（学習用 1 人可）。GitHub Free の private では使えないことがあり、本リポジトリは未設定（`main` の infra push で apply が自動）
 4. Secrets / Variables（**実登録はユーザー**。エージェントは `gh secret set` しない）。**Repository secrets**（Settings → Secrets and variables → Actions）に置く。Environment `dev` の secrets は空でよい（`backend.yml` は Environment を使わないため、Environment secrets だけだと Lambda 更新がスキップされる）:

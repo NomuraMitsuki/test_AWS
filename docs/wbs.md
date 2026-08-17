@@ -54,7 +54,7 @@
 | W-106 | github_oidc モジュール | 完了 | PR #4 |
 | W-107 | dev 合成 + infra 用 GitHub Actions（plan まで） | 完了 | PR #4 |
 | W-108 | 検証ゲート（fmt / validate / plan）＋初回 apply（OIDC 用） | 完了 | PR #6。ローカルで plan/apply 成功を確認後、課金抑制のため destroy 済み |
-| W-109 | GitHub Secrets（OIDC ロール ARN）登録と CI plan 有効化 | コード完了 | リポジトリ側は PR #20 マージ済み。運用: bootstrap / 本体 apply / `backend.hcl` 済み。Repository secrets は登録済み（plan-gate が Secret ありと判定）。OIDC の `AssumeRoleWithWebIdentity` は PR / main とも失敗。ARN の取り違え・引用符、`github_org_repo` を確認。Environment `dev` の Required reviewers は private + Free のため未設定。[設計](superpowers/specs/2026-08-17-phase10-w109-remote-state-design.md) |
+| W-109 | GitHub Secrets（OIDC ロール ARN）登録と CI plan 有効化 | コード完了 | リポジトリ側は PR #20 マージ済み。公開用に `backend.hcl` はプレースホルダへ戻した（アカウント ID はコミットしない。Mac ではローカルだけ実名）。Repository secrets は登録済みだと CI plan が赤になる。plan / apply を止めるなら `AWS_ROLE_ARN_INFRA` を消す。OIDC の `AssumeRoleWithWebIdentity` は PR / main とも失敗していた。Environment `dev` の Required reviewers は private + Free のため未設定。[設計](superpowers/specs/2026-08-17-phase10-w109-remote-state-design.md) |
 
 ---
 

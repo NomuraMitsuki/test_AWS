@@ -19,7 +19,7 @@ terraform apply
 terraform output
 ```
 
-出力を `infra/envs/dev/backend.hcl` に転記して **コミットする**（gitignore しない。CI が読む）:
+出力を `infra/envs/dev/backend.hcl` に転記する（gitignore しない。**公開時は実名をコミットせず**、リポジトリ上は `REPLACE_AFTER_BOOTSTRAP` のまま）:
 
 ```hcl
 bucket         = "<bucket_name の出力>"

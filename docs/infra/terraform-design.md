@@ -15,7 +15,7 @@ infra/
       variables.tf
       outputs.tf
       providers.tf          # required_providers + backend "s3"（部分設定）
-      backend.hcl           # bucket / dynamodb_table（bootstrap 出力。コミットする）
+      backend.hcl           # bucket / dynamodb_table（gitignore しない。公開時はプレースホルダ。実名はローカルのみ）
       terraform.tfvars
   modules/
     network/      # VPC, subnets, NAT, SG

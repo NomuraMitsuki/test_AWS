@@ -119,21 +119,21 @@ terraform apply
 terraform output
 ```
 
-**`terraform destroy` しない。** 出力の `bucket_name` / `dynamodb_table_name` を `infra/envs/dev/backend.hcl` に書いて **コミットする**（gitignore しない。CI が読む）:
+**`terraform destroy` しない。** 出力の `bucket_name` / `dynamodb_table_name` を `infra/envs/dev/backend.hcl` に書く（gitignore しない）。
 
 ```hcl
 bucket         = "attendance-tfstate-dev-<account_id>"
 dynamodb_table = "attendance-tfstate-lock-dev"
 ```
 
-プレースホルダ `REPLACE_AFTER_BOOTSTRAP` のままだと、本体の `terraform init` は失敗してよい。
+**公開リポジトリではアカウント ID をコミットしない。** リポジトリ上の `backend.hcl` は `REPLACE_AFTER_BOOTSTRAP` のままにする。Mac で本体を init / apply / destroy するときだけローカルで実名に書き換える（**コミットしない**）。プレースホルダのままだと本体の `terraform init` は失敗してよい。Secret `AWS_ROLE_ARN_INFRA` が残っていると CI plan は赤になる（プレースホルダ bucket へ init するため）。plan / apply を止めるなら Secret を消す。
 
 ## D. 作業順序（Mac・正本）
 
-認証は `aws login` + `export-credentials`。順序を守る（`backend.hcl` 未コミットやバケット未作成の状態で Secret だけあると CI plan は赤になる）。**各ステップはリポジトリルートを起点**とする（前の `cd` を引き継がない）。
+認証は `aws login` + `export-credentials`。順序を守る。公開時は `backend.hcl` をプレースホルダのままコミットし、実名はローカルだけ（§C）。**プレースホルダのまま Secret だけあると CI plan は赤になる**（止めるなら `AWS_ROLE_ARN_INFRA` を消す）。**各ステップはリポジトリルートを起点**とする（前の `cd` を引き継がない）。
 
 1. `cd infra/bootstrap` → `terraform init` → `terraform apply`（S3 + DynamoDB。この state はローカルでよい。**destroy しない**）
-2. 出力の bucket / table 名を `infra/envs/dev/backend.hcl` に書き **コミットする**
+2. 出力の bucket / table 名を `infra/envs/dev/backend.hcl` に書く。公開リポジトリでは実名をコミットせず、ローカルだけに置く（§C）
 3. `cd infra/envs/dev` → `terraform init -backend-config=backend.hcl`（backend 接続の確認）
 4. リポジトリルートに戻り `./infra/scripts/tf-dev.sh apply`（本体。RDS / Cognito / API / monitoring / OIDC 等）。migrate / 初回 admin / `.env.local` までまとめるなら `./infra/scripts/tf-dev.sh up --admin-email you@example.com`
 5. `cd infra/envs/dev` で `terraform output gha_infra_role_arn` / `gha_backend_role_arn` を控える
@@ -273,8 +273,8 @@ cat /tmp/seed-admin-out.json
 | `Function not found: attendance-dev-migrate` | W-280 のコードを `git pull` してから `tf-dev.sh apply`（または `up`） |
 | Lambda で `psycopg` / 共有ライブラリエラー | Mac 用 pip wheel を載せた。`./infra/scripts/package-migrate.sh`（manylinux / Python 3.12） |
 | `aws login` 後も sts 失敗 / `ExpiredToken` | 期限切れの `AWS_ACCESS_KEY_ID` 等がシェルに残っていると、login より優先される。`unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_SECURITY_TOKEN` のあと、本体は `tf-dev.sh`、bootstrap / invoke はあらためて `eval "$(aws configure export-credentials --format env)"` |
-| `backend.hcl` の bucket が見つからない | bootstrap apply 済みか、出力を `backend.hcl` に書いてコミットしたか |
+| `backend.hcl` の bucket が見つからない | bootstrap apply 済みか、Mac のローカル `backend.hcl` を実名にしたか（公開リポジトリでは実名をコミットしない） |
 | OIDC plan がスキップ | Secrets に `AWS_ROLE_ARN_INFRA` があるか（空なら skip-note。validate は必須） |
-| OIDC plan / apply が赤 | Secret ありなのにバケット未作成、または `backend.hcl` がプレースホルダのまま。順序は §D |
+| OIDC plan / apply が赤 | Secret ありなのに `backend.hcl` がプレースホルダ、またはバケット未作成。公開時は想定どおり。止めるなら `AWS_ROLE_ARN_INFRA` を消す |
 | `Not authorized to perform sts:AssumeRoleWithWebIdentity` | Repository secret の ARN が `gha_infra_role_arn`（plan/apply）または `gha_backend_role_arn`（Lambda 更新）と一致するか。前後の空白・引用符。`terraform.tfvars` の `github_org_repo` が `NomuraMitsuki/test_AWS` か。失敗時は Mac の `tf-dev.sh apply` で本体を更新してよい |
 | `AccessDenied` on IAM OIDC | 初回プリンシパルに `iam:CreateOpenIDConnectProvider` 等があるか |
