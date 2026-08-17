@@ -1,0 +1,2 @@
+# Lambda 同梱用。CI の pip install -t で zip に入れる。
+psycopg[binary]>=3.1,<4
