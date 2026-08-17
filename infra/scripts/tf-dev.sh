@@ -37,11 +37,23 @@ require_cmd() {
   fi
 }
 
+# 期限切れの AWS_* 環境変数はプロファイルより優先され、aws login 後も sts が失敗する。
+clear_env_creds() {
+  unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_SECURITY_TOKEN
+}
+
 ensure_aws_session() {
   require_cmd aws
 
   if aws sts get-caller-identity --output text >/dev/null 2>&1; then
     echo "→ 既存の AWS セッションを利用します"
+    return 0
+  fi
+
+  echo "→ sts に失敗したため、シェルの AWS_* 環境変数を外して再試行します"
+  clear_env_creds
+  if aws sts get-caller-identity --output text >/dev/null 2>&1; then
+    echo "→ プロファイルの資格情報を利用します"
     return 0
   fi
 
@@ -51,8 +63,14 @@ ensure_aws_session() {
     exit 1
   fi
 
-  if ! aws sts get-caller-identity --output text >/dev/null 2>&1; then
+  # login はプロファイルを更新する。残っている古い環境変数を捨ててから sts する。
+  clear_env_creds
+  local sts_err
+  if ! sts_err="$(aws sts get-caller-identity --output text 2>&1)"; then
     echo "ERROR: aws login 後も sts get-caller-identity に失敗しました。" >&2
+    echo "$sts_err" >&2
+    echo "ヒント: このシェルで次を実行してからやり直してください:" >&2
+    echo "  unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_SECURITY_TOKEN" >&2
     exit 1
   fi
 }
