@@ -3,6 +3,7 @@ data "aws_region" "current" {}
 locals {
   region = data.aws_region.current.name
 
+  # ダッシュボードはドメイン + health の 5 関数。migrate は Errors アラームのみ（W-280）
   lambda_keys = ["health", "attendance", "leave", "users", "exports"]
 
   lambda_invocations_metrics = [

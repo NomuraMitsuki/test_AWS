@@ -48,6 +48,7 @@ resource "aws_iam_role_policy" "backend_lambda" {
   name = "${var.name_prefix}-gha-backend-lambda"
   role = aws_iam_role.backend.id
 
+  # health / attendance / leave / users / exports / migrate（W-280）の UpdateFunctionCode
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
