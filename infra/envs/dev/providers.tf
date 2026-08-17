@@ -16,14 +16,12 @@ terraform {
     }
   }
 
-  # 初回はローカル state。リモート化時はコメントを外す。
-  # backend "s3" {
-  #   bucket         = "attendance-tfstate-dev"
-  #   key            = "attendance/dev/terraform.tfstate"
-  #   region         = "ap-northeast-1"
-  #   dynamodb_table = "attendance-tfstate-lock-dev"
-  #   encrypt        = true
-  # }
+  # bucket / dynamodb_table は backend.hcl（bootstrap 出力）で渡す。
+  backend "s3" {
+    key     = "attendance/dev/terraform.tfstate"
+    region  = "ap-northeast-1"
+    encrypt = true
+  }
 }
 
 provider "aws" {

@@ -135,6 +135,7 @@ frontend/       # Next.js 14
 8. フロント + Amplify — [Phase 7 スペック](2026-08-07-phase7-frontend-amplify-design.md)（W-250）。実装計画は同 Phase の plans を参照
 9. CI/CD 完成 — [Phase 8 スペック](2026-08-07-phase8-cicd-workflows-design.md)（W-260）
 10. 監視仕上げ — [Phase 9 スペック](2026-08-10-phase9-monitoring-polish-design.md)（W-270）
+11. リモート state / Secrets / CI plan — [Phase 10 スペック](2026-08-17-phase10-w109-remote-state-design.md)（W-109）
 
 ## 9. 関連ドキュメント
 
@@ -154,3 +155,4 @@ frontend/       # Next.js 14
 - [Phase 7 フロント + Amplify 設計](2026-08-07-phase7-frontend-amplify-design.md)
 - [Phase 8 CI/CD ワークフロー設計](2026-08-07-phase8-cicd-workflows-design.md)
 - [Phase 9 監視仕上げ設計](2026-08-10-phase9-monitoring-polish-design.md)
+- [Phase 10 リモート state / W-109 設計](2026-08-17-phase10-w109-remote-state-design.md)

@@ -8,12 +8,14 @@
 
 ```text
 infra/
+  bootstrap/                # state 用 S3 + DynamoDB（ローカル state。destroy しない）
   envs/
     dev/
       main.tf
       variables.tf
       outputs.tf
-      providers.tf          # required_providers + backend（現状は local、S3 はコメント）
+      providers.tf          # required_providers + backend "s3"（部分設定）
+      backend.hcl           # bucket / dynamodb_table（bootstrap 出力。コミットする）
       terraform.tfvars
   modules/
     network/      # VPC, subnets, NAT, SG
@@ -26,7 +28,7 @@ infra/
     github_oidc/  # GitHub Actions OIDC provider + roles
   scripts/
     check-aws-auth.sh
-    tf-dev.sh           # aws login + export-credentials + plan/apply
+    tf-dev.sh           # 本体（envs/dev）専用。aws login + export-credentials + plan/apply
 ```
 
 ## モジュール責務
@@ -44,9 +46,10 @@ infra/
 
 ## State 管理
 
-- **現状:** `envs/dev/providers.tf` でローカル state（S3 backend ブロックはコメントアウト）
-- **推奨（初回 apply 前または直後）:** S3 + DynamoDB ロックへリモート化。key 例: `attendance/dev/terraform.tfstate`
-- Cloud Agent などエフェメラル環境での apply は state 喪失リスクがある（[aws-auth-bootstrap.md](aws-auth-bootstrap.md)）
+- **本体（`envs/dev`）:** S3 + DynamoDB ロック。key: `attendance/dev/terraform.tfstate`。`bucket` / `dynamodb_table` は `backend.hcl`（gitignore しない）
+- **bootstrap:** `infra/bootstrap` が上記バケットとテーブルを作る。このディレクトリの state はローカルでよい。**destroy しない**
+- 学習終了時の destroy は **本体（`envs/dev`）のみ**。bootstrap は残すか、最後に明示的に消す
+- Cloud Agent では apply しない（[aws-auth-bootstrap.md](aws-auth-bootstrap.md)）
 - 認証・OIDC 切り替え手順: [aws-auth-bootstrap.md](aws-auth-bootstrap.md)
 
 ## 主要変数
@@ -72,7 +75,7 @@ infra/
 
 ## デプロイ順序
 
-1. bootstrap（state 用 S3/DynamoDB）— 必要なら
+1. `infra/bootstrap`（state 用 S3 / DynamoDB）。出力を `envs/dev/backend.hcl` へ
 2. `network` → `cognito` → `data` → `storage`
 3. `api`（health / attendance / leave / users / exports を zip）
 4. `monitoring`（api / data の出力に依存）/ `github_oidc`
@@ -82,4 +85,4 @@ infra/
 
 - NAT Gateway は 1 つ（AZ 冗長なし）
 - RDS Multi-AZ オフ、バックアップ保持は Free Tier 向けに 1 日（有料枠なら延長可）
-- 学習終了時は `terraform destroy` を前提にタグ `Project=attendance` を付与
+- 学習終了時は本体（`envs/dev`）の `terraform destroy` を前提にタグ `Project=attendance` を付与。bootstrap は残す

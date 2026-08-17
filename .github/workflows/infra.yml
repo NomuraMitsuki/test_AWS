@@ -34,9 +34,28 @@ jobs:
       - name: Terraform validate
         run: terraform validate
 
-  plan:
+  # job-level if では secrets コンテキストが使えないため、有無を output で渡す。
+  # 手順: infra/bootstrap apply → backend.hcl に実名を書いてコミット → 本体 apply → Secrets。
+  plan-gate:
     needs: validate
     if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      can_plan: ${{ steps.check.outputs.can_plan }}
+    steps:
+      - id: check
+        env:
+          AWS_ROLE_ARN_INFRA: ${{ secrets.AWS_ROLE_ARN_INFRA }}
+        run: |
+          if [ -n "${AWS_ROLE_ARN_INFRA}" ]; then
+            echo "can_plan=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "can_plan=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  plan:
+    needs: plan-gate
+    if: needs.plan-gate.outputs.can_plan == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -51,24 +70,21 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN_INFRA }}
           aws-region: ap-northeast-1
-        continue-on-error: true
       - name: Terraform init
-        run: terraform init -backend=false
+        run: terraform init -input=false -backend-config=backend.hcl
       - name: Terraform plan
-        id: plan
         run: terraform plan -input=false -no-color
-        continue-on-error: true
-        env:
-          AWS_ROLE_ARN_INFRA: ${{ secrets.AWS_ROLE_ARN_INFRA }}
-      - name: Plan note when credentials missing
-        if: steps.plan.outcome != 'success'
-        run: |
-          echo "terraform plan は AWS 認証（secrets.AWS_ROLE_ARN_INFRA）が必要です。validate までは必須ゲートです。"
 
-  # main 向け plan → apply 骨格（学習用）。
-  # 注意: リモート state 整備前は CI apply しないこと（ローカル state のまま apply しない）。
-  # 運用開始（実際に apply を通す）は W-109（Secrets・再 apply・リモート state）後。
-  # job-level if では secrets コンテキストが使えないため、有無を output で渡す
+  plan-skip-note:
+    needs: plan-gate
+    if: needs.plan-gate.outputs.can_plan == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Note when infra plan credentials missing
+        run: |
+          echo "terraform plan は secrets.AWS_ROLE_ARN_INFRA が未設定のためスキップしました。"
+          echo "validate までは必須ゲートです。OIDC と remote backend の手順は W-109 を参照。"
+
   apply-gate:
     needs: validate
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -105,12 +121,11 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN_INFRA }}
           aws-region: ap-northeast-1
       - name: Terraform init
-        # リモート state 化後は -backend=false を外す（現状は学習用骨格）
-        run: terraform init -backend=false
+        run: terraform init -input=false -backend-config=backend.hcl
       - name: Terraform plan
         run: terraform plan -input=false -no-color -out=tfplan
       - name: Terraform apply
-        # environment: dev の承認後に実行。Secret 設定後の失敗はジョブ失敗とする。
+        # environment: dev の reviewers 承認後に実行。Secret 設定後の失敗はジョブ失敗とする。
         run: terraform apply -input=false -auto-approve tfplan
 
   apply-skip-note:
@@ -121,5 +136,4 @@ jobs:
       - name: Note when infra apply credentials missing
         run: |
           echo "terraform apply は secrets.AWS_ROLE_ARN_INFRA が未設定のためスキップしました。"
-          echo "validate までは必須ゲートです。運用開始は W-109（Secrets・リモート state）後。"
-          echo "注意: リモート state 整備前は CI apply しないでください。"
+          echo "validate までは必須ゲートです。手順は W-109（bootstrap → backend.hcl → 本体 apply → Secrets）。"

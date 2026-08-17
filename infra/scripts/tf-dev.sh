@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# aws login（必要時）+ export-credentials のあと、dev 向け terraform を実行する。
+# aws login（必要時）+ export-credentials のあと、本体（infra/envs/dev）向け terraform を実行する。
+# infra/bootstrap は対象外（bootstrap は cd infra/bootstrap して直接 terraform する）。
 # 使い方（リポジトリルートから）:
 #   ./infra/scripts/tf-dev.sh auth
 #   ./infra/scripts/tf-dev.sh plan
@@ -104,8 +105,8 @@ run_plan() {
   require_cmd terraform
   ensure_tfvars
   cd "$DEV_DIR"
-  echo "→ terraform init"
-  terraform init -input=false
+  echo "→ terraform init -backend-config=backend.hcl"
+  terraform init -input=false -backend-config=backend.hcl
   echo "→ terraform plan -out=tfplan"
   terraform plan -input=false -out="$PLAN_FILE"
   echo "OK: plan を ${PLAN_FILE} に保存しました。apply する場合: ./infra/scripts/tf-dev.sh apply"
@@ -116,7 +117,7 @@ run_apply() {
   ensure_tfvars
   cd "$DEV_DIR"
   echo "→ apply 前に最新の plan を取ります（保存済み plan への apply には Terraform の yes/no が出ないため、ここで確認します）"
-  terraform init -input=false
+  terraform init -input=false -backend-config=backend.hcl
   terraform plan -input=false -out="$PLAN_FILE"
   echo ""
   echo "警告: apply すると NAT Gateway / RDS など課金リソースが作成または更新されます。"
