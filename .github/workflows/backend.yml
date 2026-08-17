@@ -64,6 +64,7 @@ jobs:
       LAMBDA_LEAVE_NAME: ${{ vars.LAMBDA_LEAVE_NAME || 'attendance-dev-leave' }}
       LAMBDA_USERS_NAME: ${{ vars.LAMBDA_USERS_NAME || 'attendance-dev-users' }}
       LAMBDA_EXPORTS_NAME: ${{ vars.LAMBDA_EXPORTS_NAME || 'attendance-dev-exports' }}
+      LAMBDA_MIGRATE_NAME: ${{ vars.LAMBDA_MIGRATE_NAME || 'attendance-dev-migrate' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -87,6 +88,11 @@ jobs:
               python -m pip install -r "backend/${dir}/requirements.txt" -t "${work}" --quiet
             fi
             cp -r "backend/${dir}/." "${work}/"
+            # migrate は SQL が backend/migrations/ にあるため zip に同梱する
+            if [ "${dir}" = "migrate" ]; then
+              mkdir -p "${work}/migrations"
+              cp backend/migrations/*.sql "${work}/migrations/"
+            fi
             find "${work}" -type d -name '__pycache__' -exec rm -rf {} + 2>/dev/null || true
             (cd "${work}" && zip -qr "/tmp/${dir}.zip" .)
             aws lambda update-function-code \
@@ -99,6 +105,7 @@ jobs:
           package_and_deploy leave "${LAMBDA_LEAVE_NAME}"
           package_and_deploy users "${LAMBDA_USERS_NAME}"
           package_and_deploy exports "${LAMBDA_EXPORTS_NAME}"
+          package_and_deploy migrate "${LAMBDA_MIGRATE_NAME}"
 
   deploy-skip-note:
     needs: deploy-gate
