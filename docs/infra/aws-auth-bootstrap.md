@@ -136,7 +136,30 @@ CI の動きは [docs/cicd/github-actions.md](../cicd/github-actions.md)。valid
 
 RDS はプライベートのため Mac から直接 `psql` できない。**migrate Lambda を手動 invoke** する（HTTP API には公開しない）。エージェントは invoke しない。
 
-前提: 本体 apply 済み（関数 `attendance-dev-migrate` が存在する）。zip に `psycopg` と `backend/migrations/*.sql` が入っていること。`main` への push 後は `backend.yml` が UpdateFunctionCode する。apply 直後で CI 未実行なら、先に backend ワークフローのデプロイを待つ。
+前提: 関数 `attendance-dev-migrate` があり、zip に `psycopg` と `backend/migrations/*.sql` が入っていること。
+
+Terraform の zip はソース + SQL のみ（`psycopg` なし）。`backend.yml` が OIDC で UpdateFunctionCode できればそれで足りる。**OIDC が `AssumeRoleWithWebIdentity` で失敗している間は CI を待たない。** Mac で apply したあと、下のローカル zip で関数コードを更新する。`main` マージだけでは Backend は再走しない。
+
+### E-0. migrate Lambda を apply する
+
+```bash
+./infra/scripts/tf-dev.sh apply
+```
+
+### E-0b. zip に `psycopg` を同梱する（CI が使えないとき）
+
+```bash
+eval "$(aws configure export-credentials --format env)"
+WORK="$(mktemp -d)"
+python3 -m pip install -r backend/migrate/requirements.txt -t "$WORK"
+cp backend/migrate/*.py "$WORK/"
+mkdir -p "$WORK/migrations"
+cp backend/migrations/*.sql "$WORK/migrations/"
+(cd "$WORK" && zip -qr /tmp/migrate.zip .)
+aws lambda update-function-code \
+  --function-name attendance-dev-migrate \
+  --zip-file fileb:///tmp/migrate.zip
+```
 
 認証は本体と同じ（`./infra/scripts/tf-dev.sh auth` または次）:
 
@@ -231,4 +254,5 @@ cat /tmp/seed-admin-out.json
 | `backend.hcl` の bucket が見つからない | bootstrap apply 済みか、出力を `backend.hcl` に書いてコミットしたか |
 | OIDC plan がスキップ | Secrets に `AWS_ROLE_ARN_INFRA` があるか（空なら skip-note。validate は必須） |
 | OIDC plan / apply が赤 | Secret ありなのにバケット未作成、または `backend.hcl` がプレースホルダのまま。順序は §D |
+| `Not authorized to perform sts:AssumeRoleWithWebIdentity` | Repository secret の ARN が `gha_infra_role_arn`（plan/apply）または `gha_backend_role_arn`（Lambda 更新）と一致するか。前後の空白・引用符。`terraform.tfvars` の `github_org_repo` が `NomuraMitsuki/test_AWS` か。失敗時は Mac の `tf-dev.sh apply` で本体を更新してよい |
 | `AccessDenied` on IAM OIDC | 初回プリンシパルに `iam:CreateOpenIDConnectProvider` 等があるか |
