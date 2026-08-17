@@ -4,7 +4,8 @@
 **ステータス**: Approved（エージェントは apply / Secrets 実登録をしない）  
 **WBS**: W-109  
 **手順正本**: [docs/infra/aws-auth-bootstrap.md](../../infra/aws-auth-bootstrap.md)  
-**CI 正本**: [docs/cicd/github-actions.md](../../cicd/github-actions.md)
+**CI 正本**: [docs/cicd/github-actions.md](../../cicd/github-actions.md)  
+**現行（公開）**: コミットする `backend.hcl` は `REPLACE_AFTER_BOOTSTRAP`。アカウント ID を含む実名は Mac ローカルだけ（コミットしない）。CI plan / apply を止めるなら `AWS_ROLE_ARN_INFRA` を消す。以下の「実名コミット」は導入時の手順。
 
 ## 1. ゴール
 
