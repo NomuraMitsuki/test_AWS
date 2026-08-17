@@ -1,25 +1,25 @@
 # ハンドオフ — 新スレッド引き継ぎ用
 
-最終更新: 2026-08-17（W-109 コード実装。次はユーザー Mac で apply / Secrets）
+最終更新: 2026-08-17（W-109 PR #20 マージ済み。次はユーザー Mac で apply / Secrets）
 
 ## 一言で
 
-AWS 学習用の勤怠管理アプリ。Phase 1 Terraform、W-200〜W-270 までコード実装済み。W-109 の **リポジトリ側**（`infra/bootstrap` / S3 backend / `infra.yml` / 手順書）は実装済み。**apply / Secrets 実登録は未実施。次はユーザーの Mac。**
+AWS 学習用の勤怠管理アプリ。Phase 1 Terraform、W-200〜W-270、W-109 の **リポジトリ側**は `main` にマージ済み。**apply / Secrets 実登録は未実施。次はユーザーの Mac。** エージェントが実装する WBS は残っていない。
 
 ## リポジトリ
 
 - GitHub: `NomuraMitsuki/test_AWS`
-- 作業ブランチ: **`cursor/w109-remote-state-a099`**（W-109 実装）
-- 直近マージ: PR #1〜#18（W-270 #18）
+- 作業ブランチ: **`main`**
+- 直近マージ: PR #20（W-109 リモート state / CI plan）
 
 ## 完了していること
 
 - 設計資料一式（`docs/`）
 - 設計レビュー担当 / 日本語ルール / PR 作成時レビュー
 - **実装委譲**: skill `implement-with-subagent` + agent `implementation-worker` + rule `delegate-implementation`（W-006）
-- WBS: W-001〜020, W-100〜108, W-006, W-200〜W-270 完了（apply / Secrets なし）。W-109 はコード完了・運用側（Mac apply / Secrets）待ち
+- WBS: W-001〜020, W-100〜108, W-006, W-200〜W-270 完了（apply / Secrets なし）。W-109 リポジトリ側は PR #20 マージ済み。運用側（Mac apply / Secrets）待ち
 - Terraform Phase 1〜7（api CORS / amplify モジュール含む）+ Phase 9 monitoring 仕上げコード
-- **W-109 コード**: `infra/bootstrap`、`envs/dev` の S3 backend、`infra.yml` の remote init、手順書。validate 済み。apply なし
+- **W-109 コード**: `infra/bootstrap`、`envs/dev` の S3 backend、`infra.yml` の remote init、手順書。PR #20 マージ済み。apply なし
 - backend: `health` + `attendance` + `leave` + `users` + `exports`（pytest）+ `migrations/001`〜`003`
 - frontend: Next.js 14（S01〜S12）+ Amplify Auth + API クライアント
 - **CI/CD（W-260 + W-109）**:
@@ -63,6 +63,6 @@ Cognito / API なしで UI 確認するときは `cd frontend && npm run dev:dem
 ```text
 @docs/handoff.md と @docs/wbs.md を読んで作業を引き継いでください。
 実装はサブエージェント（implementation-worker）へ委譲してください。
-W-109 のコードは実装済み。次はユーザー Mac での bootstrap / 本体 apply / Secrets。
-エージェントは terraform apply と gh secret set をしない。
+W-109 のコードは PR #20 で main に入った。次はユーザー Mac での bootstrap / 本体 apply / Secrets。
+エージェントは terraform apply と gh secret set をしない。実装する残 WBS はない。
 ```
