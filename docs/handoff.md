@@ -9,7 +9,7 @@ AWS 学習用の勤怠管理アプリ。Phase 1 Terraform、W-200〜W-260（API 
 ## リポジトリ
 
 - GitHub: `NomuraMitsuki/test_AWS`
-- 作業ブランチ: **`main`**
+- 作業ブランチ: **`cursor/w109-remote-state-a099`**（W-109 設計中）
 - 直近マージ: PR #1〜#18（W-270 #18）
 
 ## 完了していること
@@ -34,7 +34,7 @@ AWS 学習用の勤怠管理アプリ。Phase 1 Terraform、W-200〜W-260（API 
 
 ## 次にやること（優先順）
 
-1. **W-109**: 再 apply → GitHub Secrets / OIDC CI。Amplify apply 時は `amplify_github_access_token` と `cors_amplify_origin` の設定に注意。リモート state 整備前は CI apply しない。監視リソースもこの apply で作成される
+1. **W-109**: リモート state（`infra/bootstrap`）→ Mac で本体 apply → GitHub Secrets。手順は Phase 10 スペック。エージェントは apply / Secrets を実行しない
 
 ## フロント画面レビュー（デモモード）
 
