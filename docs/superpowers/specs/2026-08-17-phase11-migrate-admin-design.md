@@ -11,7 +11,7 @@
 プライベート RDS に `backend/migrations/001`〜`003` を適用し、最初の `admin` を Cognito + `users` 行として作れるようにする。Mac から踏み台 EC2 なしで実行できる。
 
 完了条件（リポジトリ側）: migrate Lambda + 手動 invoke 手順 + 初回 admin 手順が揃い、pytest / terraform validate が通る。  
-完了条件（運用側・ユーザー）: Mac で本体を再 apply し、`backend.yml` の UpdateFunctionCode（`psycopg` 同梱）が終わってから migrate を invoke し、admin でログインできる。
+完了条件（運用側・ユーザー）: Mac で本体を再 apply し、`psycopg` 入り zip を載せてから migrate を invoke し、admin でログインできる。zip は `backend.yml` の UpdateFunctionCode、または OIDC 失敗時は `package-migrate.sh`。
 
 ## 2. 非ゴール
 
@@ -35,7 +35,7 @@
 認証は本体と同じ（`eval "$(aws configure export-credentials --format env)"` または専用スクリプト）。
 
 1. 本機能のコードを `main` に載せたあと `./infra/scripts/tf-dev.sh apply`（migrate Lambda 追加。NAT / RDS は既存）。Terraform の zip はソース + SQL のみで `psycopg` は入らない
-2. `backend.yml` の main デプロイ（`AWS_ROLE_ARN_BACKEND` が **Repository secrets** にあること）で UpdateFunctionCode が終わるのを待つ
+2. `psycopg` を同梱する。`backend.yml` の UpdateFunctionCode が使えればそれでよい。OIDC が `AssumeRoleWithWebIdentity` で失敗している間は `./infra/scripts/package-migrate.sh`（Mac の素の `pip install -t` は使わない）
 3. migrate を invoke し `001`〜`003` を適用（`CREATE IF NOT EXISTS` で再実行可）
 4. Cognito `AdminCreateUser` + グループ `admin`（username は email）
 5. 同じメール / `cognito_sub` / `role=admin` / `status=active` を `users` に入れる（invoke の seed ペイロード）

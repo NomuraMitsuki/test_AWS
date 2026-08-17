@@ -142,24 +142,23 @@ Terraform の zip はソース + SQL のみ（`psycopg` なし）。`backend.yml
 
 ### E-0. migrate Lambda を apply する
 
+ローカルが `main` の W-280 以降であること。`Function not found: attendance-dev-migrate` は、apply 時点で migrate のコードが無かったときに出る。
+
 ```bash
+git pull origin main
 ./infra/scripts/tf-dev.sh apply
+aws lambda get-function --function-name attendance-dev-migrate --query 'Configuration.FunctionName'
 ```
 
 ### E-0b. zip に `psycopg` を同梱する（CI が使えないとき）
 
+Mac の `pip install -t` だと macos / cp310 の wheel になり、Lambda（Python 3.12 / Amazon Linux x86_64）では動かない。次を使う:
+
 ```bash
-eval "$(aws configure export-credentials --format env)"
-WORK="$(mktemp -d)"
-python3 -m pip install -r backend/migrate/requirements.txt -t "$WORK"
-cp backend/migrate/*.py "$WORK/"
-mkdir -p "$WORK/migrations"
-cp backend/migrations/*.sql "$WORK/migrations/"
-(cd "$WORK" && zip -qr /tmp/migrate.zip .)
-aws lambda update-function-code \
-  --function-name attendance-dev-migrate \
-  --zip-file fileb:///tmp/migrate.zip
+./infra/scripts/package-migrate.sh
 ```
+
+中身は `pip install --platform manylinux2014_x86_64 --python-version 3.12 --only-binary=:all:` のあと `update-function-code`。apply はしない。
 
 認証は本体と同じ（`./infra/scripts/tf-dev.sh auth` または次）:
 
@@ -250,6 +249,8 @@ cat /tmp/seed-admin-out.json
 |------|------|
 | `Unable to locate credentials` | `AWS_PROFILE` / 環境変数 / `aws sts get-caller-identity` |
 | CLI の sts は通るが Terraform だけ失敗 | `aws login` 利用時は `export-credentials` が必要。本体は `./infra/scripts/tf-dev.sh plan` を使う |
+| `Function not found: attendance-dev-migrate` | W-280 のコードを `git pull` してから `tf-dev.sh apply` |
+| Lambda で `psycopg` / 共有ライブラリエラー | Mac 用 pip wheel を載せた。`./infra/scripts/package-migrate.sh`（manylinux / Python 3.12） |
 | `aws login` 後も sts 失敗 / `ExpiredToken` | 期限切れの `AWS_ACCESS_KEY_ID` 等がシェルに残っていると、login より優先される。`unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_SECURITY_TOKEN` のあと、本体は `tf-dev.sh`、bootstrap / invoke はあらためて `eval "$(aws configure export-credentials --format env)"` |
 | `backend.hcl` の bucket が見つからない | bootstrap apply 済みか、出力を `backend.hcl` に書いてコミットしたか |
 | OIDC plan がスキップ | Secrets に `AWS_ROLE_ARN_INFRA` があるか（空なら skip-note。validate は必須） |

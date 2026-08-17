@@ -27,7 +27,7 @@ terraform apply
 
 `aws login` だけだと Terraform が資格情報を拾えないことがある。`tf-dev.sh` は `aws configure export-credentials` を挟んで回避する。`apply` は保存済み plan を使うため Terraform 標準の yes/no は出ず、スクリプトが `[y/N]` を聞く。`tf-dev.sh` は **本体専用**（bootstrap 非対象）。init は `-backend-config=backend.hcl` を使う。
 
-apply 後の RDS マイグレーションと初回 admin は、`backend.yml` の UpdateFunctionCode（`psycopg` 同梱）が終わってから `./infra/scripts/invoke-migrate.sh`（**apply はしない**）。手順の正本: [docs/infra/aws-auth-bootstrap.md](../docs/infra/aws-auth-bootstrap.md) §E。
+apply 後の RDS マイグレーションと初回 admin は、`psycopg` 入り zip を載せてから `./infra/scripts/invoke-migrate.sh`。OIDC が使えないときは `./infra/scripts/package-migrate.sh`。手順の正本: [docs/infra/aws-auth-bootstrap.md](../docs/infra/aws-auth-bootstrap.md) §E。
 
 OIDC ロールは本体の初回 apply 後に初めて作られる。成功後に次を GitHub Secrets へ登録する（エージェントは `gh secret set` しない）:
 
