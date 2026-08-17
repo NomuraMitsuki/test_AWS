@@ -250,7 +250,7 @@ cat /tmp/seed-admin-out.json
 |------|------|
 | `Unable to locate credentials` | `AWS_PROFILE` / 環境変数 / `aws sts get-caller-identity` |
 | CLI の sts は通るが Terraform だけ失敗 | `aws login` 利用時は `export-credentials` が必要。本体は `./infra/scripts/tf-dev.sh plan` を使う |
-| `ExpiredToken` | `aws login` / SSO 再ログイン、またはセッション更新 |
+| `aws login` 後も sts 失敗 / `ExpiredToken` | 期限切れの `AWS_ACCESS_KEY_ID` 等がシェルに残っていると、login より優先される。`unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_SECURITY_TOKEN` のあと、本体は `tf-dev.sh`、bootstrap / invoke はあらためて `eval "$(aws configure export-credentials --format env)"` |
 | `backend.hcl` の bucket が見つからない | bootstrap apply 済みか、出力を `backend.hcl` に書いてコミットしたか |
 | OIDC plan がスキップ | Secrets に `AWS_ROLE_ARN_INFRA` があるか（空なら skip-note。validate は必須） |
 | OIDC plan / apply が赤 | Secret ありなのにバケット未作成、または `backend.hcl` がプレースホルダのまま。順序は §D |

@@ -33,11 +33,10 @@ require_cmd() {
 }
 
 export_creds() {
+  unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_SECURITY_TOKEN
   if aws sts get-caller-identity --output text >/dev/null 2>&1; then
-    if [[ -z "${AWS_ACCESS_KEY_ID:-}" ]]; then
-      echo "→ aws configure export-credentials を環境変数へ展開"
-      eval "$(aws configure export-credentials --format env)"
-    fi
+    echo "→ aws configure export-credentials を環境変数へ展開"
+    eval "$(aws configure export-credentials --format env)"
     return 0
   fi
   echo "ERROR: AWS 資格情報がありません。先に ./infra/scripts/tf-dev.sh auth を実行してください。" >&2
