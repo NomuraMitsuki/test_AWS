@@ -27,6 +27,8 @@ terraform apply
 
 `aws login` だけだと Terraform が資格情報を拾えないことがある。`tf-dev.sh` は `aws configure export-credentials` を挟んで回避する。`apply` は保存済み plan を使うため Terraform 標準の yes/no は出ず、スクリプトが `[y/N]` を聞く。`tf-dev.sh` は **本体専用**（bootstrap 非対象）。init は `-backend-config=backend.hcl` を使う。
 
+apply 後の RDS マイグレーションと初回 admin は `./infra/scripts/invoke-migrate.sh`（**apply はしない**）。手順の正本: [docs/infra/aws-auth-bootstrap.md](../docs/infra/aws-auth-bootstrap.md) §E。
+
 OIDC ロールは本体の初回 apply 後に初めて作られる。成功後に次を GitHub Secrets へ登録する（エージェントは `gh secret set` しない）:
 
 - `AWS_ROLE_ARN_INFRA` ← `terraform output gha_infra_role_arn`
@@ -62,9 +64,9 @@ terraform validate
 | cognito | User Pool（招待のみ）/ groups / app client |
 | data | RDS PostgreSQL + Secrets Manager |
 | storage | exports 用 S3（公開禁止） |
-| monitoring | SNS + CloudWatch ダッシュボード骨格 |
+| monitoring | SNS + CloudWatch ダッシュボード（API / Lambda×5 / RDS）。migrate は Errors アラームのみ |
 | github_oidc | GitHub Actions OIDC ロール |
-| api | HTTP API / Cognito JWT authorizer / health Lambda（`GET /health` は認証なし）/ attendance・leave・users・exports Lambda（VPC 内・JWT 必須ルート。exports は S3 Put/Presign IAM）/ CORS（`cors_allow_origins`） |
+| api | HTTP API / Cognito JWT authorizer / health Lambda（`GET /health` は認証なし）/ attendance・leave・users・exports Lambda（VPC 内・JWT 必須ルート。exports は S3 Put/Presign IAM）/ migrate Lambda（VPC 内・HTTP 非公開）/ CORS（`cors_allow_origins`） |
 | amplify | Amplify Hosting（Next.js / `frontend`）。Cognito・API URL を環境変数で渡す。GitHub トークンは sensitive（空でも validate 可） |
 
 ## フロント（ローカル）

@@ -8,7 +8,7 @@
 
 | ソース | Log group | 保持 |
 |--------|-----------|------|
-| Lambda health / attendance / leave / users / exports | `/aws/lambda/attendance-dev-*` | 14 日（IaC 管理は後続可） |
+| Lambda health / attendance / leave / users / exports / migrate | `/aws/lambda/attendance-dev-*` | 14 日（IaC 管理は後続可） |
 | API Gateway アクセスログ | `/aws/apigateway/attendance-dev` | 14 日（未整備・W-270 非スコープ） |
 
 Lambda は JSON 構造化ログ（`level`, `message`, `request_id`, `user_sub` など）。  
@@ -18,7 +18,7 @@ PII（メール全文など）は必要最小限。パスワードは絶対に�
 
 | アラーム | 条件（初期値） | 意味 |
 |----------|----------------|------|
-| Lambda Errors（関数ごと×5） | エラー > 0 が 1 分×3 | 関数障害（health / attendance / leave / users / exports） |
+| Lambda Errors（関数ごと×5 + migrate） | エラー > 0 が 1 分×3 | 関数障害（health / attendance / leave / users / exports）。migrate は Errors アラームのみ（ダッシュボードの Invocations/Duration には含めない） |
 | API 5XX | 5xx count >= 5 / 5 分 | API 異常 |
 | API Latency p99 | p99 > 3000ms / 5 分 | 遅延（VPC Cold start 含む） |
 | RDS CPU | CPUUtilization > 80% / 10 分 | DB 過負荷 |
@@ -33,7 +33,7 @@ PII（メール全文など）は必要最小限。パスワードは絶対に�
 ウィジェット:
 
 1. API Gateway: 4xx / 5xx / count / latency
-2. Lambda: invocations / errors / duration（関数別×5）
+2. Lambda: invocations / errors / duration（関数別×5。migrate は含めない）
 3. RDS: CPU / connections / free storage
 4. 最近の Lambda エラーログ（ログウィジェット。メッセージに ERROR を含む行）
 

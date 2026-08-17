@@ -26,7 +26,7 @@
 | トリガー | 現状（実装・W-260） | 目標（Secrets 登録後） |
 |----------|---------------------|-------------------|
 | PR（`backend/**`） | Python 3.12、`compileall` + `pytest`（必須） | 同左 |
-| push to `main`（`backend/**`） | 同上＋ `AWS_ROLE_ARN_BACKEND` があれば zip → `lambda:UpdateFunctionCode`（health / attendance / leave / users / exports）。未設定はスキップ＋注記 | Secrets 登録後に実デプロイ |
+| push to `main`（`backend/**`） | 同上＋ `AWS_ROLE_ARN_BACKEND` があれば zip → `lambda:UpdateFunctionCode`（health / attendance / leave / users / exports / migrate）。migrate の zip には `backend/migrations/*.sql` を同梱。未設定はスキップ＋注記 | Secrets 登録後に実デプロイ |
 
 権限: 対象 Lambda の更新と、必要なら S3 アーティファクトへの書込。
 
@@ -39,6 +39,7 @@
 | `LAMBDA_LEAVE_NAME` | `attendance-dev-leave` |
 | `LAMBDA_USERS_NAME` | `attendance-dev-users` |
 | `LAMBDA_EXPORTS_NAME` | `attendance-dev-exports` |
+| `LAMBDA_MIGRATE_NAME` | `attendance-dev-migrate` |
 
 ### 3. `frontend.yml` — Amplify / Next.js
 

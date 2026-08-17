@@ -61,8 +61,9 @@ Browser
 | `users` | 招待・一覧・更新・Cognito 同期 |
 | `exports` | CSV 生成 → S3 → 署名付き URL |
 | `health` | 稼働確認のみ（`GET /health`）。JWT 不要・**VPC 外**（DB 非接続） |
+| `migrate` | RDS へ SQL `001`〜`003` を適用し、任意で初回 admin の `users` INSERT。**HTTP 非公開**・VPC 内・手動 `aws lambda invoke`（[Phase 11](2026-08-17-phase11-migrate-admin-design.md)） |
 
-ドメイン Lambda（attendance / leave / users / exports）共通: VPC 配置、Secrets Manager から DB 接続情報取得、構造化 JSON ログ。`health` は例外（VPC 外）。詳細: [Phase 2 スペック](2026-08-07-phase2-http-api-health-design.md)。
+ドメイン Lambda（attendance / leave / users / exports）共通: VPC 配置、Secrets Manager から DB 接続情報取得、構造化 JSON ログ。`health` は例外（VPC 外）。`migrate` も VPC 内・DB secret 読取だが API Gateway には繋がない。詳細: [Phase 2 スペック](2026-08-07-phase2-http-api-health-design.md)、[Phase 11](2026-08-17-phase11-migrate-admin-design.md)。
 
 ### 4.4 Cognito
 
