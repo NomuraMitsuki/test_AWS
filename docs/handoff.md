@@ -17,7 +17,7 @@ AWS 学習用の勤怠管理アプリ。Phase 1 Terraform、W-200〜W-270 まで
 - 設計資料一式（`docs/`）
 - 設計レビュー担当 / 日本語ルール / PR 作成時レビュー
 - **実装委譲**: skill `implement-with-subagent` + agent `implementation-worker` + rule `delegate-implementation`（W-006）
-- WBS: W-001〜020, W-100〜108, W-006, W-200〜W-270 完了（apply / Secrets なし）
+- WBS: W-001〜020, W-100〜108, W-006, W-200〜W-270 完了（apply / Secrets なし）。W-109 はコード完了・運用側（Mac apply / Secrets）待ち
 - Terraform Phase 1〜7（api CORS / amplify モジュール含む）+ Phase 9 monitoring 仕上げコード
 - **W-109 コード**: `infra/bootstrap`、`envs/dev` の S3 backend、`infra.yml` の remote init、手順書。validate 済み。apply なし
 - backend: `health` + `attendance` + `leave` + `users` + `exports`（pytest）+ `migrations/001`〜`003`

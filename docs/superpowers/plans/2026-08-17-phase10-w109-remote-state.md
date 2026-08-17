@@ -19,7 +19,7 @@
 ## File structure
 
 ```text
-infra/bootstrap/{main.tf,variables.tf,outputs.tf,providers.tf,README.md}
+infra/bootstrap/{main.tf,outputs.tf,providers.tf,README.md}
 infra/envs/dev/providers.tf          # backend "s3" 部分設定
 infra/envs/dev/backend.hcl.example
 infra/envs/dev/backend.hcl           # example と同型のプレースホルダ可（CI init 用。実名はユーザーが上書きコミット）

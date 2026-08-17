@@ -11,7 +11,7 @@
 Terraform の **リモート state（S3 + DynamoDB）** をコード化し、`infra.yml` の plan / apply が backend を使えるようにする。本体 apply と GitHub Secrets 登録は **ユーザーの Mac** で行い、Cloud Agent では実行しない（エフェメラル環境で state を失うため）。
 
 完了条件（リポジトリ側）: bootstrap / `envs/dev` backend / CI 配線 / 手順書が揃い、`terraform validate` が通る。  
-完了条件（運用側・ユーザー）: Mac で bootstrap → 本体 apply → Secrets 登録。
+完了条件（運用側・ユーザー）: Mac で bootstrap → `backend.hcl` 実名コミット → 本体 apply → Secrets 登録 → Environment `dev` の reviewers 必須。
 
 ## 2. 非ゴール
 
@@ -26,13 +26,13 @@ Terraform の **リモート state（S3 + DynamoDB）** をコード化し、`in
 
 ## 4. 作業順序（Mac）
 
-認証は `aws login` + `export-credentials`。`./infra/scripts/tf-dev.sh` は **本体（`infra/envs/dev`）専用**。bootstrap には使わない。
+認証は `aws login` + `export-credentials`。`./infra/scripts/tf-dev.sh` は **本体（`infra/envs/dev`）専用**。bootstrap には使わない。**各ステップはリポジトリルートを起点**とする（前の `cd` を引き継がない）。
 
 1. `cd infra/bootstrap` → `terraform init` → `terraform apply`（S3 + DynamoDB。この state はローカルでよい。**destroy しない**）
 2. 出力の bucket / table 名を `infra/envs/dev/backend.hcl` に書き **コミットする**（gitignore しない。CI が読む）
-3. `cd infra/envs/dev` → `terraform init -backend-config=backend.hcl`
-4. `./infra/scripts/tf-dev.sh apply`（本体。RDS / Cognito / API / monitoring / OIDC 等）
-5. `terraform output gha_infra_role_arn` / `gha_backend_role_arn` を控える
+3. `cd infra/envs/dev` → `terraform init -backend-config=backend.hcl`（backend 接続の確認）
+4. リポジトリルートに戻り `./infra/scripts/tf-dev.sh apply`（本体。RDS / Cognito / API / monitoring / OIDC 等）
+5. `cd infra/envs/dev` で `terraform output gha_infra_role_arn` / `gha_backend_role_arn` を控える
 6. GitHub Secrets: `AWS_ROLE_ARN_INFRA` / `AWS_ROLE_ARN_BACKEND`。リージョンは workflow 既定 `ap-northeast-1`（Secret 不要）
 7. Repository Environment `dev` に **reviewers を必須**（学習用 1 人可）。`main` push の apply が NAT / RDS を自動作成しないため
 8. Amplify を接続した場合: `amplify_default_branch_url` を `cors_amplify_origin` に入れて再 apply（循環回避は現状どおり）
@@ -68,7 +68,7 @@ Terraform の `backend "s3"` は変数展開できない。
 
 - `infra/bootstrap` と `infra/envs/dev`: `terraform fmt` / `init -backend=false` / `validate`（bootstrap の validate はローカル。CI validate ジョブは従来どおり `envs/dev`）
 - docs 更新対象（実装時）:
-  - [aws-auth-bootstrap.md](../../infra/aws-auth-bootstrap.md): 前提の local state / Cloud Agent apply 許容を改める。§C は Mac + `tf-dev.sh`（本体）。§D を本スペック §4 に置き換え（手作り bucket + migrate は捨てる）
+  - [aws-auth-bootstrap.md](../../infra/aws-auth-bootstrap.md): Cloud Agent apply 禁止。§B は本体専用 `tf-dev.sh`、§C は bootstrap、§D を本スペック §4 に置き換え（手作り bucket + migrate は捨てる）
   - [github-actions.md](../../cicd/github-actions.md): 現状＝validate 必須、plan/apply は OIDC + remote backend。apply は `environment: dev` **reviewers 必須**
   - [terraform-design.md](../../infra/terraform-design.md): `infra/bootstrap` を構成に追加。State は S3。学習終了時の destroy は **本体のみ**（bootstrap は残すか明示的に最後）
   - handoff / WBS（コード完了とユーザー apply 待ちを区別）

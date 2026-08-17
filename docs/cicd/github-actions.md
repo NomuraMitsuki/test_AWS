@@ -4,7 +4,7 @@
 
 - AWS 認証は **OIDC**（アクセスキーを GitHub Secrets に置かない）
 - `main` ブランチが `dev` 環境の正
-- Terraform apply は plan 結果の確認後に手動承認（`environment: dev` 保護ルール。**reviewers 必須**）
+- Terraform apply は `environment: dev` 保護ルールで **ジョブ開始前**に手動承認（**reviewers 必須**。承認後に plan → apply。plan を見てから承認する流れではない）
 - **品質ゲートは常に必須**。デプロイ／apply は Secret / Variable 未設定ならスキップ＋注記（workflow を赤にしない）。設定後の失敗はジョブ失敗とする（`continue-on-error` で握りつぶさない）
 - job-level `if` では `secrets` コンテキストが使えないため、デプロイ系は gate ジョブで Secret 有無を `outputs` に渡し、後続ジョブを分岐する
 

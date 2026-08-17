@@ -63,7 +63,7 @@ Next.js + API Gateway + Lambda + Cognito + RDS + S3 による勤怠管理アプ�
 
 ```text
 docs/       # 設計資料
-infra/      # Terraform（modules + envs/dev。Amplify / API CORS 含む）
+infra/      # Terraform（bootstrap + modules + envs/dev。Amplify / API CORS 含む）
 backend/    # Lambda (Python)
 frontend/   # Next.js 14（Amplify Auth + API Gateway クライアント）
 .github/workflows/  # infra.yml / backend.yml / frontend.yml（Phase 8 / W-260）

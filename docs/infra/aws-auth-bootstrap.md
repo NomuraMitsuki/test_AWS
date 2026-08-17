@@ -111,13 +111,13 @@ dynamodb_table = "attendance-tfstate-lock-dev"
 
 ## D. 作業順序（Mac・正本）
 
-認証は `aws login` + `export-credentials`。順序を守る（`backend.hcl` 未コミットやバケット未作成の状態で Secret だけあると CI plan は赤になる）。
+認証は `aws login` + `export-credentials`。順序を守る（`backend.hcl` 未コミットやバケット未作成の状態で Secret だけあると CI plan は赤になる）。**各ステップはリポジトリルートを起点**とする（前の `cd` を引き継がない）。
 
 1. `cd infra/bootstrap` → `terraform init` → `terraform apply`（S3 + DynamoDB。この state はローカルでよい。**destroy しない**）
 2. 出力の bucket / table 名を `infra/envs/dev/backend.hcl` に書き **コミットする**
-3. `cd infra/envs/dev` → `terraform init -backend-config=backend.hcl`
-4. `./infra/scripts/tf-dev.sh apply`（本体。RDS / Cognito / API / monitoring / OIDC 等）
-5. `terraform output gha_infra_role_arn` / `gha_backend_role_arn` を控える
+3. `cd infra/envs/dev` → `terraform init -backend-config=backend.hcl`（backend 接続の確認）
+4. リポジトリルートに戻り `./infra/scripts/tf-dev.sh apply`（本体。RDS / Cognito / API / monitoring / OIDC 等）
+5. `cd infra/envs/dev` で `terraform output gha_infra_role_arn` / `gha_backend_role_arn` を控える
 6. GitHub Secrets を登録する（リージョンは workflow 既定 `ap-northeast-1`。Secret 不要）:
 
    ```bash

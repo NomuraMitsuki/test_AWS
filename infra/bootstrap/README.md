@@ -26,4 +26,4 @@ bucket         = "<bucket_name の出力>"
 dynamodb_table = "<dynamodb_table_name の出力>"
 ```
 
-続けて本体の init / apply は認証手順書の §C 以降を参照。
+続けて本体の init / apply は認証手順書の [§D（作業順序）](../../docs/infra/aws-auth-bootstrap.md) と [§B（`tf-dev.sh`）](../../docs/infra/aws-auth-bootstrap.md) を参照。
