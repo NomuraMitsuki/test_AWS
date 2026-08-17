@@ -1,13 +1,22 @@
 # Infra (Terraform)
 
-`infra/envs/dev` が合成ルート。モジュールは `infra/modules/*`。
+`infra/envs/dev` が合成ルート。モジュールは `infra/modules/*`。state 用バケットは `infra/bootstrap`（本体とは独立。**destroy しない**）。
 
 ## AWS 認証（初回必須）
 
 手順の詳細: [docs/infra/aws-auth-bootstrap.md](../docs/infra/aws-auth-bootstrap.md)
 
+**Cloud Agent では apply しない。** 次はユーザーの Mac で bootstrap → `backend.hcl` コミット → 本体 apply → Secrets。
+
 ```bash
-# 推奨: aws login（必要時）+ export-credentials + terraform を一括
+# 1) state 用 S3 / DynamoDB（tf-dev.sh は使わない）
+cd infra/bootstrap
+eval "$(aws configure export-credentials --format env)"  # aws login 利用時
+terraform init
+terraform apply
+# 出力を infra/envs/dev/backend.hcl に書いてコミット
+
+# 2) 本体（推奨: aws login + export-credentials + terraform を一括）
 ./infra/scripts/tf-dev.sh auth
 ./infra/scripts/tf-dev.sh plan
 ./infra/scripts/tf-dev.sh apply   # 再 plan のあと [y/N]（課金リソースに注意）
@@ -16,27 +25,33 @@
 ./infra/scripts/check-aws-auth.sh
 ```
 
-`aws login` だけだと Terraform が資格情報を拾えないことがある。`tf-dev.sh` は `aws configure export-credentials` を挟んで回避する。`apply` は保存済み plan を使うため Terraform 標準の yes/no は出ず、スクリプトが `[y/N]` を聞く。
+`aws login` だけだと Terraform が資格情報を拾えないことがある。`tf-dev.sh` は `aws configure export-credentials` を挟んで回避する。`apply` は保存済み plan を使うため Terraform 標準の yes/no は出ず、スクリプトが `[y/N]` を聞く。`tf-dev.sh` は **本体専用**（bootstrap 非対象）。init は `-backend-config=backend.hcl` を使う。
 
-OIDC ロールは初回 apply 後に初めて作られるため、**最初の plan/apply はローカル等の一時資格情報**で行う（state はローカルのままなので、永続環境で apply するか先にリモート state 化する。詳細は認証手順）。成功後に次を GitHub Secrets へ登録する:
+OIDC ロールは本体の初回 apply 後に初めて作られる。成功後に次を GitHub Secrets へ登録する（エージェントは `gh secret set` しない）:
 
 - `AWS_ROLE_ARN_INFRA` ← `terraform output gha_infra_role_arn`
 - `AWS_ROLE_ARN_BACKEND` ← `terraform output gha_backend_role_arn`
 
+Repository Environment `dev` は **reviewers 必須**。
+
 ## ローカル検証
 
 ```bash
-# 一括（推奨）
-./infra/scripts/tf-dev.sh plan
+# bootstrap（apply は Mac。validate はローカル可）
+cd infra/bootstrap
+terraform fmt -check
+terraform init -backend=false
+terraform validate
 
-# または手動
+# 本体
 cd infra/envs/dev
 cp terraform.tfvars.example terraform.tfvars   # 必要なら編集
-eval "$(aws configure export-credentials --format env)"   # aws login 利用時
-terraform init
-terraform fmt -recursive ../..
+terraform fmt -check -recursive ../..
+terraform init -backend=false
 terraform validate
-terraform plan
+
+# 資格情報付き plan（backend.hcl に実名を書いたあと）
+./infra/scripts/tf-dev.sh plan
 ```
 
 ## モジュール

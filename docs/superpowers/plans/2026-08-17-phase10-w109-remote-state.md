@@ -43,8 +43,8 @@ infra/README.md
 - Create: `infra/bootstrap/outputs.tf` — bucket_name, dynamodb_table_name
 - Create: `infra/bootstrap/README.md` — init/apply、destroy しない、出力を backend.hcl へ
 
-- [ ] `cd infra/bootstrap && terraform fmt && terraform init -backend=false && terraform validate`
-- [ ] Commit: `feat(infra): add tfstate S3 and DynamoDB bootstrap (W-109)`
+- [x] `cd infra/bootstrap && terraform fmt && terraform init -backend=false && terraform validate`
+- [x] Commit: `feat(infra): add tfstate S3 and DynamoDB bootstrap (W-109)`
 
 ---
 
@@ -70,8 +70,8 @@ dynamodb_table = "attendance-tfstate-lock-dev"
 
 - Modify: `infra/scripts/tf-dev.sh` — `init` 時に `-backend-config=backend.hcl` を使う（apply/plan がリモートを向く）。ファイルがプレースホルダのままでも、ユーザーが実名に差し替えるまで Mac apply は失敗してよい。スクリプト先頭コメントで bootstrap 非対象と明記。
 
-- [ ] `cd infra/envs/dev && terraform init -backend=false && terraform validate`
-- [ ] Commit: `feat(infra): enable S3 backend config for envs/dev (W-109)`
+- [x] `cd infra/envs/dev && terraform init -backend=false && terraform validate`
+- [x] Commit: `feat(infra): enable S3 backend config for envs/dev (W-109)`
 
 ---
 
@@ -86,7 +86,7 @@ dynamodb_table = "attendance-tfstate-lock-dev"
 - apply: Secret 空なら skip。あり: `environment: dev` → OIDC → 同上 init（`-backend=false` 削除）→ plan → apply
 - コメントを W-109 手順に更新
 
-- [ ] Commit: `ci: use remote terraform backend for plan and apply (W-109)`
+- [x] Commit: `ci: use remote terraform backend for plan and apply (W-109)`
 
 ---
 
@@ -99,8 +99,8 @@ dynamodb_table = "attendance-tfstate-lock-dev"
 - Update: `infra/README.md`、`docs/handoff.md`（次はユーザー Mac apply）
 - Do not set WBS ステータス完了（親）。メモの食い違いだけ直してよいがステータスは触らない方が安全 → **wbs.md は触らない**
 
-- [ ] Commit: `docs: rewrite W-109 remote state and Secrets procedure`
-- [ ] Push `cursor/w109-remote-state-a099`
+- [x] Commit: `docs: rewrite W-109 remote state and Secrets procedure`
+- [x] Push `cursor/w109-remote-state-a099`
 
 ---
 
