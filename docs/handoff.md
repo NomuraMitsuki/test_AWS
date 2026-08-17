@@ -1,16 +1,16 @@
 # ハンドオフ — 新スレッド引き継ぎ用
 
-最終更新: 2026-08-17（W-280 コード実装。次は Mac で apply / invoke）
+最終更新: 2026-08-17（W-280 PR #22 マージ済み。次は Mac で apply / invoke）
 
 ## 一言で
 
-AWS 学習用の勤怠管理アプリ。W-001〜270 と W-109 は `main`。本体 Terraform は Mac で apply 済み。**W-280 のリポジトリ側（migrate Lambda）は実装済み。** 次は Mac で再 apply → backend デプロイ待ち → invoke → 初回 admin。エージェントは apply / invoke をしない。
+AWS 学習用の勤怠管理アプリ。W-001〜270・W-109・**W-280 のコードは `main`。** 本体 Terraform は以前 Mac で apply 済み。次は migrate Lambda 追加の再 apply → backend デプロイ（psycopg）→ invoke → 初回 admin。エージェントは apply / invoke をしない。
 
 ## リポジトリ
 
 - GitHub: `NomuraMitsuki/test_AWS`（**private**）
-- 作業ブランチ: **`cursor/w280-migrate-admin-a099`**（W-280）
-- 直近マージ: PR #20（W-109）、`backend.hcl` 実名、PR #21（handoff）
+- 作業ブランチ: **`main`**
+- 直近マージ: PR #22（W-280 migrate Lambda / 初回 admin）
 
 ## 完了していること
 
@@ -31,8 +31,8 @@ AWS 学習用の勤怠管理アプリ。W-001〜270 と W-109 は `main`。本�
 
 ## 次にやること（優先順）
 
-1. **ユーザーの Mac（W-280 運用側）**: PR マージ後に `./infra/scripts/tf-dev.sh apply`（または `main` の infra push で CI apply）。`backend.yml` の UpdateFunctionCode（psycopg 同梱）が終わってから `./infra/scripts/invoke-migrate.sh` → Cognito admin → seed。手順は [aws-auth-bootstrap.md](infra/aws-auth-bootstrap.md) §E
-2. GitHub Secrets は **Repository secrets**（Settings → Secrets and variables → Actions）。Environment `dev` の secrets は空でよい
+1. **ユーザーの Mac（W-280 運用側）**: CI の OIDC は `AssumeRoleWithWebIdentity` で失敗している（PR plan も main の Backend deploy も）。関数作成は `./infra/scripts/tf-dev.sh apply`。続けて §E-0b で `psycopg` 入り zip を `update-function-code` してから `./infra/scripts/invoke-migrate.sh` → Cognito admin → seed。手順は [aws-auth-bootstrap.md](infra/aws-auth-bootstrap.md) §E
+2. GitHub Secrets は **Repository secrets** に入っている（OIDC 失敗は未登録ではなく ARN / 信頼ポリシーの切り分け）。Environment `dev` の secrets は空でよい
 3. そのあと: 実ログイン（`frontend/.env.local` + `npm run dev`）。Amplify 利用時は `cors_amplify_origin`
 
 ## フロント画面レビュー（デモモード）
