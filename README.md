@@ -38,6 +38,7 @@ Next.js + API Gateway + Lambda + Cognito + RDS + S3 による勤怠管理アプ�
 | Phase 10 設計（W-109 リモート state / Secrets） | [docs/superpowers/specs/2026-08-17-phase10-w109-remote-state-design.md](docs/superpowers/specs/2026-08-17-phase10-w109-remote-state-design.md) |
 | Phase 10 実装計画 | [docs/superpowers/plans/2026-08-17-phase10-w109-remote-state.md](docs/superpowers/plans/2026-08-17-phase10-w109-remote-state.md) |
 | Phase 11 設計（マイグレーション / 初回 admin） | [docs/superpowers/specs/2026-08-17-phase11-migrate-admin-design.md](docs/superpowers/specs/2026-08-17-phase11-migrate-admin-design.md) |
+| 本体立ち上げスクリプト（W-281） | [docs/superpowers/specs/2026-08-17-w281-standup-scripts-design.md](docs/superpowers/specs/2026-08-17-w281-standup-scripts-design.md) |
 | 作業一覧（WBS） | [docs/wbs.md](docs/wbs.md) |
 | ハンドオフ（新スレッド用） | [docs/handoff.md](docs/handoff.md) |
 
