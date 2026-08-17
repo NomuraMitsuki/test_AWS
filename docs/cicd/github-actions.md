@@ -4,7 +4,7 @@
 
 - AWS 認証は **OIDC**（アクセスキーを GitHub Secrets に置かない）
 - `main` ブランチが `dev` 環境の正
-- Terraform apply は `environment: dev` 保護ルールで **ジョブ開始前**に手動承認（**reviewers 必須**。承認後に plan → apply。plan を見てから承認する流れではない）
+- Terraform apply は `environment: dev` 保護ルールで **ジョブ開始前**に手動承認（**reviewers 必須**。承認後に plan → apply。plan を見てから承認する流れではない）。GitHub Free の private リポジトリでは Required reviewers が使えないことがあり、その場合は `main` の infra push で apply が自動実行される（本学習リポジトリは受容済み）
 - **品質ゲートは常に必須**。デプロイ／apply は Secret / Variable 未設定ならスキップ＋注記（workflow を赤にしない）。設定後の失敗はジョブ失敗とする（`continue-on-error` で握りつぶさない）
 - job-level `if` では `secrets` コンテキストが使えないため、デプロイ系は gate ジョブで Secret 有無を `outputs` に渡し、後続ジョブを分岐する
 
@@ -15,7 +15,7 @@
 | トリガー | 現状（W-109） |
 |----------|----------------|
 | PR（`infra/**`） | `fmt` / `validate` 必須（`terraform init -backend=false`）。**plan-gate**: `AWS_ROLE_ARN_INFRA` が空なら plan をスキップ＋注記。Secret ありなら OIDC → `terraform init -backend-config=backend.hcl` → plan（失敗はジョブ失敗） |
-| push to `main`（`infra/**`） | fmt + validate 必須。`AWS_ROLE_ARN_INFRA` があれば `environment: dev`（**reviewers 必須**）→ OIDC → 同上 init → plan → apply。未設定はスキップ＋注記 |
+| push to `main`（`infra/**`） | fmt + validate 必須。`AWS_ROLE_ARN_INFRA` があれば `environment: dev` → OIDC → 同上 init → plan → apply。Required reviewers は付けられるプランなら必須。本リポジトリ（private + Free）は未設定のため apply は自動。Secret 未設定はスキップ＋注記 |
 
 権限: `github_oidc` モジュールが発行する `attendance-dev-gha-infra` ロール（必要最小の Terraform 権限へ後で絞る）。
 
@@ -63,7 +63,7 @@ feature/*  →  PR  →  main (dev)
 
 1. **Mac** で `infra/bootstrap` を apply し、`backend.hcl` をコミットしたうえで `infra/envs/dev` を apply する（手順: [docs/infra/aws-auth-bootstrap.md](../infra/aws-auth-bootstrap.md)）。Cloud Agent では apply しない
 2. IAM ロールの信頼ポリシーで `repo:ORG/REPO:*` または `ref:refs/heads/main` に制限（モジュール既定）
-3. Repository Environments: `dev` — apply ジョブで使用。**reviewers 必須**（学習用 1 人可）
+3. Repository Environments: `dev` — apply ジョブで使用。Required reviewers は付けられるプランなら必須（学習用 1 人可）。GitHub Free の private では使えないことがあり、本リポジトリは未設定（`main` の infra push で apply が自動）
 4. Secrets / Variables（**実登録はユーザーの Mac**。エージェントは `gh secret set` しない）:
    - Secret `AWS_ROLE_ARN_INFRA`（`terraform output gha_infra_role_arn`）— infra plan/apply および任意の Amplify `start-job`
    - Secret `AWS_ROLE_ARN_BACKEND`（`terraform output gha_backend_role_arn`）— Lambda 更新

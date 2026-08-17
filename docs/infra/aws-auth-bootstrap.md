@@ -2,7 +2,7 @@
 
 リモート Terraform state（S3 + DynamoDB）を用意し、本体スタックを Mac で apply したあと、OIDC ロール ARN を GitHub Secrets に登録するまでの手順。
 
-**エージェント（Cloud Agent）は `terraform apply` / `terraform destroy` / `gh secret set` を実行しない。** エフェメラル環境で state を失うため、apply と Secrets 登録は **ユーザーの Mac** で行う。
+**エージェント（Cloud Agent）は `terraform apply` / `terraform destroy` / `gh secret set` / Lambda invoke を実行しない。** エフェメラル環境で state を失うため、apply・Secrets 登録・migrate invoke は **ユーザーの Mac** で行う。
 
 ## 前提
 
@@ -127,17 +127,16 @@ dynamodb_table = "attendance-tfstate-lock-dev"
    ```
 
    コンソールなら Settings → Secrets and variables → Actions に同名で貼る。
-7. Repository Environment `dev` に **reviewers を必須**（学習用 1 人可）。`main` push の apply が NAT / RDS を自動作成しないため
+7. Repository Environment `dev` に **reviewers を必須**（学習用 1 人可）。GitHub Free の **private** リポジトリでは Required reviewers が使えないことがある。その場合は未設定のまま進めてよい（`main` の infra push で apply が自動実行される）
 8. Amplify を接続した場合: `amplify_default_branch_url` を `cors_amplify_origin` に入れて再 apply（循環回避は現状どおり）
 
 CI の動きは [docs/cicd/github-actions.md](../cicd/github-actions.md)。validate は `init -backend=false` のまま必須。PR plan / main apply は Secret があるときだけ OIDC + `init -backend-config=backend.hcl`。
 
 ## E. apply 後の残作業（短く）
 
-本体 apply が終わったら、アプリを動かすために次を行う（詳細は各設計資料）:
+本体 apply が終わったら、アプリを動かすために次を行う:
 
-- **初回 admin:** Cognito コンソールまたは `AdminCreateUser` で管理者を招待し、仮パスワードでログインする
-- **migrations:** RDS に `backend/migrations/001`〜`003` を適用する（プライベートサブネットのため、踏み台または一時的な接続手段が必要）
+- **migrations + 初回 admin:** RDS はプライベートのため Mac から直接 `psql` できない。W-280 で migrate Lambda を手動 invoke する（[Phase 11 スペック](../superpowers/specs/2026-08-17-phase11-migrate-admin-design.md)）。Cognito の最初の admin も同作業
 - Amplify の default branch URL が分かったら `cors_amplify_origin` を更新して再 apply（§D の 8）
 
 ## F. 権限の目安（初回ローカル用）

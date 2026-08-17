@@ -75,10 +75,10 @@ Browser
 アプリの `POST /users`（招待）は JWT 付き admin が前提のため、**最初の1人は手動で作る**。
 
 1. AWS コンソールまたは CLI で Cognito User Pool にユーザーを作成し、グループ `admin` に追加する（仮パスワード発行）
-2. RDS の `users` に同じメール／`cognito_sub`／`role=admin`／`status=active` の行を挿入する（マイグレーション直後のシード SQL または運用スクリプト）
+2. RDS の `users` に同じメール／`cognito_sub`／`role=admin`／`status=active` の行を挿入する（マイグレーション直後。到達手段は [Phase 11](2026-08-17-phase11-migrate-admin-design.md) の migrate Lambda invoke）
 3. その admin でログインし、以降のユーザーはアプリの招待画面から作成する
 
-Terraform での完全自動シードは学習コストを上げるため必須としない。手順書として本節と要件定義を正とする。
+Terraform での完全自動シードは学習コストを上げるため必須としない。Cognito 側の手順は本節と要件定義、RDS 到達は Phase 11 / [aws-auth-bootstrap.md](../../infra/aws-auth-bootstrap.md) §E を正とする。
 
 ### 4.5 RDS PostgreSQL
 
@@ -136,6 +136,7 @@ frontend/       # Next.js 14
 9. CI/CD 完成 — [Phase 8 スペック](2026-08-07-phase8-cicd-workflows-design.md)（W-260）
 10. 監視仕上げ — [Phase 9 スペック](2026-08-10-phase9-monitoring-polish-design.md)（W-270）
 11. リモート state / Secrets / CI plan — [Phase 10 スペック](2026-08-17-phase10-w109-remote-state-design.md)（W-109）
+12. RDS マイグレーション / 初回 admin — [Phase 11 スペック](2026-08-17-phase11-migrate-admin-design.md)（W-280）
 
 ## 9. 関連ドキュメント
 
@@ -156,3 +157,4 @@ frontend/       # Next.js 14
 - [Phase 8 CI/CD ワークフロー設計](2026-08-07-phase8-cicd-workflows-design.md)
 - [Phase 9 監視仕上げ設計](2026-08-10-phase9-monitoring-polish-design.md)
 - [Phase 10 リモート state / W-109 設計](2026-08-17-phase10-w109-remote-state-design.md)
+- [Phase 11 マイグレーション / 初回 admin 設計](2026-08-17-phase11-migrate-admin-design.md)
