@@ -16,7 +16,11 @@ terraform init
 terraform apply
 # 出力を infra/envs/dev/backend.hcl に書いてコミット
 
-# 2) 本体（推奨: aws login + export-credentials + terraform を一括）
+# 2) 本体の再立ち上げ / 停止（推奨）
+./infra/scripts/tf-dev.sh up --admin-email you@example.com
+./infra/scripts/tf-dev.sh down   # 本体のみ。bootstrap は消さない
+
+# 認証・plan・apply だけ使う場合
 ./infra/scripts/tf-dev.sh auth
 ./infra/scripts/tf-dev.sh plan
 ./infra/scripts/tf-dev.sh apply   # 再 plan のあと [y/N]（課金リソースに注意）
@@ -25,9 +29,9 @@ terraform apply
 ./infra/scripts/check-aws-auth.sh
 ```
 
-`aws login` だけだと Terraform が資格情報を拾えないことがある。`tf-dev.sh` は `aws configure export-credentials` を挟んで回避する。`apply` は保存済み plan を使うため Terraform 標準の yes/no は出ず、スクリプトが `[y/N]` を聞く。`tf-dev.sh` は **本体専用**（bootstrap 非対象）。init は `-backend-config=backend.hcl` を使う。
+`aws login` だけだと Terraform が資格情報を拾えないことがある。`tf-dev.sh` は `aws configure export-credentials` を挟んで回避する。`apply` / `up` は保存済み plan を使うため Terraform 標準の yes/no は出ず、スクリプトが `[y/N]` を聞く。`down` も destroy 前に `[y/N]`。`tf-dev.sh` は **本体専用**（bootstrap 非対象）。init は `-backend-config=backend.hcl` を使う。
 
-apply 後の RDS マイグレーションと初回 admin は、`backend.yml` の UpdateFunctionCode（`psycopg` 同梱）が終わってから `./infra/scripts/invoke-migrate.sh`（**apply はしない**）。手順の正本: [docs/infra/aws-auth-bootstrap.md](../docs/infra/aws-auth-bootstrap.md) §E。
+`up` は apply のあと `package-migrate.sh`（Linux / Python 3.12 wheel）→ `invoke-migrate.sh` → 任意で Cognito admin / seed → `frontend/.env.local`。手順の正本: [docs/infra/aws-auth-bootstrap.md](../docs/infra/aws-auth-bootstrap.md)。手作業の内訳は同文書 §E。
 
 OIDC ロールは本体の初回 apply 後に初めて作られる。成功後に次を GitHub Secrets へ登録する（エージェントは `gh secret set` しない）:
 
@@ -72,6 +76,8 @@ terraform validate
 | amplify | Amplify Hosting（Next.js / `frontend`）。Cognito・API URL を環境変数で渡す。GitHub トークンは sensitive（空でも validate 可） |
 
 ## フロント（ローカル）
+
+`./infra/scripts/tf-dev.sh up` は `frontend/.env.local` を terraform output から書く。手作業なら:
 
 ```bash
 cd frontend

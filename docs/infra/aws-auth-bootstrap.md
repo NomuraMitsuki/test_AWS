@@ -18,6 +18,23 @@
 
 W-108 時点のリソースは destroy 済みのため、**本体 Terraform state の移行（`terraform init -migrate-state`）は不要**（新規 apply）。バケットをコンソールで手作りしない。RDS の SQL 適用は §E の migrate Lambda。
 
+## 立ち上げ / 停止（推奨）
+
+bootstrap（§C）と `backend.hcl` が済んでいれば、destroy した本体の再 apply からローカルログインまで次で足りる。**エージェントは実行しない。** 中身は §E（apply → Linux zip → SQL → 任意で admin → `frontend/.env.local`）。
+
+```bash
+# リポジトリルート
+./infra/scripts/tf-dev.sh up --admin-email you@example.com
+# 停止（本体のみ。bootstrap は消さない）
+./infra/scripts/tf-dev.sh down
+```
+
+`up` は課金リソース作成前に `[y/N]`。`down` は destroy 前に `[y/N]`。**`down` は `infra/envs/dev` のみ**（`infra/bootstrap` では絶対に destroy しない）。
+
+`--admin-email` を省略すると Cognito / seed はスキップし、migrate と `frontend/.env.local` までは行う。指定した場合、Cognito に既存ユーザーがいれば作成はスキップしてグループ `admin` と seed だけ行う（再 `up` してよい）。新規作成時の仮パスワードは生成して **標準出力にだけ**出す（コミットしない。既存ユーザーでは出さない）。`--admin-name` 省略時は `Admin`。
+
+`auth` / `plan` / `apply` だけ使う場合は §B。手作業の内訳は §E。
+
 ## A. 初回 apply 用の資格情報
 
 次のいずれかでよい（長期キーをリポジトリに置かない）。**Cloud Agent に資格情報を渡して apply しない。**
@@ -68,7 +85,7 @@ eval "$(aws configure export-credentials --format env)"
 
 ## B. 一括スクリプト（本体専用）
 
-`./infra/scripts/tf-dev.sh` は **`infra/envs/dev` 専用**。`infra/bootstrap` には使わない。
+`./infra/scripts/tf-dev.sh` は **`infra/envs/dev` 専用**。`infra/bootstrap` には使わない。再立ち上げ / 停止は冒頭の `up` / `down` を推奨。
 
 リポジトリルートから（`backend.hcl` に bootstrap 出力の実名を書いたあと）:
 
@@ -76,9 +93,11 @@ eval "$(aws configure export-credentials --format env)"
 ./infra/scripts/tf-dev.sh auth    # login（必要時）+ export-credentials + 確認
 ./infra/scripts/tf-dev.sh plan    # 上記のあと terraform init -backend-config=backend.hcl / plan -out=tfplan
 ./infra/scripts/tf-dev.sh apply   # 内部で plan し直し → [y/N] 確認 → apply
+./infra/scripts/tf-dev.sh up --admin-email you@example.com
+./infra/scripts/tf-dev.sh down    # 本体のみ destroy。[y/N]。bootstrap は消さない
 ```
 
-`apply` は単体で完結する（直前の `plan` サブコマンドは必須ではない。付けると plan が二重になる）。保存済み plan への `terraform apply tfplan` には Terraform 標準の yes/no が出ないため、スクリプト側で `[y/N]` を聞く。
+`apply` は単体で完結する（直前の `plan` サブコマンドは必須ではない。付けると plan が二重になる）。保存済み plan への `terraform apply tfplan` には Terraform 標準の yes/no が出ないため、スクリプト側で `[y/N]` を聞く。`up` は同じ確認のあと `package-migrate.sh` → `invoke-migrate.sh` → 任意で admin → `frontend/.env.local`。
 
 AWS CLI の疎通確認だけなら:
 
@@ -116,7 +135,7 @@ dynamodb_table = "attendance-tfstate-lock-dev"
 1. `cd infra/bootstrap` → `terraform init` → `terraform apply`（S3 + DynamoDB。この state はローカルでよい。**destroy しない**）
 2. 出力の bucket / table 名を `infra/envs/dev/backend.hcl` に書き **コミットする**
 3. `cd infra/envs/dev` → `terraform init -backend-config=backend.hcl`（backend 接続の確認）
-4. リポジトリルートに戻り `./infra/scripts/tf-dev.sh apply`（本体。RDS / Cognito / API / monitoring / OIDC 等）
+4. リポジトリルートに戻り `./infra/scripts/tf-dev.sh apply`（本体。RDS / Cognito / API / monitoring / OIDC 等）。migrate / 初回 admin / `.env.local` までまとめるなら `./infra/scripts/tf-dev.sh up --admin-email you@example.com`
 5. `cd infra/envs/dev` で `terraform output gha_infra_role_arn` / `gha_backend_role_arn` を控える
 6. GitHub Secrets を登録する（リージョンは workflow 既定 `ap-northeast-1`。Secret 不要）:
 
@@ -134,6 +153,8 @@ CI の動きは [docs/cicd/github-actions.md](../cicd/github-actions.md)。valid
 
 ## E. apply 後: マイグレーションと初回 admin（W-280）
 
+通常は冒頭の `./infra/scripts/tf-dev.sh up --admin-email ...` がこの節をまとめて実行する。以下は内訳・手作業用。
+
 RDS はプライベートのため Mac から直接 `psql` できない。**migrate Lambda を手動 invoke** する（HTTP API には公開しない）。エージェントは invoke しない。
 
 前提: 関数 `attendance-dev-migrate` があり、zip に `psycopg` と `backend/migrations/*.sql` が入っていること。
@@ -142,24 +163,23 @@ Terraform の zip はソース + SQL のみ（`psycopg` なし）。`backend.yml
 
 ### E-0. migrate Lambda を apply する
 
+ローカルが `main` の W-280 以降であること。`Function not found: attendance-dev-migrate` は、apply 時点で migrate のコードが無かったときに出る。
+
 ```bash
+git pull origin main
 ./infra/scripts/tf-dev.sh apply
+aws lambda get-function --function-name attendance-dev-migrate --query 'Configuration.FunctionName'
 ```
 
 ### E-0b. zip に `psycopg` を同梱する（CI が使えないとき）
 
+Mac の `pip install -t` だと macos / cp310 の wheel になり、Lambda（Python 3.12 / Amazon Linux x86_64）では動かない。次を使う:
+
 ```bash
-eval "$(aws configure export-credentials --format env)"
-WORK="$(mktemp -d)"
-python3 -m pip install -r backend/migrate/requirements.txt -t "$WORK"
-cp backend/migrate/*.py "$WORK/"
-mkdir -p "$WORK/migrations"
-cp backend/migrations/*.sql "$WORK/migrations/"
-(cd "$WORK" && zip -qr /tmp/migrate.zip .)
-aws lambda update-function-code \
-  --function-name attendance-dev-migrate \
-  --zip-file fileb:///tmp/migrate.zip
+./infra/scripts/package-migrate.sh
 ```
+
+中身は `pip install --platform manylinux2014_x86_64 --python-version 3.12 --only-binary=:all:` のあと `update-function-code`。apply はしない。
 
 認証は本体と同じ（`./infra/scripts/tf-dev.sh auth` または次）:
 
@@ -191,7 +211,7 @@ cat /tmp/migrate-out.json
 ```bash
 cd infra/envs/dev
 POOL_ID="$(terraform output -raw cognito_user_pool_id)"
-# 仮パスワードは Cognito のポリシー（大文字・小文字・数字・記号）を満たすこと。コミットしない。
+# 仮パスワードは Cognito のポリシー（最低 8・大文字・小文字・数字。記号は任意）を満たすこと。コミットしない。
 aws cognito-idp admin-create-user \
   --user-pool-id "$POOL_ID" \
   --username "admin@example.com" \
@@ -233,7 +253,7 @@ cat /tmp/seed-admin-out.json
 
 ### E-4. ログイン確認
 
-フロントは `frontend/.env.example` を `.env.local` にして `npm run dev`。Amplify を使う場合は `amplify_default_branch_url` を `cors_amplify_origin` に入れて再 apply（§D の 8）。
+`up` は `frontend/.env.local` を terraform output（region / user pool / client / API）から書く（gitignore 済み。既存があっても上書きしてよい）。手作業なら `frontend/.env.example` を `.env.local` にして同じ値を入れる。続けて `cd frontend && npm run dev`（`http://localhost:3000`）。Amplify を使う場合は `amplify_default_branch_url` を `cors_amplify_origin` に入れて再 apply（§D の 8）。
 
 ## F. 権限の目安（初回ローカル用）
 
@@ -250,6 +270,8 @@ cat /tmp/seed-admin-out.json
 |------|------|
 | `Unable to locate credentials` | `AWS_PROFILE` / 環境変数 / `aws sts get-caller-identity` |
 | CLI の sts は通るが Terraform だけ失敗 | `aws login` 利用時は `export-credentials` が必要。本体は `./infra/scripts/tf-dev.sh plan` を使う |
+| `Function not found: attendance-dev-migrate` | W-280 のコードを `git pull` してから `tf-dev.sh apply`（または `up`） |
+| Lambda で `psycopg` / 共有ライブラリエラー | Mac 用 pip wheel を載せた。`./infra/scripts/package-migrate.sh`（manylinux / Python 3.12） |
 | `aws login` 後も sts 失敗 / `ExpiredToken` | 期限切れの `AWS_ACCESS_KEY_ID` 等がシェルに残っていると、login より優先される。`unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_SECURITY_TOKEN` のあと、本体は `tf-dev.sh`、bootstrap / invoke はあらためて `eval "$(aws configure export-credentials --format env)"` |
 | `backend.hcl` の bucket が見つからない | bootstrap apply 済みか、出力を `backend.hcl` に書いてコミットしたか |
 | OIDC plan がスキップ | Secrets に `AWS_ROLE_ARN_INFRA` があるか（空なら skip-note。validate は必須） |
