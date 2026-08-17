@@ -70,7 +70,7 @@
 | W-250 | Next.js フロント + Amplify | 完了 | PR #14。apply なし（lint / next build / terraform validate）。実装は implementation-worker。Amplify Actions デプロイは W-260 |
 | W-260 | GitHub Actions（backend / frontend）完成 | 完了 | PR #15。backend.yml / frontend start-job / infra apply 骨格。Secrets 実登録は W-109。実装は implementation-worker |
 | W-270 | CloudWatch ダッシュボード・アラーム仕上げ | 完了 | PR #18。apply なし（terraform validate）。実装は implementation-worker。[設計](superpowers/specs/2026-08-10-phase9-monitoring-polish-design.md) |
-| W-280 | RDS マイグレーション実行と初回 admin | 未着手 | プライベート RDS へ `001`〜`003` を流し、Cognito + `users` の最初の admin を作る。踏み台 EC2 は使わず migrate Lambda を手動 invoke。[設計](superpowers/specs/2026-08-17-phase11-migrate-admin-design.md) |
+| W-280 | RDS マイグレーション実行と初回 admin | コード完了 | リポジトリ側は PR #22（migrate Lambda / invoke 手順 / 初回 admin CLI）。運用側は未実施: Mac で再 apply → backend.yml の UpdateFunctionCode（psycopg 同梱）待ち → invoke → Cognito admin → seed。[設計](superpowers/specs/2026-08-17-phase11-migrate-admin-design.md) |
 
 ---
 

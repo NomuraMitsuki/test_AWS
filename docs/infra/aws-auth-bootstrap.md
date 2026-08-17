@@ -16,7 +16,7 @@
 
 **State:** 本体（`infra/envs/dev`）は S3 backend。バケットとロックテーブルは独立した `infra/bootstrap` が作る（bootstrap の state はローカルでよい。**destroy しない**）。`./infra/scripts/tf-dev.sh` は **本体専用** で、bootstrap には使わない。
 
-W-108 時点のリソースは destroy 済みのため、**本体 state の migrate は不要**（新規 apply）。バケットをコンソールで手作りしない。
+W-108 時点のリソースは destroy 済みのため、**本体 Terraform state の移行（`terraform init -migrate-state`）は不要**（新規 apply）。バケットをコンソールで手作りしない。RDS の SQL 適用は §E の migrate Lambda。
 
 ## A. 初回 apply 用の資格情報
 
@@ -126,7 +126,7 @@ dynamodb_table = "attendance-tfstate-lock-dev"
    gh secret set AWS_ROLE_ARN_BACKEND --body "$(terraform output -raw gha_backend_role_arn)"
    ```
 
-   コンソールなら Settings → Secrets and variables → Actions に同名で貼る。
+   コンソールなら Settings → Secrets and variables → Actions（**Repository secrets**）に同名で貼る。Environment `dev` の secrets は空でよい（plan / backend deploy は Environment を使わない）。
 7. Repository Environment `dev` に **reviewers を必須**（学習用 1 人可）。GitHub Free の **private** リポジトリでは Required reviewers が使えないことがある。その場合は未設定のまま進めてよい（`main` の infra push で apply が自動実行される）
 8. Amplify を接続した場合: `amplify_default_branch_url` を `cors_amplify_origin` に入れて再 apply（循環回避は現状どおり）
 

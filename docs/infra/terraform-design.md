@@ -78,7 +78,7 @@ infra/
 
 1. `infra/bootstrap`（state 用 S3 / DynamoDB）。出力を `envs/dev/backend.hcl` へ
 2. `network` → `cognito` → `data` → `storage`
-3. `api`（health / attendance / leave / users / exports / migrate を zip。migrate の zip には `backend/migrations/*.sql` を同梱。HTTP ルートは migrate 以外）
+3. `api`（health / attendance / leave / users / exports / migrate を zip。migrate の Terraform zip はソース + SQL。`psycopg` は `backend.yml` の UpdateFunctionCode で同梱。HTTP ルートは migrate 以外）
 4. `monitoring`（api / data の出力に依存。ダッシュボードは Lambda×5、migrate は Errors アラームのみ）/ `github_oidc`
 5. `amplify`（Hosting）。API CORS の localhost は `cors_allow_localhost`。Amplify オリジンは apply 後に `cors_amplify_origin` へ反映（`api`↔`amplify` 循環回避）
 

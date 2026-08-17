@@ -26,7 +26,7 @@
 | トリガー | 現状（実装・W-260） | 目標（Secrets 登録後） |
 |----------|---------------------|-------------------|
 | PR（`backend/**`） | Python 3.12、`compileall` + `pytest`（必須） | 同左 |
-| push to `main`（`backend/**`） | 同上＋ `AWS_ROLE_ARN_BACKEND` があれば zip → `lambda:UpdateFunctionCode`（health / attendance / leave / users / exports / migrate）。migrate の zip には `backend/migrations/*.sql` を同梱。未設定はスキップ＋注記 | Secrets 登録後に実デプロイ |
+| push to `main`（`backend/**`） | 同上＋ `AWS_ROLE_ARN_BACKEND` があれば zip → `lambda:UpdateFunctionCode`（health / attendance / leave / users / exports / migrate）。migrate の zip には `requirements.txt` の `psycopg` と `backend/migrations/*.sql` を同梱。未設定はスキップ＋注記 | Secrets 登録後に実デプロイ |
 
 権限: 対象 Lambda の更新と、必要なら S3 アーティファクトへの書込。
 
@@ -65,7 +65,7 @@ feature/*  →  PR  →  main (dev)
 1. **Mac** で `infra/bootstrap` を apply し、`backend.hcl` をコミットしたうえで `infra/envs/dev` を apply する（手順: [docs/infra/aws-auth-bootstrap.md](../infra/aws-auth-bootstrap.md)）。Cloud Agent では apply しない
 2. IAM ロールの信頼ポリシーで `repo:ORG/REPO:*` または `ref:refs/heads/main` に制限（モジュール既定）
 3. Repository Environments: `dev` — apply ジョブで使用。Required reviewers は付けられるプランなら必須（学習用 1 人可）。GitHub Free の private では使えないことがあり、本リポジトリは未設定（`main` の infra push で apply が自動）
-4. Secrets / Variables（**実登録はユーザーの Mac**。エージェントは `gh secret set` しない）:
+4. Secrets / Variables（**実登録はユーザー**。エージェントは `gh secret set` しない）。**Repository secrets**（Settings → Secrets and variables → Actions）に置く。Environment `dev` の secrets は空でよい（`backend.yml` は Environment を使わないため、Environment secrets だけだと Lambda 更新がスキップされる）:
    - Secret `AWS_ROLE_ARN_INFRA`（`terraform output gha_infra_role_arn`）— infra plan/apply および任意の Amplify `start-job`
    - Secret `AWS_ROLE_ARN_BACKEND`（`terraform output gha_backend_role_arn`）— Lambda 更新
    - リージョンは workflow 既定 `ap-northeast-1`（Secret 不要）
