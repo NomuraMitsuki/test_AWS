@@ -1,7 +1,7 @@
 # Phase 11 — RDS マイグレーションと初回 admin（W-280）
 
 **日付**: 2026-08-17  
-**ステータス**: Proposed（OK で実装。エージェントは apply / Lambda invoke しない）  
+**ステータス**: Approved（エージェントは apply / Lambda invoke しない）  
 **WBS**: W-280  
 **親スペック**: [2026-08-05-attendance-aws-design.md](2026-08-05-attendance-aws-design.md) §4.4.1 / §4.5  
 **手順正本（運用）**: [docs/infra/aws-auth-bootstrap.md](../../infra/aws-auth-bootstrap.md) §E
