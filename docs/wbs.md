@@ -70,8 +70,8 @@
 | W-250 | Next.js フロント + Amplify | 完了 | PR #14。apply なし（lint / next build / terraform validate）。実装は implementation-worker。Amplify Actions デプロイは W-260 |
 | W-260 | GitHub Actions（backend / frontend）完成 | 完了 | PR #15。backend.yml / frontend start-job / infra apply 骨格。Secrets 実登録は W-109。実装は implementation-worker |
 | W-270 | CloudWatch ダッシュボード・アラーム仕上げ | 完了 | PR #18。apply なし（terraform validate）。実装は implementation-worker。[設計](superpowers/specs/2026-08-10-phase9-monitoring-polish-design.md) |
-| W-280 | RDS マイグレーション実行と初回 admin | コード完了 | リポジトリ側は PR #22 マージ済み。運用側は未実施。CI OIDC 失敗のため関数作成は Mac の `tf-dev.sh apply`、`psycopg` 同梱は §E-0b のローカル zip。その後 invoke → Cognito admin → seed。[設計](superpowers/specs/2026-08-17-phase11-migrate-admin-design.md) |
-| W-281 | 本体の立ち上げ / 停止を少数コマンド化 | 進行中 | `tf-dev.sh up` / `down`。apply + migrate zip + SQL + 初回 admin + `.env.local`。bootstrap は destroy しない。[設計](superpowers/specs/2026-08-17-w281-standup-scripts-design.md) |
+| W-280 | RDS マイグレーション実行と初回 admin | コード完了 | リポジトリ側は PR #22 マージ済み。運用の正は W-281 の `tf-dev.sh up`（apply + Linux zip + SQL + 任意 admin + `.env.local`）。手作業の内訳は [aws-auth-bootstrap.md](infra/aws-auth-bootstrap.md) §E。[設計](superpowers/specs/2026-08-17-phase11-migrate-admin-design.md) |
+| W-281 | 本体の立ち上げ / 停止を少数コマンド化 | コード完了 | `tf-dev.sh up` / `down`。apply + migrate zip + SQL + 初回 admin + `.env.local`。bootstrap は destroy しない。エージェントは実行しない。[設計](superpowers/specs/2026-08-17-w281-standup-scripts-design.md) |
 
 ---
 

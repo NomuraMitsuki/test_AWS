@@ -31,7 +31,7 @@ bootstrap（§C）と `backend.hcl` が済んでいれば、destroy した本体
 
 `up` は課金リソース作成前に `[y/N]`。`down` は destroy 前に `[y/N]`。**`down` は `infra/envs/dev` のみ**（`infra/bootstrap` では絶対に destroy しない）。
 
-`--admin-email` を省略すると Cognito / seed はスキップし、migrate と `frontend/.env.local` までは行う。仮パスワードは生成して **標準出力にだけ**出す（コミットしない）。`--admin-name` 省略時は `Admin`。
+`--admin-email` を省略すると Cognito / seed はスキップし、migrate と `frontend/.env.local` までは行う。指定した場合、Cognito に既存ユーザーがいれば作成はスキップしてグループ `admin` と seed だけ行う（再 `up` してよい）。新規作成時の仮パスワードは生成して **標準出力にだけ**出す（コミットしない。既存ユーザーでは出さない）。`--admin-name` 省略時は `Admin`。
 
 `auth` / `plan` / `apply` だけ使う場合は §B。手作業の内訳は §E。
 

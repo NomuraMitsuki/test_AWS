@@ -30,9 +30,9 @@ destroy した本体スタックを、Mac から **数コマンド**で再 apply
 
 1. 期限切れ `AWS_*` を捨て、login + `export-credentials`（既存 `tf-dev.sh`）
 2. `terraform apply`（本体。既存 apply と同じ確認）
-3. `package-migrate.sh`（Linux / Python 3.12 wheel + UpdateFunctionCode）。main に無ければこの PR で追加
+3. `package-migrate.sh`（Linux / Python 3.12 wheel + UpdateFunctionCode）
 4. `invoke-migrate.sh`（SQL 001〜003）
-5. `--admin-email` があれば Cognito `AdminCreateUser`（既存ならスキップ）+ グループ `admin` + seed。仮パスワードは生成して画面にだけ出す（コミットしない）
+5. `--admin-email` があれば Cognito `AdminCreateUser`（既存ならスキップ）+ グループ `admin` + seed。仮パスワードは生成して標準出力にだけ出す（コミットしない）
 6. `frontend/.env.local` を terraform output から書く（gitignore 済み）
 
 完了後に出す案内: 仮パスワード、`cd frontend && npm run dev`

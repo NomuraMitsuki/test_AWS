@@ -4,14 +4,15 @@
 **ステータス**: Approved（エージェントは apply / Lambda invoke しない）  
 **WBS**: W-280  
 **親スペック**: [2026-08-05-attendance-aws-design.md](2026-08-05-attendance-aws-design.md) §4.4.1 / §4.5  
-**手順正本（運用）**: [docs/infra/aws-auth-bootstrap.md](../../infra/aws-auth-bootstrap.md) §E
+**手順正本（運用）**: [docs/infra/aws-auth-bootstrap.md](../../infra/aws-auth-bootstrap.md) 冒頭の `tf-dev.sh up` / `down`（W-281）。手作業の内訳は同文書 §E。  
+**現行の Mac 手順**: CI の OIDC が使えない間は `backend.yml` の UpdateFunctionCode を待たない。`./infra/scripts/tf-dev.sh up --admin-email ...` が apply → Linux zip → SQL → 任意 admin → `.env.local` をまとめる。
 
 ## 1. ゴール
 
 プライベート RDS に `backend/migrations/001`〜`003` を適用し、最初の `admin` を Cognito + `users` 行として作れるようにする。Mac から踏み台 EC2 なしで実行できる。
 
 完了条件（リポジトリ側）: migrate Lambda + 手動 invoke 手順 + 初回 admin 手順が揃い、pytest / terraform validate が通る。  
-完了条件（運用側・ユーザー）: Mac で本体を再 apply し、`backend.yml` の UpdateFunctionCode（`psycopg` 同梱）が終わってから migrate を invoke し、admin でログインできる。
+完了条件（運用側・ユーザー）: Mac で `tf-dev.sh up`（または apply → Linux zip → invoke → admin）し、admin でログインできる。CI の UpdateFunctionCode 待ちは OIDC が通るときの代替。
 
 ## 2. 非ゴール
 
@@ -32,10 +33,10 @@
 
 ## 4. 作業順序（Mac・実装後）
 
-認証は本体と同じ（`eval "$(aws configure export-credentials --format env)"` または専用スクリプト）。
+認証は本体と同じ（`eval "$(aws configure export-credentials --format env)"` または専用スクリプト）。**いまの正は W-281 の `tf-dev.sh up`。** 以下は機能導入時の分解手順（OIDC が通るときの CI zip 待ちを含む）。
 
-1. 本機能のコードを `main` に載せたあと `./infra/scripts/tf-dev.sh apply`（migrate Lambda 追加。NAT / RDS は既存）。Terraform の zip はソース + SQL のみで `psycopg` は入らない
-2. `backend.yml` の main デプロイ（`AWS_ROLE_ARN_BACKEND` が **Repository secrets** にあること）で UpdateFunctionCode が終わるのを待つ
+1. 本機能のコードを `main` に載せたあと `./infra/scripts/tf-dev.sh apply`（migrate Lambda 追加。NAT / RDS は既存）。Terraform の zip はソース + SQL のみで `psycopg` は入らない。OIDC が失敗している間は続けて `package-migrate.sh`（または `tf-dev.sh up`）
+2. `backend.yml` の main デプロイ（`AWS_ROLE_ARN_BACKEND` が **Repository secrets** にあること）で UpdateFunctionCode が終わるのを待つ。OIDC 失敗時はこの待ちをせず Mac の Linux zip を使う
 3. migrate を invoke し `001`〜`003` を適用（`CREATE IF NOT EXISTS` で再実行可）
 4. Cognito `AdminCreateUser` + グループ `admin`（username は email）
 5. 同じメール / `cognito_sub` / `role=admin` / `status=active` を `users` に入れる（invoke の seed ペイロード）
