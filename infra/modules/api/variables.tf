@@ -47,9 +47,19 @@ variable "exports_source_dir" {
   description = "backend/exports のソースディレクトリ（archive_file 用）"
 }
 
+variable "migrate_source_dir" {
+  type        = string
+  description = "backend/migrate のソースディレクトリ（archive_file 用）"
+}
+
+variable "migrations_source_dir" {
+  type        = string
+  description = "backend/migrations の SQL ディレクトリ（migrate zip に migrations/ として同梱）"
+}
+
 variable "private_subnet_ids" {
   type        = list(string)
-  description = "ドメイン Lambda（attendance / leave / users / exports）を配置するプライベートサブネット"
+  description = "ドメイン Lambda（attendance / leave / users / exports）と migrate Lambda を配置するプライベートサブネット"
 }
 
 variable "lambda_security_group_id" {

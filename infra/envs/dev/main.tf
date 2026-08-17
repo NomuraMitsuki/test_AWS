@@ -40,6 +40,8 @@ module "api" {
   leave_source_dir         = "${path.root}/../../../backend/leave"
   users_source_dir         = "${path.root}/../../../backend/users"
   exports_source_dir       = "${path.root}/../../../backend/exports"
+  migrate_source_dir       = "${path.root}/../../../backend/migrate"
+  migrations_source_dir    = "${path.root}/../../../backend/migrations"
   private_subnet_ids       = module.network.private_subnet_ids
   lambda_security_group_id = module.network.lambda_security_group_id
   db_secret_arn            = module.data.db_secret_arn
@@ -60,6 +62,7 @@ module "monitoring" {
     leave      = module.api.leave_lambda_function_name
     users      = module.api.users_lambda_function_name
     exports    = module.api.exports_lambda_function_name
+    migrate    = module.api.migrate_lambda_function_name
   }
   db_instance_id = module.data.db_instance_id
 }

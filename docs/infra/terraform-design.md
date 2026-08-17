@@ -22,12 +22,13 @@ infra/
     cognito/      # User Pool, groups, app client
     data/         # RDS, Secrets Manager, subnet group
     storage/      # S3 exports bucket
-    api/          # HTTP API, JWT authorizer, Lambda, IAM, CORS
+    api/          # HTTP API, JWT authorizer, Lambda（health〜exports + migrate）, IAM, CORS
     amplify/      # Amplify Hosting app + branch（Next.js / frontend）
     monitoring/   # SNS, CloudWatch dashboard, alarms
     github_oidc/  # GitHub Actions OIDC provider + roles
   scripts/
     check-aws-auth.sh
+    invoke-migrate.sh   # migrate Lambda の手動 invoke（apply しない）
     tf-dev.sh           # 本体（envs/dev）専用。aws login + export-credentials + plan/apply
 ```
 
@@ -39,9 +40,9 @@ infra/
 | cognito | User Pool（セルフサインアップ無効）, Groups, App Client, Domain（任意） |
 | data | RDS PostgreSQL `db.t4g.micro`, Secrets Manager, parameter group |
 | storage | S3 bucket, Block Public Access, lifecycle（任意） |
-| api | HTTP API, Cognito JWT authorizer, health Lambda（VPC 外・`GET /health` 認証なし）, attendance Lambda（VPC 内・JWT 必須の打刻/履歴/サマリ）, leave Lambda（VPC 内・JWT 必須の休暇申請/承認/却下）, users Lambda（VPC 内・JWT 必須の一覧/招待/更新・Cognito Admin IAM）, exports Lambda（VPC 内・JWT 必須の勤怠 CSV エクスポート・S3 Put/Presign IAM）, CORS（Amplify オリジン + ローカル `http://localhost:3000`） |
+| api | HTTP API, Cognito JWT authorizer, health Lambda（VPC 外・`GET /health` 認証なし）, attendance Lambda（VPC 内・JWT 必須の打刻/履歴/サマリ）, leave Lambda（VPC 内・JWT 必須の休暇申請/承認/却下）, users Lambda（VPC 内・JWT 必須の一覧/招待/更新・Cognito Admin IAM）, exports Lambda（VPC 内・JWT 必須の勤怠 CSV エクスポート・S3 Put/Presign IAM）, **migrate Lambda**（VPC 内・HTTP 非公開・DB secret 読取・SQL `001`〜`003` と同梱・手動 invoke）, CORS（Amplify オリジン + ローカル `http://localhost:3000`） |
 | amplify | Amplify Hosting アプリ + branch（ルート `frontend`、Next.js）。環境変数（Cognito / API URL）。GitHub 連携トークンは sensitive 変数 |
-| monitoring | SNS（`${name_prefix}-alarms`・email 任意）、CloudWatch ダッシュボード（API / Lambda×5 / RDS / ERROR ログ）、アラーム（Lambda Errors×5・API 5xx・Latency p99・RDS CPU/Connections）。`http_api_id` / `lambda_function_names` / `db_instance_id` を api・data から受け取る（正本: [monitoring.md](../ops/monitoring.md)） |
+| monitoring | SNS（`${name_prefix}-alarms`・email 任意）、CloudWatch ダッシュボード（API / Lambda×5 / RDS / ERROR ログ）、アラーム（Lambda Errors×5 + migrate Errors・API 5xx・Latency p99・RDS CPU/Connections）。`http_api_id` / `lambda_function_names` / `db_instance_id` を api・data から受け取る（正本: [monitoring.md](../ops/monitoring.md)） |
 | github_oidc | OIDC provider, deploy roles（infra / backend）。Amplify `start-job` は学習用に infra ロール流用（W-260）。専用 frontend ロールは後続の IAM 整理でよい |
 
 ## State 管理
@@ -77,8 +78,8 @@ infra/
 
 1. `infra/bootstrap`（state 用 S3 / DynamoDB）。出力を `envs/dev/backend.hcl` へ
 2. `network` → `cognito` → `data` → `storage`
-3. `api`（health / attendance / leave / users / exports を zip）
-4. `monitoring`（api / data の出力に依存）/ `github_oidc`
+3. `api`（health / attendance / leave / users / exports / migrate を zip。migrate の Terraform zip はソース + SQL。`psycopg` は `backend.yml` の UpdateFunctionCode で同梱。HTTP ルートは migrate 以外）
+4. `monitoring`（api / data の出力に依存。ダッシュボードは Lambda×5、migrate は Errors アラームのみ）/ `github_oidc`
 5. `amplify`（Hosting）。API CORS の localhost は `cors_allow_localhost`。Amplify オリジンは apply 後に `cors_amplify_origin` へ反映（`api`↔`amplify` 循環回避）
 
 ## コスト抑制メモ

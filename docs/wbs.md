@@ -54,7 +54,7 @@
 | W-106 | github_oidc モジュール | 完了 | PR #4 |
 | W-107 | dev 合成 + infra 用 GitHub Actions（plan まで） | 完了 | PR #4 |
 | W-108 | 検証ゲート（fmt / validate / plan）＋初回 apply（OIDC 用） | 完了 | PR #6。ローカルで plan/apply 成功を確認後、課金抑制のため destroy 済み |
-| W-109 | GitHub Secrets（OIDC ロール ARN）登録と CI plan 有効化 | コード完了 | リポジトリ側は PR #20 マージ済み（bootstrap / S3 backend / `infra.yml` / 手順書）。運用側は未実施: Mac で bootstrap → `backend.hcl` 実名コミット → 本体 apply → Secrets → Environment `dev` reviewers 必須。[設計](superpowers/specs/2026-08-17-phase10-w109-remote-state-design.md) |
+| W-109 | GitHub Secrets（OIDC ロール ARN）登録と CI plan 有効化 | コード完了 | リポジトリ側は PR #20 マージ済み。運用: bootstrap / 本体 apply / `backend.hcl` 済み。Secrets はコンソールで登録（済みかはユーザー確認）。Environment `dev` の Required reviewers は private + Free のため未設定（`main` の infra push で apply が自動）。[設計](superpowers/specs/2026-08-17-phase10-w109-remote-state-design.md) |
 
 ---
 
@@ -70,6 +70,7 @@
 | W-250 | Next.js フロント + Amplify | 完了 | PR #14。apply なし（lint / next build / terraform validate）。実装は implementation-worker。Amplify Actions デプロイは W-260 |
 | W-260 | GitHub Actions（backend / frontend）完成 | 完了 | PR #15。backend.yml / frontend start-job / infra apply 骨格。Secrets 実登録は W-109。実装は implementation-worker |
 | W-270 | CloudWatch ダッシュボード・アラーム仕上げ | 完了 | PR #18。apply なし（terraform validate）。実装は implementation-worker。[設計](superpowers/specs/2026-08-10-phase9-monitoring-polish-design.md) |
+| W-280 | RDS マイグレーション実行と初回 admin | コード完了 | リポジトリ側は PR #22（migrate Lambda / invoke 手順 / 初回 admin CLI）。運用側は未実施: Mac で再 apply → backend.yml の UpdateFunctionCode（psycopg 同梱）待ち → invoke → Cognito admin → seed。[設計](superpowers/specs/2026-08-17-phase11-migrate-admin-design.md) |
 
 ---
 

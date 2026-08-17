@@ -70,6 +70,11 @@ output "exports_lambda_function_name" {
   value = module.api.exports_lambda_function_name
 }
 
+output "migrate_lambda_function_name" {
+  value       = module.api.migrate_lambda_function_name
+  description = "手動 invoke 用（HTTP 非公開）。手順: docs/infra/aws-auth-bootstrap.md §E"
+}
+
 output "http_api_id" {
   value = module.api.http_api_id
 }

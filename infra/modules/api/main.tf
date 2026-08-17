@@ -555,3 +555,87 @@ resource "aws_lambda_permission" "exports_apigw" {
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.http.execution_arn}/*/*"
 }
+
+# -----------------------------------------------------------------------------
+# migrate Lambda（VPC 内）。HTTP ルートは作らない（手動 invoke のみ）
+# zip には backend/migrate の Python と backend/migrations/*.sql を同梱する。
+# -----------------------------------------------------------------------------
+
+resource "aws_iam_role" "migrate_lambda" {
+  name               = "${var.name_prefix}-migrate-lambda"
+  assume_role_policy = data.aws_iam_policy_document.lambda_assume.json
+}
+
+resource "aws_iam_role_policy_attachment" "migrate_basic" {
+  role       = aws_iam_role.migrate_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "migrate_vpc" {
+  role       = aws_iam_role.migrate_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+}
+
+data "aws_iam_policy_document" "migrate_secrets" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "secretsmanager:GetSecretValue",
+    ]
+    resources = [var.db_secret_arn]
+  }
+}
+
+resource "aws_iam_role_policy" "migrate_secrets" {
+  name   = "${var.name_prefix}-migrate-secrets"
+  role   = aws_iam_role.migrate_lambda.id
+  policy = data.aws_iam_policy_document.migrate_secrets.json
+}
+
+locals {
+  migrate_python_files = {
+    for f in fileset(var.migrate_source_dir, "**") :
+    f => file("${var.migrate_source_dir}/${f}")
+    if !endswith(f, ".pyc") && !strcontains(f, "__pycache__") && basename(f) != "requirements.txt"
+  }
+  migrate_sql_files = {
+    for f in fileset(var.migrations_source_dir, "*.sql") :
+    "migrations/${f}" => file("${var.migrations_source_dir}/${f}")
+  }
+}
+
+data "archive_file" "migrate" {
+  type        = "zip"
+  output_path = "${path.module}/.build/migrate.zip"
+
+  dynamic "source" {
+    for_each = merge(local.migrate_python_files, local.migrate_sql_files)
+    content {
+      content  = source.value
+      filename = source.key
+    }
+  }
+}
+
+resource "aws_lambda_function" "migrate" {
+  function_name = "${var.name_prefix}-migrate"
+  role          = aws_iam_role.migrate_lambda.arn
+  handler       = "handler.handler"
+  runtime       = "python3.12"
+  timeout       = 60
+  memory_size   = 256
+
+  filename         = data.archive_file.migrate.output_path
+  source_code_hash = data.archive_file.migrate.output_base64sha256
+
+  environment {
+    variables = {
+      DB_SECRET_ARN = var.db_secret_arn
+    }
+  }
+
+  vpc_config {
+    subnet_ids         = var.private_subnet_ids
+    security_group_ids = [var.lambda_security_group_id]
+  }
+}

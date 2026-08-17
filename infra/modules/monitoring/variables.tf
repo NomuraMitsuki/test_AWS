@@ -14,7 +14,7 @@ variable "http_api_id" {
 
 variable "lambda_function_names" {
   type        = map(string)
-  description = "Map of Lambda role keys to function names (health, attendance, leave, users, exports)"
+  description = "Lambda 名のマップ。ダッシュボードは health / attendance / leave / users / exports。migrate は Errors アラームのみ（W-280）"
 
   validation {
     condition = alltrue([
@@ -23,8 +23,9 @@ variable "lambda_function_names" {
       contains(keys(var.lambda_function_names), "leave"),
       contains(keys(var.lambda_function_names), "users"),
       contains(keys(var.lambda_function_names), "exports"),
+      contains(keys(var.lambda_function_names), "migrate"),
     ])
-    error_message = "lambda_function_names must include keys: health, attendance, leave, users, exports."
+    error_message = "lambda_function_names must include keys: health, attendance, leave, users, exports, migrate."
   }
 }
 

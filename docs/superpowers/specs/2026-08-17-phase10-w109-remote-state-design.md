@@ -11,7 +11,7 @@
 Terraform の **リモート state（S3 + DynamoDB）** をコード化し、`infra.yml` の plan / apply が backend を使えるようにする。本体 apply と GitHub Secrets 登録は **ユーザーの Mac** で行い、Cloud Agent では実行しない（エフェメラル環境で state を失うため）。
 
 完了条件（リポジトリ側）: bootstrap / `envs/dev` backend / CI 配線 / 手順書が揃い、`terraform validate` が通る。  
-完了条件（運用側・ユーザー）: Mac で bootstrap → `backend.hcl` 実名コミット → 本体 apply → Secrets 登録 → Environment `dev` の reviewers 必須。
+完了条件（運用側・ユーザー）: Mac で bootstrap → `backend.hcl` 実名コミット → 本体 apply → Secrets 登録。Environment `dev` の reviewers は付けられるプランなら必須。GitHub Free の private では使えないことがあり、その場合は未設定のまま（`main` の infra push で apply が自動）でよい。
 
 ## 2. 非ゴール
 
@@ -34,7 +34,7 @@ Terraform の **リモート state（S3 + DynamoDB）** をコード化し、`in
 4. リポジトリルートに戻り `./infra/scripts/tf-dev.sh apply`（本体。RDS / Cognito / API / monitoring / OIDC 等）
 5. `cd infra/envs/dev` で `terraform output gha_infra_role_arn` / `gha_backend_role_arn` を控える
 6. GitHub Secrets: `AWS_ROLE_ARN_INFRA` / `AWS_ROLE_ARN_BACKEND`。リージョンは workflow 既定 `ap-northeast-1`（Secret 不要）
-7. Repository Environment `dev` に **reviewers を必須**（学習用 1 人可）。`main` push の apply が NAT / RDS を自動作成しないため
+7. Repository Environment `dev` に **reviewers を必須**（学習用 1 人可）。GitHub Free の **private** では使えないことがある。その場合は未設定のまま進めてよい（`main` の infra push で apply が自動実行される）
 8. Amplify を接続した場合: `amplify_default_branch_url` を `cors_amplify_origin` に入れて再 apply（循環回避は現状どおり）
 
 ## 5. コード
@@ -60,7 +60,7 @@ Terraform の `backend "s3"` は変数展開できない。
 |--------|-----------------|
 | validate | `-backend=false` のまま。必須ゲート |
 | PR plan | **gate ジョブ**: `AWS_ROLE_ARN_INFRA` が空なら plan をスキップ＋注記（validate は必須）。Secret ありなら OIDC → `terraform init -backend-config=backend.hcl` → plan。init/plan 失敗はジョブ失敗（continue-on-error で握りつぶさない） |
-| main apply | 現状どおり Secret 空ならスキップ。Secret ありなら `environment: dev`（reviewers 必須）→ OIDC → 同上 init → plan → apply。`-backend=false` は使わない |
+| main apply | 現状どおり Secret 空ならスキップ。Secret ありなら `environment: dev` → OIDC → 同上 init → plan → apply。`-backend=false` は使わない。Required reviewers は付けられるプランなら必須。private + Free では未設定になり、apply は自動 |
 
 `backend.hcl` 未コミットや bucket 未作成の状態で Secret だけあると plan は赤になる。順序は §4 どおり bootstrap → `backend.hcl` コミット → 本体 apply → Secrets。
 

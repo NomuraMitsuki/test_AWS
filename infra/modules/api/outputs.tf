@@ -22,6 +22,10 @@ output "exports_lambda_function_name" {
   value = aws_lambda_function.exports.function_name
 }
 
+output "migrate_lambda_function_name" {
+  value = aws_lambda_function.migrate.function_name
+}
+
 output "http_api_id" {
   value = aws_apigatewayv2_api.http.id
 }

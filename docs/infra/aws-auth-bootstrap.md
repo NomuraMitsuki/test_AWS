@@ -2,7 +2,7 @@
 
 リモート Terraform state（S3 + DynamoDB）を用意し、本体スタックを Mac で apply したあと、OIDC ロール ARN を GitHub Secrets に登録するまでの手順。
 
-**エージェント（Cloud Agent）は `terraform apply` / `terraform destroy` / `gh secret set` を実行しない。** エフェメラル環境で state を失うため、apply と Secrets 登録は **ユーザーの Mac** で行う。
+**エージェント（Cloud Agent）は `terraform apply` / `terraform destroy` / `gh secret set` / Lambda invoke を実行しない。** エフェメラル環境で state を失うため、apply・Secrets 登録・migrate invoke は **ユーザーの Mac** で行う。
 
 ## 前提
 
@@ -16,7 +16,7 @@
 
 **State:** 本体（`infra/envs/dev`）は S3 backend。バケットとロックテーブルは独立した `infra/bootstrap` が作る（bootstrap の state はローカルでよい。**destroy しない**）。`./infra/scripts/tf-dev.sh` は **本体専用** で、bootstrap には使わない。
 
-W-108 時点のリソースは destroy 済みのため、**本体 state の migrate は不要**（新規 apply）。バケットをコンソールで手作りしない。
+W-108 時点のリソースは destroy 済みのため、**本体 Terraform state の移行（`terraform init -migrate-state`）は不要**（新規 apply）。バケットをコンソールで手作りしない。RDS の SQL 適用は §E の migrate Lambda。
 
 ## A. 初回 apply 用の資格情報
 
@@ -126,19 +126,91 @@ dynamodb_table = "attendance-tfstate-lock-dev"
    gh secret set AWS_ROLE_ARN_BACKEND --body "$(terraform output -raw gha_backend_role_arn)"
    ```
 
-   コンソールなら Settings → Secrets and variables → Actions に同名で貼る。
-7. Repository Environment `dev` に **reviewers を必須**（学習用 1 人可）。`main` push の apply が NAT / RDS を自動作成しないため
+   コンソールなら Settings → Secrets and variables → Actions（**Repository secrets**）に同名で貼る。Environment `dev` の secrets は空でよい（plan / backend deploy は Environment を使わない）。
+7. Repository Environment `dev` に **reviewers を必須**（学習用 1 人可）。GitHub Free の **private** リポジトリでは Required reviewers が使えないことがある。その場合は未設定のまま進めてよい（`main` の infra push で apply が自動実行される）
 8. Amplify を接続した場合: `amplify_default_branch_url` を `cors_amplify_origin` に入れて再 apply（循環回避は現状どおり）
 
 CI の動きは [docs/cicd/github-actions.md](../cicd/github-actions.md)。validate は `init -backend=false` のまま必須。PR plan / main apply は Secret があるときだけ OIDC + `init -backend-config=backend.hcl`。
 
-## E. apply 後の残作業（短く）
+## E. apply 後: マイグレーションと初回 admin（W-280）
 
-本体 apply が終わったら、アプリを動かすために次を行う（詳細は各設計資料）:
+RDS はプライベートのため Mac から直接 `psql` できない。**migrate Lambda を手動 invoke** する（HTTP API には公開しない）。エージェントは invoke しない。
 
-- **初回 admin:** Cognito コンソールまたは `AdminCreateUser` で管理者を招待し、仮パスワードでログインする
-- **migrations:** RDS に `backend/migrations/001`〜`003` を適用する（プライベートサブネットのため、踏み台または一時的な接続手段が必要）
-- Amplify の default branch URL が分かったら `cors_amplify_origin` を更新して再 apply（§D の 8）
+前提: 本体 apply 済み（関数 `attendance-dev-migrate` が存在する）。zip に `psycopg` と `backend/migrations/*.sql` が入っていること。`main` への push 後は `backend.yml` が UpdateFunctionCode する。apply 直後で CI 未実行なら、先に backend ワークフローのデプロイを待つ。
+
+認証は本体と同じ（`./infra/scripts/tf-dev.sh auth` または次）:
+
+```bash
+eval "$(aws configure export-credentials --format env)"
+export AWS_DEFAULT_REGION=ap-northeast-1
+aws sts get-caller-identity
+```
+
+関数名は `terraform output -raw migrate_lambda_function_name`（既定 `attendance-dev-migrate`）。短いラッパ: `./infra/scripts/invoke-migrate.sh`（**apply はしない**）。
+
+### E-1. SQL `001`〜`003` を適用
+
+```bash
+aws lambda invoke \
+  --function-name attendance-dev-migrate \
+  --cli-binary-format raw-in-base64-out \
+  --payload '{}' \
+  /tmp/migrate-out.json
+cat /tmp/migrate-out.json
+```
+
+成功例: `{"ok": true, "action": "migrate", "applied": ["001_init_attendance.sql", "002_leave_requests.sql", "003_export_jobs.sql"]}`。`CREATE IF NOT EXISTS` のため再実行してよい。
+
+または: `./infra/scripts/invoke-migrate.sh`
+
+### E-2. Cognito に最初の admin を作る
+
+```bash
+cd infra/envs/dev
+POOL_ID="$(terraform output -raw cognito_user_pool_id)"
+# 仮パスワードは Cognito のポリシー（大文字・小文字・数字・記号）を満たすこと。コミットしない。
+aws cognito-idp admin-create-user \
+  --user-pool-id "$POOL_ID" \
+  --username "admin@example.com" \
+  --user-attributes Name=email,Value=admin@example.com Name=email_verified,Value=true Name=name,Value=Admin \
+  --temporary-password 'ChangeMe_Temp1!' \
+  --message-action SUPPRESS
+
+aws cognito-idp admin-add-user-to-group \
+  --user-pool-id "$POOL_ID" \
+  --username "admin@example.com" \
+  --group-name admin
+
+aws cognito-idp admin-get-user \
+  --user-pool-id "$POOL_ID" \
+  --username "admin@example.com" \
+  --query "UserAttributes[?Name=='sub'].Value" \
+  --output text
+```
+
+表示された値が `cognito_sub`。username は email。`--message-action SUPPRESS` は招待メールを送らない。送る場合は当該オプションを外す。
+
+### E-3. `users` 行を seed する
+
+Cognito は Lambda から呼ばない。`sub` をペイロードに渡す。
+
+```bash
+# SUB は E-2 の admin-get-user 出力
+aws lambda invoke \
+  --function-name attendance-dev-migrate \
+  --cli-binary-format raw-in-base64-out \
+  --payload '{"action":"seed_admin","email":"admin@example.com","cognito_sub":"SUB","name":"Admin"}' \
+  /tmp/seed-admin-out.json
+cat /tmp/seed-admin-out.json
+```
+
+または: `./infra/scripts/invoke-migrate.sh seed-admin admin@example.com SUB Admin`
+
+成功例: `{"ok": true, "action": "seed_admin", "created": true, "user": {...}}`。同じ email / `cognito_sub` の再実行は `created: false` で既存行を返す。
+
+### E-4. ログイン確認
+
+フロントは `frontend/.env.example` を `.env.local` にして `npm run dev`。Amplify を使う場合は `amplify_default_branch_url` を `cors_amplify_origin` に入れて再 apply（§D の 8）。
 
 ## F. 権限の目安（初回ローカル用）
 
